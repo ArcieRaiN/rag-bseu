@@ -3,3 +3,4 @@ numpy==2.4.0
 pandas==2.1.1
 requests==2.31.0
 python-dotenv==1.2.1
+faiss-cpu==1.7.4
