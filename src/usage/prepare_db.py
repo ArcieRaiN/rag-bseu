@@ -1,40 +1,47 @@
 from pathlib import Path
+import json
+
 from src.prepare_db.chunk_maker import ChunkMaker
 from src.main.vectorizer import HashVectorizer
-import json
 
 
 def main():
-    # Папка src/
+    # Корень src/
     src_dir = Path(__file__).resolve().parent.parent  # rag-bseu/src
 
-    # Папка с PDF-файлами
+    # PDF-документы
     docs_dir = src_dir / "prepare_db" / "documents"
 
-    # Проверка наличия PDF
     pdf_files = list(docs_dir.glob("*.pdf"))
     if not pdf_files:
-        print(f"Нет PDF-файлов в {docs_dir}. Поместите PDF для индексации.")
+        print(f"❌ Нет PDF-файлов в {docs_dir}")
         return
-    else:
-        print(f"Найдено {len(pdf_files)} PDF-файлов в {docs_dir}")
 
-    # Векторизатор
-    vectorizer = HashVectorizer(dimension=32)
+    print(f"📄 Найдено PDF-файлов: {len(pdf_files)}")
 
-    # Папка для сохранения векторного хранилища
+    # ⚠️ УВЕЛИЧЕННАЯ РАЗМЕРНОСТЬ
+    vectorizer = HashVectorizer(dimension=256)
+
+    # vector_store
     vector_store_dir = src_dir / "prepare_db" / "vector_store"
+    vector_store_dir.mkdir(parents=True, exist_ok=True)
 
-    print("Строим индекс из PDF...")
-    chunk_maker = ChunkMaker(vectorizer, documents_dir=docs_dir)
+    print("🔧 Строим семантический индекс из PDF...")
+    chunk_maker = ChunkMaker(
+        vectorizer=vectorizer,
+        documents_dir=docs_dir,
+        min_words=20,
+    )
+
     artifacts = chunk_maker.build_from_pdfs(output_dir=vector_store_dir)
 
-    print(f"Индекс построен! Файлы сохранены в {vector_store_dir}")
+    print("✅ Индекс построен!")
+    print(f"📁 vector_store: {vector_store_dir}")
 
-    # Считаем количество таблиц
     with open(artifacts.data_path, "r", encoding="utf-8") as f:
         data = json.load(f)
-    print(f"Всего таблиц обработано: {len(data)}")
+
+    print(f"📊 Всего сохранено семантических чанков: {len(data)}")
 
 
 if __name__ == "__main__":

@@ -6,3 +6,5 @@ python-dotenv==1.2.1
 faiss-cpu==1.8.0
 pytest==8.0.0
 pdfminer.six==20221105
+setuptools==80.10.1
+natasha==1.6.0

@@ -1,154 +1,149 @@
 import json
-from dataclasses import dataclass
+import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Dict
+from dataclasses import dataclass
 
 import numpy as np
 from pdfminer.high_level import extract_pages
-from pdfminer.layout import LTTextContainer, LTTextLineHorizontal
+from pdfminer.layout import LTTextContainer
 
-try:
-    import faiss
-except ImportError:
-    faiss = None
-
+from src.main.input_normalizer import normalize_text_lemmatized
 from src.main.vectorizer import HashVectorizer
-from src.main.file_utils import list_pdfs
 
 
 @dataclass
-class VectorStoreArtifacts:
+class BuildArtifacts:
     index_path: Path
     metadata_path: Path
     data_path: Path
 
 
-def extract_tables_from_pdf(pdf_path: Path) -> List[Dict]:
-    """
-    Ищет таблицы в PDF. Для каждой таблицы:
-    - title = первая строка
-    - data = все строки таблицы
-    """
-    tables: List[Dict] = []
-
-    for page_idx, page_layout in enumerate(extract_pages(str(pdf_path)), start=1):
-        # получаем все строки текста на странице
-        lines: List[str] = []
-        for element in page_layout:
-            if isinstance(element, LTTextContainer):
-                for line in element:
-                    if isinstance(line, LTTextLineHorizontal):
-                        text = line.get_text().strip()
-                        if text:
-                            lines.append(text)
-        if not lines:
-            continue
-
-        # Простейшее разбиение на таблицы по пустой строке
-        current_table: List[List[str]] = []
-        for line in lines + [""]:
-            row = line.split()  # простое разбиение на ячейки по пробелам
-            if not line.strip():
-                if current_table:
-                    title = current_table[0][0] if current_table[0] else "Без названия"
-                    tables.append({
-                        "title": title,
-                        "data": current_table,
-                        "source": str(pdf_path),
-                        "page": page_idx
-                    })
-                    current_table = []
-            else:
-                current_table.append(row)
-    if not tables:
-        # fallback, если таблиц не найдено
-        tables.append({
-            "title": pdf_path.stem,
-            "data": [["text"], [pdf_path.name]],
-            "source": str(pdf_path),
-            "page": 1
-        })
-    return tables
-
-
 class ChunkMaker:
-    """
-    Строим векторное хранилище из таблиц PDF.
-    """
-
     def __init__(
         self,
         vectorizer: HashVectorizer,
-        documents_dir: Optional[Path] = None,
-        vector_store_dir: Optional[Path] = None,
+        documents_dir: Path,
+        min_words: int = 20,
     ):
         self.vectorizer = vectorizer
-        self.documents_dir = Path(documents_dir or Path(__file__).parent / "documents")
-        self.vector_store_dir = Path(vector_store_dir or Path(__file__).parent / "vector_store")
-        self.vector_store_dir.mkdir(parents=True, exist_ok=True)
+        self.documents_dir = documents_dir
+        self.min_words = min_words
 
-    def build_from_pdfs(self, output_dir: Optional[Path] = None) -> VectorStoreArtifacts:
-        pdfs = list_pdfs(self.documents_dir)
-        if not pdfs:
-            raise FileNotFoundError(f"No PDFs found in {self.documents_dir}")
+    # -----------------------------
 
-        all_tables: List[Dict] = []
-        for pdf in pdfs:
-            tables = extract_tables_from_pdf(pdf)
-            all_tables.extend(tables)
-
-        return self.build_from_tables(all_tables, output_dir=output_dir)
-
-    def build_from_tables(
-        self, tables: List[Dict], output_dir: Optional[Path] = None
-    ) -> VectorStoreArtifacts:
-        out_dir = Path(output_dir or self.vector_store_dir)
-        out_dir.mkdir(parents=True, exist_ok=True)
-
+    def build_from_pdfs(self, output_dir: Path) -> BuildArtifacts:
+        chunks: List[Dict] = []
         embeddings = []
-        metadata: Dict[str, Dict] = {}
-        data_entries: List[Dict] = []
 
-        for idx, table in enumerate(tables):
-            title = table.get("title") or f"table_{idx}"
-            text_for_embedding = title  # embedding только по заголовку
-            embedding = self.vectorizer.embed(text_for_embedding)
-            embeddings.append(embedding)
+        chunk_id = 0
 
-            metadata[str(idx)] = {
-                "title": title,
-                "source": table.get("source"),
-                "page": table.get("page")
-            }
-            data_entries.append({
-                "id": idx,
-                "title": title,
-                "data": table.get("data"),
-                "source": table.get("source"),
-                "page": table.get("page")
-            })
+        for pdf_path in self.documents_dir.glob("*.pdf"):
+            print(f"📘 Обработка: {pdf_path.name}")
 
-        emb_array = np.stack(embeddings).astype(np.float32)
+            for page_num, page_layout in enumerate(extract_pages(pdf_path), start=1):
+                page_blocks = []
 
-        artifacts = VectorStoreArtifacts(
-            index_path=out_dir / "index.faiss",
-            metadata_path=out_dir / "metadata.json",
-            data_path=out_dir / "data.json",
+                for element in page_layout:
+                    if isinstance(element, LTTextContainer):
+                        text = self._clean_text(element.get_text())
+                        if text:
+                            page_blocks.append(text)
+
+                semantic_chunks = self._build_semantic_chunks(page_blocks)
+
+                for chunk_text in semantic_chunks:
+                    normalized = normalize_text_lemmatized(chunk_text)
+
+                    if not normalized:
+                        continue
+
+                    emb = self.vectorizer.embed(normalized)
+
+                    chunks.append(
+                        {
+                            "id": chunk_id,
+                            "text": chunk_text,
+                            "normalized": normalized,
+                            "source": pdf_path.name,
+                            "page": page_num,
+                        }
+                    )
+
+                    embeddings.append(emb)
+                    chunk_id += 1
+
+        embeddings_np = np.array(embeddings, dtype=np.float32)
+
+        index_path = output_dir / "index.npy"
+        data_path = output_dir / "data.json"
+        meta_path = output_dir / "metadata.json"
+
+        np.save(index_path, embeddings_np)
+
+        with open(data_path, "w", encoding="utf-8") as f:
+            json.dump(chunks, f, ensure_ascii=False, indent=2)
+
+        with open(meta_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "vectorizer": "HashVectorizer",
+                    "dimension": self.vectorizer.dimension,
+                    "chunks": len(chunks),
+                },
+                f,
+                ensure_ascii=False,
+                indent=2,
+            )
+
+        return BuildArtifacts(
+            index_path=index_path,
+            metadata_path=meta_path,
+            data_path=data_path,
         )
 
-        # сохраняем индекс
-        if faiss is not None:
-            index = faiss.IndexFlatIP(emb_array.shape[1])
-            faiss.normalize_L2(emb_array)
-            index.add(emb_array)
-            faiss.write_index(index, str(artifacts.index_path))
-        else:
-            with open(artifacts.index_path, "wb") as f:
-                np.save(f, emb_array)
+    # -----------------------------
 
-        with open(artifacts.metadata_path, "w", encoding="utf-8") as f:
-            json.dump(metadata, f, ensure_ascii=False, indent=2)
-        with open(artifacts.data_path, "w", encoding="utf-8") as f:
-            json.dump(data_entries, f, ensure_ascii=False, indent=2)
+    def _build_semantic_chunks(self, blocks: List[str]) -> List[str]:
+        """
+        Склеиваем текст по смыслу, а не по layout
+        """
+        chunks = []
+        buffer = ""
 
-        return artifacts
+        for block in blocks:
+            if self._is_header(block):
+                if self._is_good_chunk(buffer):
+                    chunks.append(buffer.strip())
+                buffer = block
+            else:
+                buffer += " " + block
+
+        if self._is_good_chunk(buffer):
+            chunks.append(buffer.strip())
+
+        return chunks
+
+    # -----------------------------
+
+    def _is_header(self, text: str) -> bool:
+        return (
+            len(text.split()) <= 6
+            and text.isupper()
+        )
+
+    def _is_good_chunk(self, text: str) -> bool:
+        words = text.split()
+        return (
+            len(words) >= self.min_words
+            and not text.strip().isdigit()
+        )
+
+    def _clean_text(self, text: str) -> str:
+        text = re.sub(r"\s+", " ", text)
+        text = text.strip()
+
+        if len(text) < 5:
+            return ""
+
+        return text

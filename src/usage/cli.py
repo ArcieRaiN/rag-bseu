@@ -1,10 +1,10 @@
 from pathlib import Path
-from src.main.retriever import TableRetriever
+from src.main.retriever import SemanticRetriever
 from src.main.vectorizer import HashVectorizer
 
 # Флаги запуска
 predefined_queries_flag = True   # запустить в начале предопределённые запросы
-user_queries_flag = False         # дать пользователю возможность вводить запросы
+user_queries_flag = False        # дать пользователю возможность вводить запросы
 
 def main() -> None:
     # Базовая директория src/
@@ -15,10 +15,8 @@ def main() -> None:
 
     vectorizer = HashVectorizer(dimension=32)
 
-    retriever = TableRetriever(
+    retriever = SemanticRetriever(
         vectorizer=vectorizer,
-        index_path=vector_store_dir / "index.faiss",
-        metadata_path=vector_store_dir / "metadata.json",
         data_path=vector_store_dir / "data.json",
     )
 
@@ -40,7 +38,7 @@ def main() -> None:
         if predefined_queries_flag:
             for query in predefined_queries:
                 print(f"> {query}")
-                results = retriever.search_by_table_title(query, top_k=3)
+                results = retriever.search(query, top_k=3)
 
                 if not results:
                     print("Ничего не найдено.\n")
@@ -48,13 +46,10 @@ def main() -> None:
 
                 print("Топ-3 совпадения:")
                 for i, r in enumerate(results, start=1):
-                    print(f"\n{i}. {r['title']}")
+                    print(f"\n{i}. {r['text']}")
                     print(f"   score: {r['score']:.2f}")
                     print(f"   source: {r['source']}")
                     print(f"   page: {r['page']}")
-                    print("result:")
-                    for row in r["data"]:
-                        print("\t".join(map(str, row)))
                 print()
 
         # Пользовательский интерактив
@@ -65,20 +60,17 @@ def main() -> None:
                 if not query:
                     continue
 
-                results = retriever.search_by_table_title(query, top_k=3)
+                results = retriever.search(query, top_k=3)
                 if not results:
                     print("Ничего не найдено.\n")
                     continue
 
                 print("Топ-3 совпадения:")
                 for i, r in enumerate(results, start=1):
-                    print(f"\n{i}. {r['title']}")
+                    print(f"\n{i}. {r['text']}")
                     print(f"   score: {r['score']:.2f}")
                     print(f"   source: {r['source']}")
                     print(f"   page: {r['page']}")
-                    print("result:")
-                    for row in r["data"]:
-                        print("\t".join(map(str, row)))
                 print()
 
     except KeyboardInterrupt:
