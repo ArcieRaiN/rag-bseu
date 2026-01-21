@@ -1,5 +1,8 @@
-#Python 3.12.7
-numpy==2.4.0
-pandas==2.1.1
+# Python 3.12.7
+numpy==1.26.4
+pandas==2.2.2
 requests==2.31.0
 python-dotenv==1.2.1
+faiss-cpu==1.8.0
+pytest==8.0.0
+pdfminer.six==20221105
