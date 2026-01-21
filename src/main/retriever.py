@@ -6,31 +6,25 @@ import numpy as np
 
 try:
     import faiss  # type: ignore
-except ImportError:  # pragma: no cover - optional dependency
+except ImportError:
     faiss = None
 
 from src.main.vectorizer import HashVectorizer
 
 
 class _NumpyIndex:
-    """
-    Lightweight in-memory index as a fallback when faiss is unavailable.
-    Stores embeddings and performs cosine similarity search.
-    """
+    """Fallback in-memory index with cosine similarity."""
 
     def __init__(self, dimension: int):
         self.dimension = dimension
         self.embeddings = np.zeros((0, dimension), dtype=np.float32)
 
     def add(self, vectors: np.ndarray) -> None:
-        self.embeddings = (
-            vectors if self.embeddings.size == 0 else np.vstack([self.embeddings, vectors])
-        )
+        self.embeddings = vectors if self.embeddings.size == 0 else np.vstack([self.embeddings, vectors])
 
     def search(self, query: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray]:
         if self.embeddings.size == 0:
             return np.array([]), np.array([])
-        # Cosine similarity
         query_norm = query / (np.linalg.norm(query) + 1e-9)
         emb_norms = self.embeddings / (np.linalg.norm(self.embeddings, axis=1, keepdims=True) + 1e-9)
         sims = emb_norms @ query_norm
@@ -49,10 +43,7 @@ class _NumpyIndex:
 
 
 class TableRetriever:
-    """
-    Retrieve table chunks by comparing query embeddings against a vector store.
-    Supports faiss when available; falls back to a numpy implementation otherwise.
-    """
+    """Retrieve table chunks by comparing query embeddings against a vector store."""
 
     def __init__(
         self,
@@ -92,7 +83,6 @@ class TableRetriever:
                 pass
         if self.index_path.exists():
             return _NumpyIndex.load(self.index_path), False
-        # Empty index
         return _NumpyIndex(self.vectorizer.dimension), False
 
     def _search_faiss(self, query_vec: np.ndarray, top_k: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -104,37 +94,33 @@ class TableRetriever:
     def _search_numpy(self, query_vec: np.ndarray, top_k: int) -> Tuple[np.ndarray, np.ndarray]:
         return self.index.search(query_vec, top_k)
 
-    def search(self, query: str, top_k: int = 3) -> List[Dict]:
+    def search_by_table_title(self, query: str, top_k: int = 1) -> List[Dict]:
         """
-        Search the vector store for the most relevant tables.
-        Returns a list of dicts with metadata, table content, and score.
+        Search tables by title embedding.
+        Returns top_k results with score, title, data, source, page.
         """
-        if top_k <= 0:
-            raise ValueError("top_k must be positive")
-        query_vec = self.vectorizer.embed(query)
+        query_vec = self.vectorizer.embed(query).astype(np.float32)
+        query_vec = query_vec.reshape(1, -1)
 
         if self.using_faiss:
-            if getattr(self.index, "ntotal", 0) == 0:
-                return []
-            scores, ids = self._search_faiss(query_vec, top_k)
+            faiss.normalize_L2(query_vec)
+            scores, ids = self.index.search(query_vec, top_k)
+            scores = scores[0]
+            ids = ids[0]
         else:
-            scores, ids = self._search_numpy(query_vec, top_k)
+            scores, ids = self.index.search(query_vec, top_k)
 
         results = []
         for score, idx in zip(scores, ids):
             if idx == -1 or str(idx) not in self.data:
                 continue
             entry = self.data[str(idx)]
-            meta = self.metadata.get(str(idx), {})
-            results.append(
-                {
-                    "id": idx,
-                    "score": float(score),
-                    "title": meta.get("title") or entry.get("title"),
-                    "source": meta.get("source") or entry.get("source"),
-                    "page": meta.get("page") or entry.get("page"),
-                    "table": entry.get("data"),
-                }
-            )
+            results.append({
+                "id": idx,
+                "title": entry.get("title"),
+                "data": entry.get("data"),
+                "source": entry.get("source"),
+                "page": entry.get("page"),
+                "score": float(score)
+            })
         return results
-

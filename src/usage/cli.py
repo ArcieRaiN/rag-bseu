@@ -1,5 +1,4 @@
 from pathlib import Path
-
 from src.main.retriever import TableRetriever
 from src.main.vectorizer import HashVectorizer
 
@@ -20,28 +19,57 @@ def main() -> None:
         data_path=vector_store_dir / "data.json",
     )
 
-    print("RAG CLI запущен.")
-    print("Введите запрос (Ctrl+C для выхода)\n")
+    print("RAG CLI запущен.\n")
+
+    # Список предопределённых запросов
+    predefined_queries = [
+        "Население РБ",
+        "Сколько человек в Беларуси",
+        "Сколько человек в Минске было в 2025 году"
+    ]
 
     try:
-        while True:
-            query = input("> ").strip()
-            if not query:
-                continue
-
-            results = retriever.search(query, top_k=3)
+        # Сначала прогоняем predefined_queries
+        for query in predefined_queries:
+            print(f"> {query}")
+            results = retriever.search_by_table_title(query, top_k=3)
 
             if not results:
                 print("Ничего не найдено.\n")
                 continue
 
-            print("\nТоп-3 результата:")
+            print("Топ-3 совпадения:")
             for i, r in enumerate(results, start=1):
-                print(f"\n{i}. {r.get('title')}")
-                print(f"   score: {r.get('score'):.4f}")
-                print(f"   source: {r.get('source')}")
-                print(f"   page: {r.get('page')}")
+                print(f"\n{i}. {r['title']}")
+                print(f"   score: {r['score']:.2f}")
+                print(f"   source: {r['source']}")
+                print(f"   page: {r['page']}")
+                print("result:")
+                for row in r["data"]:
+                    print("\t".join(map(str, row)))
+            print()
 
+        # После прогонки predefined_queries, интерактивный режим
+        print("Теперь можно вводить свои запросы (Ctrl+C для выхода):\n")
+        while True:
+            query = input("> ").strip()
+            if not query:
+                continue
+
+            results = retriever.search_by_table_title(query, top_k=3)
+            if not results:
+                print("Ничего не найдено.\n")
+                continue
+
+            print("Топ-3 совпадения:")
+            for i, r in enumerate(results, start=1):
+                print(f"\n{i}. {r['title']}")
+                print(f"   score: {r['score']:.2f}")
+                print(f"   source: {r['source']}")
+                print(f"   page: {r['page']}")
+                print("result:")
+                for row in r["data"]:
+                    print("\t".join(map(str, row)))
             print()
 
     except KeyboardInterrupt:
