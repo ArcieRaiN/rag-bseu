@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
+from pdfminer.high_level import extract_pages
+from pdfminer.layout import LTTextContainer
 
 try:
     import faiss  # type: ignore
@@ -24,6 +26,60 @@ class VectorStoreArtifacts:
 def _flatten_table(table: List[List]) -> str:
     """Convert a 2D table into a flat string for embedding."""
     return " ".join(str(cell) for row in table for cell in row)
+
+
+def _extract_text_chunks(pdf_path: Path, max_chars: int = 800, overlap: int = 80) -> List[Dict]:
+    """
+    Extract text from a PDF and split it into overlapping character chunks.
+    Falls back to a single stub chunk if parsing fails.
+    """
+    chunks: List[Dict] = []
+    try:
+        pages_text: List[str] = []
+        for page_layout in extract_pages(str(pdf_path)):
+            parts: List[str] = []
+            for element in page_layout:
+                if isinstance(element, LTTextContainer):
+                    text = element.get_text().strip()
+                    if text:
+                        parts.append(text)
+            if parts:
+                pages_text.append(" ".join(parts))
+
+        for page_idx, text in enumerate(pages_text, start=1):
+            normalized = " ".join(text.split())
+            if not normalized:
+                continue
+            start = 0
+            chunk_idx = 1
+            while start < len(normalized):
+                end = start + max_chars
+                chunk_text = normalized[start:end]
+                chunks.append(
+                    {
+                        "title": f"{pdf_path.stem} p{page_idx} chunk{chunk_idx}",
+                        "data": [["text"], [chunk_text]],
+                        "source": str(pdf_path),
+                        "page": page_idx,
+                        "raw_text": chunk_text,
+                    }
+                )
+                start = max(end - overlap, end) if overlap >= max_chars else end - overlap
+                chunk_idx += 1
+    except Exception:
+        pass
+
+    if not chunks:
+        chunks.append(
+            {
+                "title": pdf_path.stem,
+                "data": [["text"], [pdf_path.name]],
+                "source": str(pdf_path),
+                "page": 1,
+                "raw_text": pdf_path.stem,
+            }
+        )
+    return chunks
 
 
 class ChunkMaker:
@@ -48,6 +104,7 @@ class ChunkMaker:
         """
         Build vector store files from already extracted tables.
         Each table dict must include: title, data (list of rows), source, and optional page.
+        Optional key `text` overrides embedding text (useful for non-tabular chunks).
         """
         if not tables:
             raise ValueError("tables must not be empty")
@@ -64,7 +121,7 @@ class ChunkMaker:
             table_data = table.get("data") or []
             source = table.get("source") or ""
             page = table.get("page")
-            text_for_embedding = f"{title} {_flatten_table(table_data)}"
+            text_for_embedding = table.get("text") or f"{title} {_flatten_table(table_data)}"
             embedding = self.vectorizer.embed(text_for_embedding)
 
             embeddings.append(embedding)
@@ -90,23 +147,26 @@ class ChunkMaker:
 
     def build_from_pdfs(self, output_dir: Optional[Path] = None) -> VectorStoreArtifacts:
         """
-        Minimal PDF handler: uses document names as titles to keep the prototype running
-        without heavy PDF parsing dependencies.
+        Parse PDFs from the documents directory, split text into chunks, and build the vector store.
+        Falls back to filename-based chunks if parsing fails, ensuring at least one chunk per PDF.
         """
         pdfs = list_pdfs(self.documents_dir)
         if not pdfs:
             raise FileNotFoundError(f"No PDFs found in {self.documents_dir}")
 
-        tables = []
+        tables: List[Dict] = []
         for pdf in pdfs:
-            tables.append(
-                {
-                    "title": pdf.stem,
-                    "data": [["document", pdf.name]],
-                    "source": str(pdf),
-                    "page": 1,
-                }
-            )
+            chunk_entries = _extract_text_chunks(pdf)
+            for chunk in chunk_entries:
+                tables.append(
+                    {
+                        "title": chunk["title"],
+                        "data": chunk["data"],
+                        "source": chunk["source"],
+                        "page": chunk["page"],
+                        "text": chunk["raw_text"],
+                    }
+                )
         return self.build_from_tables(tables, output_dir=output_dir)
 
     def _save_index(self, embeddings: np.ndarray, index_path: Path) -> None:
@@ -116,5 +176,6 @@ class ChunkMaker:
             index.add(embeddings)
             faiss.write_index(index, str(index_path))
         else:
-            np.save(index_path, embeddings)
+            with open(index_path, "wb") as f:
+                np.save(f, embeddings)
 

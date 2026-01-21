@@ -85,8 +85,11 @@ class TableRetriever:
 
     def _load_index(self):
         if faiss is not None and self.index_path.exists():
-            index = faiss.read_index(str(self.index_path))
-            return index, True
+            try:
+                index = faiss.read_index(str(self.index_path))
+                return index, True
+            except Exception:
+                pass
         if self.index_path.exists():
             return _NumpyIndex.load(self.index_path), False
         # Empty index
@@ -111,6 +114,8 @@ class TableRetriever:
         query_vec = self.vectorizer.embed(query)
 
         if self.using_faiss:
+            if getattr(self.index, "ntotal", 0) == 0:
+                return []
             scores, ids = self._search_faiss(query_vec, top_k)
         else:
             scores, ids = self._search_numpy(query_vec, top_k)
