@@ -13,7 +13,7 @@ def main() -> None:
     # Папка с уже построенным индексом
     vector_store_dir = base_dir / "prepare_db" / "vector_store"
 
-    vectorizer = HashVectorizer(dimension=32)
+    vectorizer = HashVectorizer(dimension=256)
 
     retriever = SemanticRetriever(
         vectorizer=vectorizer,
@@ -24,7 +24,7 @@ def main() -> None:
 
     # Список предопределённых запросов
     predefined_queries = [
-        "Население РБ",
+        "Число учреждений дошкольного образования",
         "Сколько человек в Беларуси",
         "Сколько человек в Минске было в 2025 году"
     ]

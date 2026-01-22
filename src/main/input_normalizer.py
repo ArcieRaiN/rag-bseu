@@ -10,35 +10,40 @@ _emb = NewsEmbedding()
 _morph_tagger = NewsMorphTagger(_emb)
 _vocab = MorphVocab()
 
-# русские + белорусские буквы
-WORD_RE = re.compile(r"[а-яёіў]+", re.IGNORECASE)
+TOKEN_RE = re.compile(r"[а-яёіў]+|\d+", re.IGNORECASE)
 
 
 def normalize_text_lemmatized(text: str) -> str:
     """
-    Приводит текст к леммам.
-    НИЧЕГО не выбрасывает кроме мусора и цифр.
+    Нормализация для RAG:
+    - лемматизация RU/BY
+    - сохранение чисел
+    - ничего не склеиваем
     """
     if not text:
         return ""
 
     text = text.lower()
 
-    # извлекаем слова вручную (важно!)
-    words = WORD_RE.findall(text)
-    if not words:
+    tokens = TOKEN_RE.findall(text)
+    if not tokens:
         return ""
 
-    doc = Doc(" ".join(words))
-    doc.segment(_segmenter)
-    doc.tag_morph(_morph_tagger)
+    # разделяем слова и числа
+    words = [t for t in tokens if not t.isdigit()]
+    numbers = [t for t in tokens if t.isdigit()]
 
     lemmas: List[str] = []
-    for token in doc.tokens:
-        if not token.pos:
-            continue
-        token.lemmatize(_vocab)
-        if token.lemma:
-            lemmas.append(token.lemma)
 
-    return " ".join(lemmas)
+    if words:
+        doc = Doc(" ".join(words))
+        doc.segment(_segmenter)
+        doc.tag_morph(_morph_tagger)
+
+        for token in doc.tokens:
+            token.lemmatize(_vocab)
+            if token.lemma:
+                lemmas.append(token.lemma)
+
+    # числа добавляем в конец (стабильно)
+    return " ".join(lemmas + numbers)
