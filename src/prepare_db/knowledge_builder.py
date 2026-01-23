@@ -207,25 +207,142 @@ class KnowledgeBaseBuilder:
 
     def _enrich_chunks_with_llm_batch(self, pdf_name: str, chunks: List[Chunk]) -> List[Chunk]:
         """
-        Батчевое LLM‑обогащение чанков ОДНИМ запросом.
+        Батчевое LLM‑обогащение чанков с контекстом.
 
-        Схема промпта:
-        - кратко описать документ (pdf_name)
-        - передать список чанков с их текстами и метаданными (page и пр.)
-        - попросить модель вернуть JSON‑массив с объектами вида:
-          {
-            "chunk_id": "...",
-            "context": "...",
-            "geo": "...",
-            "metrics": [...],
-            "years": [...],
-            "time_granularity": "year",
-            "oked": null
-          }
+        Для каждого чанка передается:
+        - Страницы 3-8 (содержание и примечания)
+        - 3 чанка до и 3 чанка после текущего
+        - Текущий чанк для обогащения
 
-        ВАЖНО:
-        - все чанки одного документа обрабатываются одним запросом
-        - модель видит полный контекст документа для генерации context каждого чанка
+        Обрабатывается батчами для ускорения.
+        """
+        if not chunks:
+            return []
+        
+        # Получаем чанки со страниц 3-8 (содержание)
+        toc_chunks = [ch for ch in chunks if 3 <= ch.page <= 8]
+        
+        # Обрабатываем батчами по 10 чанков
+        BATCH_SIZE = 10
+        all_enriched_chunks: List[Chunk] = []
+        total = len(chunks)
+        
+        for batch_start in range(0, len(chunks), BATCH_SIZE):
+            batch_end = min(batch_start + BATCH_SIZE, len(chunks))
+            batch_chunks = chunks[batch_start:batch_end]
+            
+            batch_num = batch_start // BATCH_SIZE + 1
+            total_batches = (len(chunks) + BATCH_SIZE - 1) // BATCH_SIZE
+            print(f"   Обработка батча {batch_num}/{total_batches} (чанки {batch_start+1}-{batch_end} из {total})")
+            
+            enriched_batch = self._enrich_batch_with_context(pdf_name, batch_chunks, chunks, toc_chunks)
+            all_enriched_chunks.extend(enriched_batch)
+        
+        return all_enriched_chunks
+    
+    def _enrich_batch_with_context(self, pdf_name: str, target_chunks: List[Chunk], all_chunks: List[Chunk], toc_chunks: List[Chunk]) -> List[Chunk]:
+        """
+        Обогащение батча чанков с контекстом (3 до, 3 после, страницы 3-8).
+        """
+        enriched_results: List[Chunk] = []
+        
+        for target_chunk in target_chunks:
+            # Находим индекс текущего чанка
+            target_idx = next((i for i, ch in enumerate(all_chunks) if ch.id == target_chunk.id), -1)
+            if target_idx == -1:
+                enriched_results.append(target_chunk)
+                continue
+            
+            # Получаем контекстные чанки (3 до и 3 после)
+            context_before = all_chunks[max(0, target_idx - 3):target_idx]
+            context_after = all_chunks[target_idx + 1:min(len(all_chunks), target_idx + 4)]
+            
+            # Формируем данные для промпта
+            context_data = {
+                "toc": [{"page": ch.page, "text": ch.text[:200]} for ch in toc_chunks[:10]],  # Первые 10 чанков из содержания
+                "before": [{"page": ch.page, "text": ch.text[:200]} for ch in context_before],
+                "target": {
+                    "chunk_id": target_chunk.id,
+                    "page": target_chunk.page,
+                    "text": target_chunk.text
+                },
+                "after": [{"page": ch.page, "text": ch.text[:200]} for ch in context_after]
+            }
+            
+            # Обогащаем один чанк с контекстом
+            enriched = self._enrich_single_with_context(pdf_name, target_chunk, context_data)
+            enriched_results.append(enriched)
+        
+        return enriched_results
+    
+    def _enrich_single_with_context(self, pdf_name: str, chunk: Chunk, context_data: Dict[str, Any]) -> Chunk:
+        """
+        Обогащение одного чанка с контекстом.
+        """
+        system_prompt = (
+            "Ты — аналитик по официальной статистике Республики Беларусь. "
+            "Твоя задача — обогатить чанк документа структурированными метаданными. "
+            "Верни ТОЛЬКО JSON-объект (не массив!) с полями: chunk_id, context, geo, metrics, years, time_granularity, oked."
+        )
+        
+        prompt = (
+            f"Документ: {pdf_name}\n\n"
+            "СОДЕРЖАНИЕ ДОКУМЕНТА (страницы 3-8):\n"
+            f"{json.dumps(context_data['toc'], ensure_ascii=False, indent=2)}\n\n"
+            "КОНТЕКСТ ДО ТЕКУЩЕГО ЧАНКА (3 предыдущих чанка):\n"
+            f"{json.dumps(context_data['before'], ensure_ascii=False, indent=2)}\n\n"
+            "ТЕКУЩИЙ ЧАНК ДЛЯ ОБОГАЩЕНИЯ:\n"
+            f"ID: {context_data['target']['chunk_id']}\n"
+            f"Страница: {context_data['target']['page']}\n"
+            f"Текст: {context_data['target']['text']}\n\n"
+            "КОНТЕКСТ ПОСЛЕ ТЕКУЩЕГО ЧАНКА (3 следующих чанка):\n"
+            f"{json.dumps(context_data['after'], ensure_ascii=False, indent=2)}\n\n"
+            "Задача: опиши ТЕКУЩИЙ ЧАНК на основе его текста и контекста.\n"
+            "Верни JSON-объект с полями:\n"
+            "- chunk_id: точно такой же как ID выше\n"
+            "- context: краткое описание чанка (1-2 предложения) на основе контекста\n"
+            "- geo: географический объект или null\n"
+            "- metrics: список показателей или null\n"
+            "- years: список годов или null\n"
+            "- time_granularity: 'year'/'quarter'/'month'/'day' или null\n"
+            "- oked: код ОКЭД или null\n\n"
+            "ВАЖНО: Верни ТОЛЬКО JSON-объект {}, НЕ массив!"
+        )
+        
+        try:
+            raw_response = self._llm.generate(prompt, system_prompt=system_prompt, format="json")
+            enriched_data = self._parse_llm_single_enrichment(raw_response, chunk.id)
+            
+            if enriched_data:
+                # Обновляем чанк данными от LLM
+                if enriched_data.get("context"):
+                    chunk.context = str(enriched_data["context"])[:200]
+                elif chunk.text:
+                    chunk.context = chunk.text[:200]
+                else:
+                    chunk.context = "нет текста"
+                
+                if "geo" in enriched_data:
+                    chunk.geo = enriched_data["geo"]
+                if "metrics" in enriched_data:
+                    chunk.metrics = enriched_data["metrics"]
+                if "years" in enriched_data:
+                    chunk.years = self._normalize_years(enriched_data["years"])
+                if "time_granularity" in enriched_data:
+                    chunk.time_granularity = enriched_data["time_granularity"]
+                if "oked" in enriched_data:
+                    chunk.oked = enriched_data["oked"]
+        except Exception as e:
+            print(f"   ⚠️  Ошибка при обогащении чанка {chunk.id}: {e}")
+            # Оставляем чанк без обогащения
+            if not chunk.context:
+                chunk.context = chunk.text[:200] if chunk.text else "нет текста"
+        
+        return chunk
+    
+    def _enrich_single_batch(self, pdf_name: str, chunks: List[Chunk]) -> List[Chunk]:
+        """
+        Обогащение одного батча чанков.
         """
         if not chunks:
             return []
@@ -239,87 +356,373 @@ class KnowledgeBaseBuilder:
                 "page": ch.page,
             })
 
-        prompt = (
-            "Ты аналитик по официальной статистике Республики Беларусь.\n"
-            "Твоя задача — обогатить чанки документа структурированными метаданными.\n\n"
-            f"Документ: {pdf_name}\n\n"
-            "Для каждого чанка нужно:\n"
-            "1. Написать краткий context (1-2 предложения) на основе ПОЛНОГО документа.\n"
-            "   Context должен описывать суть чанка в контексте всего документа.\n"
-            "2. Извлечь и заполнить поля:\n"
-            "   - geo: географический объект (страна, область, город и т.п.) или null\n"
-            "   - metrics: список показателей (например, ['добыча нефти', 'численность населения']) или null\n"
-            "   - years: список целых годов, упомянутых в чанке (например, [2020, 2021, 2022]) или null\n"
-            "   - time_granularity: 'year' | 'quarter' | 'month' | 'day' или null\n"
-            "   - oked: код или описание из ОКЭД при наличии, иначе null\n\n"
-            "Верни ТОЛЬКО JSON‑массив без пояснений. Формат:\n"
-            "[\n"
-            '  {\n'
-            '    "chunk_id": "...",\n'
-            '    "context": "...",\n'
-            '    "geo": "..." или null,\n'
-            '    "metrics": ["...", "..."] или null,\n'
-            '    "years": [2020, 2021] или null,\n'
-            '    "time_granularity": "year" или null,\n'
-            '    "oked": "..." или null\n'
-            '  },\n'
-            "  ...\n"
-            "]\n\n"
-            f"Чанки документа:\n{json.dumps(chunks_data, ensure_ascii=False, indent=2)}"
+        # System prompt для строгого контроля формата
+        system_prompt = (
+            "Ты — аналитик по официальной статистике Республики Беларусь. "
+            "Твоя задача — обогатить чанки документа структурированными метаданными. "
+            "ОБЯЗАТЕЛЬНО верни JSON-массив, который начинается с символа '[' и заканчивается ']'. "
+            "НЕ возвращай объект '{...}'. НЕ добавляй пояснений. Только JSON-массив."
         )
+        
+        # Упрощенный промпт для одного или нескольких чанков
+        if len(chunks_data) == 1:
+            # Для одного чанка - более простой промпт
+            chunk = chunks_data[0]
+            prompt = (
+                f"Документ: {pdf_name}\n\n"
+                f"Чанк для обработки:\n"
+                f"ID: {chunk['chunk_id']}\n"
+                f"Страница: {chunk['page']}\n"
+                f"Текст: {chunk['text'][:500]}...\n\n"
+                "Верни JSON-объект с полями:\n"
+                "- chunk_id: \"{chunk_id}\" (точно такой же как выше)\n"
+                "- context: краткое описание чанка (1-2 предложения)\n"
+                "- geo: географический объект или null\n"
+                "- metrics: список показателей или null\n"
+                "- years: список годов или null\n"
+                "- time_granularity: 'year'/'quarter'/'month'/'day' или null\n"
+                "- oked: код ОКЭД или null\n\n"
+                "ВАЖНО: Верни ТОЛЬКО JSON-объект в фигурных скобках {}, НЕ массив!"
+            )
+        else:
+            # Для нескольких чанков
+            prompt = (
+                f"Документ: {pdf_name}\n\n"
+                "Задача: для каждого чанка верни объект с полями:\n"
+                "- chunk_id: идентификатор чанка (обязательно)\n"
+                "- context: краткое описание (1-2 предложения)\n"
+                "- geo: географический объект или null\n"
+                "- metrics: список показателей или null\n"
+                "- years: список годов или null\n"
+                "- time_granularity: 'year'/'quarter'/'month'/'day' или null\n"
+                "- oked: код ОКЭД или null\n\n"
+                "ФОРМАТ ОТВЕТА: JSON-массив объектов. Начинай с '[' и заканчивай ']'.\n"
+                "Пример: [{\"chunk_id\": \"id1\", \"context\": \"...\", \"geo\": null, ...}, ...]\n\n"
+                f"Чанки для обработки ({len(chunks_data)} шт.):\n"
+                f"{json.dumps(chunks_data, ensure_ascii=False, indent=2)}\n\n"
+                "Верни массив результатов для ВСЕХ чанков выше."
+            )
 
-        # Вызываем LLM
-        raw_response = self._llm.generate(prompt)
+        # Вызываем LLM с форсированием JSON формата
+        # Ollama поддерживает параметр format для форсирования JSON
+        raw_response = self._llm.generate(
+            prompt, 
+            system_prompt=system_prompt,
+            format="json"  # Форсируем JSON формат
+        )
 
         # Парсим JSON‑ответ
         enriched_data = self._parse_llm_batch_enrichment(raw_response)
+        
+        # Отладочная информация
+        if not enriched_data:
+            print(f"⚠️  WARNING: LLM не вернул данные для обогащения чанков документа {pdf_name}")
+            print(f"   Количество чанков: {len(chunks)}")
+            print(f"   Первые 500 символов ответа LLM: {raw_response[:500]}")
 
+        # Фильтруем только словари из enriched_data
+        valid_enriched_data = [item for item in enriched_data if isinstance(item, dict)]
+        
         # Создаём словарь chunk_id -> enriched_data для быстрого поиска
         enriched_map: Dict[str, Dict[str, Any]] = {}
-        for item in enriched_data:
+        for item in valid_enriched_data:
             chunk_id = item.get("chunk_id")
             if chunk_id:
                 enriched_map[str(chunk_id)] = item
+        
+        # Проверяем, сколько чанков было обогащено
+        if len(enriched_map) < len(chunks):
+            print(f"⚠️  WARNING: Только {len(enriched_map)} из {len(chunks)} чанков были обогащены для документа {pdf_name}")
+            # Показываем примеры chunk_id для отладки
+            if chunks:
+                print(f"   Пример chunk_id из чанков: {chunks[0].id}")
+            if enriched_map:
+                example_id = list(enriched_map.keys())[0]
+                print(f"   Пример chunk_id из ответа LLM: {example_id}")
 
         # Обогащаем чанки данными от LLM
         enriched_chunks: List[Chunk] = []
         for ch in chunks:
             enriched = enriched_map.get(ch.id, {})
-            ch.context = (enriched.get("context") or ch.text or "нет текста")[:200]
-            ch.geo = enriched.get("geo")
-            ch.metrics = enriched.get("metrics")
-            ch.years = self._normalize_years(enriched.get("years"))
-            ch.time_granularity = enriched.get("time_granularity")
-            ch.oked = enriched.get("oked")
+            
+            # Если для одного чанка не нашли по ID, но есть один объект в enriched_data - используем его
+            if not enriched and len(chunks) == 1 and valid_enriched_data:
+                # Для одного чанка модель могла вернуть объект без chunk_id
+                if len(valid_enriched_data) == 1:
+                    enriched = valid_enriched_data[0]
+                    # Добавляем chunk_id если его нет
+                    if "chunk_id" not in enriched:
+                        enriched["chunk_id"] = ch.id
+                elif len(valid_enriched_data) > 0:
+                    # Если несколько объектов, берем первый
+                    enriched = valid_enriched_data[0]
+                    if "chunk_id" not in enriched:
+                        enriched["chunk_id"] = ch.id
+            
+            # Обновляем context (с fallback на text)
+            if enriched.get("context"):
+                ch.context = str(enriched.get("context"))[:200]
+            elif ch.text:
+                ch.context = ch.text[:200]
+            else:
+                ch.context = "нет текста"
+            
+            # Обновляем метаданные: всегда обновляем, если ключ присутствует в enriched
+            # Это позволяет явно установить None для полей, которые LLM вернул как null
+            if "geo" in enriched:
+                ch.geo = enriched["geo"]
+            if "metrics" in enriched:
+                ch.metrics = enriched["metrics"]
+            if "years" in enriched:
+                ch.years = self._normalize_years(enriched["years"])
+            if "time_granularity" in enriched:
+                ch.time_granularity = enriched["time_granularity"]
+            if "oked" in enriched:
+                ch.oked = enriched["oked"]
+            
             enriched_chunks.append(ch)
 
         return enriched_chunks
 
+    @staticmethod
+    def _parse_llm_single_enrichment(raw: str, expected_chunk_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Парсит ответ LLM для одного чанка (объект, не массив).
+        """
+        if not raw:
+            return None
+        
+        # Удаление markdown code blocks
+        cleaned = raw.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
+        
+        # Попытка парсинга как объект
+        try:
+            data = json.loads(cleaned)
+            if isinstance(data, dict):
+                # Нормализуем ключи (ID -> chunk_id, и т.д.)
+                normalized = KnowledgeBaseBuilder._normalize_enrichment_object(data, expected_chunk_id)
+                return normalized
+        except json.JSONDecodeError:
+            pass
+        
+        # Поиск объекта в тексте
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            try:
+                data = json.loads(cleaned[start:end+1])
+                if isinstance(data, dict):
+                    normalized = KnowledgeBaseBuilder._normalize_enrichment_object(data, expected_chunk_id)
+                    return normalized
+            except json.JSONDecodeError:
+                pass
+        
+        return None
+    
+    @staticmethod
+    def _normalize_enrichment_object(obj: Dict[str, Any], expected_chunk_id: str) -> Dict[str, Any]:
+        """
+        Нормализует объект обогащения: исправляет ключи, извлекает вложенные данные.
+        """
+        result = {}
+        
+        # Нормализация chunk_id (может быть ID, chunk_id, ИД и т.д.)
+        for key in ["chunk_id", "ID", "ИД", "id", "chunkId"]:
+            if key in obj:
+                chunk_id_value = str(obj[key])
+                # Исправляем формат если нужно (page153::chunk1351 -> полный формат)
+                if "::" not in chunk_id_value and "::" in expected_chunk_id:
+                    # Пытаемся извлечь номер из chunk_id и использовать expected_chunk_id
+                    result["chunk_id"] = expected_chunk_id
+                else:
+                    result["chunk_id"] = chunk_id_value
+                break
+        if "chunk_id" not in result:
+            result["chunk_id"] = expected_chunk_id
+        
+        # Извлечение остальных полей
+        for field in ["context", "geo", "metrics", "years", "time_granularity", "oked"]:
+            if field in obj:
+                result[field] = obj[field]
+            else:
+                # Пробуем найти вложенные объекты
+                found = False
+                for key, value in obj.items():
+                    if isinstance(value, dict):
+                        if field in value:
+                            result[field] = value[field]
+                            found = True
+                            break
+                        # Рекурсивно ищем в глубоко вложенных объектах
+                        elif any(isinstance(v, dict) for v in value.values() if isinstance(v, dict)):
+                            for sub_key, sub_value in value.items():
+                                if isinstance(sub_value, dict) and field in sub_value:
+                                    result[field] = sub_value[field]
+                                    found = True
+                                    break
+                            if found:
+                                break
+                if not found:
+                    result[field] = None
+        
+        # Если объект содержит вложенные объекты с нужными полями, извлекаем первый
+        # (например, когда модель возвращает {"Светлогорский": {"chunk_id": ..., "context": ...}})
+        for key, value in obj.items():
+            if isinstance(value, dict):
+                # Проверяем, содержит ли вложенный объект нужные поля
+                has_enrichment_fields = any(field in value for field in ["context", "geo", "metrics", "chunk_id"])
+                if has_enrichment_fields:
+                    # Используем вложенный объект
+                    nested = KnowledgeBaseBuilder._normalize_enrichment_object(value, expected_chunk_id)
+                    # Объединяем результаты (вложенные данные имеют приоритет)
+                    for k, v in nested.items():
+                        if v is not None or k not in result:
+                            result[k] = v
+                    break
+        
+        return result
+    
     @staticmethod
     def _parse_llm_batch_enrichment(raw: str) -> List[Dict[str, Any]]:
         """
         Робастный парсер JSON‑ответа от LLM для батчевого enrichment.
 
         Ищет JSON‑массив в ответе и пытается его распарсить.
+        Если найден объект вместо массива, пытается извлечь из него данные.
         При ошибке возвращает пустой список.
         """
         if not raw:
             return []
 
-        # Ищем JSON‑массив
-        start = raw.find("[")
-        end = raw.rfind("]")
-        if start == -1 or end == -1 or end <= start:
-            return []
+        # Стратегия 1: Удаление markdown code blocks
+        cleaned = raw.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]  # Удаляем ```json
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:]  # Удаляем ```
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]  # Удаляем закрывающий ```
+        cleaned = cleaned.strip()
 
-        snippet = raw[start : end + 1]
+        # Стратегия 2: Попытка прямого парсинга всего ответа
         try:
-            data = json.loads(snippet)
-            if not isinstance(data, list):
-                return []
-            return data
+            data = json.loads(cleaned)
+            if isinstance(data, list):
+                return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(data)
+            elif isinstance(data, dict):
+                # LLM вернул объект вместо массива - пытаемся извлечь массив из него
+                # Ищем ключи, которые могут содержать массив
+                for key in ["chunks", "data", "results", "items", "array"]:
+                    if key in data and isinstance(data[key], list):
+                        return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(data[key])
+                # Если объект содержит chunk_id, возможно это один элемент - оборачиваем в массив
+                if "chunk_id" in data:
+                    return KnowledgeBaseBuilder._validate_and_fix_enrichment_data([data])
         except json.JSONDecodeError:
+            pass
+
+        # Стратегия 3: Поиск JSON-массива в тексте
+        start = cleaned.find("[")
+        end = cleaned.rfind("]")
+        if start != -1 and end != -1 and end > start:
+            snippet = cleaned[start : end + 1]
+            try:
+                data = json.loads(snippet)
+                if isinstance(data, list):
+                    return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(data)
+            except json.JSONDecodeError:
+                pass
+
+        # Стратегия 4: Поиск JSON-объекта и попытка извлечь из него данные
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            snippet = cleaned[start : end + 1]
+            try:
+                data = json.loads(snippet)
+                if isinstance(data, dict):
+                    # Пытаемся найти массив внутри объекта
+                    for key in ["chunks", "data", "results", "items", "array"]:
+                        if key in data and isinstance(data[key], list):
+                            return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(data[key])
+                    # Если объект содержит chunk_id, оборачиваем в массив
+                    if "chunk_id" in data:
+                        return KnowledgeBaseBuilder._validate_and_fix_enrichment_data([data])
+                    # Если это один объект без chunk_id, но с нужными полями - тоже принимаем
+                    if any(key in data for key in ["context", "geo", "metrics", "years"]):
+                        # Пытаемся создать объект с chunk_id из первого чанка в запросе
+                        # Но это не идеально, лучше вернуть как есть и обработать позже
+                        return KnowledgeBaseBuilder._validate_and_fix_enrichment_data([data])
+            except json.JSONDecodeError:
+                pass
+
+        # Стратегия 5: Попытка найти несколько JSON объектов в тексте
+        # Иногда LLM возвращает несколько объектов подряд
+        objects = []
+        i = 0
+        while i < len(cleaned):
+            if cleaned[i] == '{':
+                # Находим закрывающую скобку
+                depth = 0
+                j = i
+                while j < len(cleaned):
+                    if cleaned[j] == '{':
+                        depth += 1
+                    elif cleaned[j] == '}':
+                        depth -= 1
+                        if depth == 0:
+                            try:
+                                obj = json.loads(cleaned[i:j+1])
+                                if isinstance(obj, dict) and "chunk_id" in obj:
+                                    objects.append(obj)
+                            except json.JSONDecodeError:
+                                pass
+                            i = j
+                            break
+                    j += 1
+            i += 1
+        
+        if objects:
+            return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(objects)
+
+        # Если ничего не сработало
+        print(f"⚠️  WARNING: Не найден JSON-массив в ответе LLM. Первые 500 символов: {raw[:500]}")
+        return []
+    
+    @staticmethod
+    def _validate_and_fix_enrichment_data(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Валидирует и исправляет данные обогащения.
+        """
+        if not isinstance(data, list):
+            print(f"⚠️  WARNING: Парсер вернул не список, а {type(data).__name__}")
             return []
+        
+        # Фильтруем только словари
+        valid_items = []
+        for i, item in enumerate(data):
+            if not isinstance(item, dict):
+                # Пропускаем не-словари без предупреждения (могут быть строки из неправильного парсинга)
+                continue
+            valid_items.append(item)
+        
+        # Проверяем, что каждый элемент содержит необходимые поля
+        for item in valid_items:
+            # Убеждаемся, что все поля присутствуют (даже если null)
+            required_fields = ["chunk_id", "context", "geo", "metrics", "years", "time_granularity", "oked"]
+            for field in required_fields:
+                if field not in item:
+                    # Если поле отсутствует, добавляем его как None
+                    item[field] = None
+        
+        return valid_items
 
     @staticmethod
     def _normalize_years(value: Any) -> Optional[List[int]]:

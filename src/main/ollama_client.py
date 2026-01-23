@@ -19,7 +19,7 @@ import requests
 class OllamaConfig:
     base_url: str = "http://localhost:11434"
     model: str = "llama3.2"
-    timeout: float = 60.0
+    timeout: float = 300.0  # Увеличено до 5 минут для больших батчей
 
 
 class OllamaClient:
@@ -37,12 +37,18 @@ class OllamaClient:
     def __init__(self, config: Optional[OllamaConfig] = None):
         self.config = config or OllamaConfig()
 
-    def generate(self, prompt: str, *, system_prompt: str | None = None, **params: Any) -> str:
+    def generate(self, prompt: str, *, system_prompt: str | None = None, max_retries: int = 3, **params: Any) -> str:
         """
         Получить текстовую completion от Ollama.
 
         Интерфейс специально упрощён: вызывающий код сам отвечает за формат prompt
         и JSON‑схему ответа.
+        
+        Args:
+            prompt: Текст запроса
+            system_prompt: Системный промпт
+            max_retries: Максимальное количество повторных попыток при таймауте
+            **params: Дополнительные параметры для Ollama API
         """
         url = f"{self.config.base_url}/api/generate"
 
@@ -56,14 +62,24 @@ class OllamaClient:
             payload["system"] = system_prompt
         payload.update(params)
 
-        # ВНИМАНИЕ: это минимальный, отладочно‑ориентированный клиент.
-        # В боевом коде сюда можно добавить:
-        # - retries
-        # - логирование
-        # - более подробную обработку ошибок
-        resp = requests.post(url, json=payload, timeout=self.config.timeout)
-        resp.raise_for_status()
-        data = resp.json()
-        # Ollama по умолчанию возвращает поле "response" с текстом
-        return data.get("response", "")
+        # Retry логика для обработки таймаутов
+        import time
+        for attempt in range(max_retries):
+            try:
+                resp = requests.post(url, json=payload, timeout=self.config.timeout)
+                resp.raise_for_status()
+                data = resp.json()
+                # Ollama по умолчанию возвращает поле "response" с текстом
+                return data.get("response", "")
+            except requests.exceptions.ReadTimeout as e:
+                if attempt < max_retries - 1:
+                    wait_time = (2 ** attempt) * 5  # Экспоненциальная задержка: 5, 10, 20 сек
+                    print(f"⚠️  Таймаут при запросе к LLM (попытка {attempt + 1}/{max_retries}). Повтор через {wait_time} сек...")
+                    time.sleep(wait_time)
+                else:
+                    print(f"❌ Ошибка: Превышено максимальное количество попыток. Таймаут: {self.config.timeout} сек")
+                    raise
+            except requests.exceptions.RequestException as e:
+                print(f"❌ Ошибка при запросе к Ollama: {e}")
+                raise
 
