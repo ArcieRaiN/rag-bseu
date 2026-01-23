@@ -285,7 +285,7 @@ class KnowledgeBaseBuilder:
         enriched_chunks: List[Chunk] = []
         for ch in chunks:
             enriched = enriched_map.get(ch.id, {})
-            ch.context = enriched.get("context", "") or ch.text[:200]  # fallback на начало text
+            ch.context = (enriched.get("context") or ch.text or "нет текста")[:200]
             ch.geo = enriched.get("geo")
             ch.metrics = enriched.get("metrics")
             ch.years = self._normalize_years(enriched.get("years"))

@@ -18,7 +18,7 @@ import requests
 @dataclass
 class OllamaConfig:
     base_url: str = "http://localhost:11434"
-    model: str = "llama2"
+    model: str = "llama3.2"
     timeout: float = 60.0
 
 
