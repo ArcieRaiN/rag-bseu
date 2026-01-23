@@ -8,3 +8,6 @@ pytest==8.0.0
 pdfminer.six==20221105
 setuptools==80.10.1
 natasha==1.6.0
+llama-index==0.10.56
+llama-index-readers-file==0.1.19
+

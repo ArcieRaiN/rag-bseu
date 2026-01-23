@@ -1,11 +1,19 @@
-from pathlib import Path
-import json
+"""
+PIPELINE 1: подготовка базы знаний через новый пайплайн.
 
-from src.prepare_db.chunk_maker import ChunkMaker
-from src.main.vectorizer import HashVectorizer
+Использует:
+- LlamaIndex для чанкинга PDF
+- Ollama для батчевого enrichment чанков
+- FAISS для векторного индекса
+"""
+
+from pathlib import Path
+
+from src.prepare_db.knowledge_builder import KnowledgeBaseBuilder, BuildConfig
 
 
 def main() -> None:
+    """Entrypoint для подготовки базы знаний через новый пайплайн."""
     # Корень src/
     src_dir = Path(__file__).resolve().parent.parent  # rag-bseu/src
 
@@ -19,45 +27,41 @@ def main() -> None:
 
     print(f"📄 Найдено PDF-файлов: {len(pdf_files)}")
 
-    # ⚠️ ВАЖНО: увеличенная размерность
-    vectorizer = HashVectorizer(dimension=256)
-
     # Папка для индекса
     vector_store_dir = src_dir / "prepare_db" / "vector_store"
     vector_store_dir.mkdir(parents=True, exist_ok=True)
 
-    print("🔧 Строим ТАБЛИЧНЫЙ семантический индекс из PDF...")
+    print("🔧 Строим базу знаний через LlamaIndex + Ollama enrichment...")
+    print("   (Это может занять некоторое время из-за LLM-запросов)")
 
-    # ChunkMaker теперь работает ТОЛЬКО с таблицами
-    chunk_maker = ChunkMaker(
-        vectorizer=vectorizer,
+    # Конфигурация
+    config = BuildConfig(
         documents_dir=docs_dir,
-
-        # минимальная длина заголовка таблицы
-        min_title_words=3,
-
-        # игнорируем слишком короткие / мусорные таблицы
-        min_rows=2,
-        min_cols=2,
+        output_dir=vector_store_dir,
+        vector_dim=256,
     )
 
-    artifacts = chunk_maker.build_tables_from_pdfs(
-        output_dir=vector_store_dir
-    )
+    # Строим базу знаний
+    builder = KnowledgeBaseBuilder(config=config)
+    builder.build()
 
-    print("✅ Индекс таблиц построен!")
+    print("✅ База знаний построена!")
     print(f"📁 vector_store: {vector_store_dir}")
 
     # Диагностика
-    with open(artifacts.data_path, "r", encoding="utf-8") as f:
-        tables = json.load(f)
+    import json
+    data_path = vector_store_dir / "data.json"
+    if data_path.exists():
+        with open(data_path, "r", encoding="utf-8") as f:
+            chunks = json.load(f)
 
-    print(f"📊 Всего таблиц проиндексировано: {len(tables)}")
+        print(f"📊 Всего чанков проиндексировано: {len(chunks)}")
 
-    # полезный дебаг
-    print("\n🧪 Примеры заголовков таблиц:")
-    for t in tables[10:15]:
-        print(" •", t["title"])
+        # Полезный дебаг: примеры context
+        print("\n🧪 Примеры context (первые 3 чанка):")
+        for ch in chunks[:3]:
+            context_preview = ch.get("context", "")[:100]
+            print(f" • {context_preview}...")
 
 
 if __name__ == "__main__":
