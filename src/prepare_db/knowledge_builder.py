@@ -26,7 +26,7 @@ import json
 import shutil
 import faiss
 
-from llama_index.core import SimpleDirectoryReader
+from llama_index.readers.file import PDFReader
 from llama_index.core.node_parser import SimpleNodeParser
 
 from src.main.models import Chunk
@@ -133,7 +133,7 @@ class KnowledgeBaseBuilder:
         Интеграция с LlamaIndex для чанкинга PDF.
 
         Использует:
-        - SimpleDirectoryReader для чтения PDF
+        - PDFReader для чтения PDF
         - SimpleNodeParser для разбиения на чанки (chunk_size=512, chunk_overlap=50)
         - Извлечение метаданных страницы из node.metadata
 
@@ -144,7 +144,7 @@ class KnowledgeBaseBuilder:
         - context и метаданные пока пустые (заполнятся в _enrich_chunks_with_llm_batch)
         """
         # Создаём временную директорию с одним PDF для LlamaIndex
-        # (SimpleDirectoryReader работает с директориями)
+        # (PDFReader работает с директориями)
         temp_dir = pdf_path.parent / f"_temp_{pdf_path.stem}"
         temp_dir.mkdir(exist_ok=True)
         temp_pdf = temp_dir / pdf_path.name
@@ -154,12 +154,8 @@ class KnowledgeBaseBuilder:
             shutil.copy2(pdf_path, temp_pdf)
 
             # Читаем PDF через LlamaIndex
-            reader = SimpleDirectoryReader(
-                input_files=[str(temp_pdf)],
-                required_exts=[".pdf"],
-                file_metadata=lambda x: {"file_path": str(pdf_path)},
-            )
-            documents = reader.load_data()
+            pdf_reader = PDFReader()
+            documents = pdf_reader.load_data(file=str(temp_pdf))
 
             # Парсим документы на ноды (чанки)
             # Используем разумные параметры для статистических документов
