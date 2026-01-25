@@ -108,7 +108,7 @@ class RerankConfig:
     """
 
     top_k: int = 3
-    model_name: str = "llama2"
+    model_name: str = "llama3.2:3b"
     temperature: float = 0.0
 
 
