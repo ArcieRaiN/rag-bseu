@@ -25,6 +25,10 @@ from typing import List, Dict, Any, Optional
 import json
 import shutil
 import faiss
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import os
+import time
+import threading
 
 from llama_index.readers.file import PDFReader
 from llama_index.core.node_parser import SimpleNodeParser
@@ -32,6 +36,8 @@ from llama_index.core.node_parser import SimpleNodeParser
 from src.main.models import Chunk
 from src.main.ollama_client import OllamaClient
 from src.main.vectorizer import HashVectorizer
+
+_LLM_LOG_LOCK = threading.Lock()
 
 
 @dataclass
@@ -210,70 +216,117 @@ class KnowledgeBaseBuilder:
         Батчевое LLM‑обогащение чанков с контекстом.
 
         Для каждого чанка передается:
-        - Страницы 3-8 (содержание и примечания)
-        - 3 чанка до и 3 чанка после текущего
+        - 1 чанка до и 1 чанка после текущего
         - Текущий чанк для обогащения
 
-        Обрабатывается батчами для ускорения.
+        Обрабатывается батчами (один LLM-запрос на N чанков), чтобы
+        резко сократить количество запросов к Ollama и получить скорость 1600–3200 чанков/час.
+        Параллелизм применяется на уровне батчей (обычно 1–2 одновременных запроса).
+        Пропускает LLM обработку для страниц 1-3 (только обложка и название).
         """
         if not chunks:
             return []
         
-        # Получаем чанки со страниц 3-8 (содержание)
-        toc_chunks = [ch for ch in chunks if 3 <= ch.page <= 8]
         
-        # Обрабатываем батчами по 10 чанков
-        BATCH_SIZE = 10
-        all_enriched_chunks: List[Chunk] = []
-        total = len(chunks)
+        # Разделяем чанки на те, что нужно обработать LLM и те, что можно пропустить
+        chunks_to_process: List[Chunk] = []
+        chunks_to_skip: List[Chunk] = []
         
-        for batch_start in range(0, len(chunks), BATCH_SIZE):
-            batch_end = min(batch_start + BATCH_SIZE, len(chunks))
-            batch_chunks = chunks[batch_start:batch_end]
+        for chunk in chunks:
+            if chunk.page <= 3:
+                # Для первых трёх страниц просто используем text как context
+                chunk.context = chunk.text[:200] if chunk.text else "нет текста"
+                chunks_to_skip.append(chunk)
+            else:
+                chunks_to_process.append(chunk)
+        
+        if not chunks_to_process:
+            return chunks
+        
+        # Настройки батчирования/параллелизма через env:
+        # - RAG_ENRICH_BATCH_SIZE: сколько чанков в одном LLM-запросе (по умолчанию 5 для лучшего качества)
+        # - RAG_ENRICH_CONCURRENCY: сколько батчей обрабатывать параллельно (по умолчанию 2 для ускорения)
+        #
+        # ВАЖНО: маленькие модели (llama3.2:3b) лучше работают с меньшими батчами (5 вместо 10)
+        # Это повышает качество и снижает вероятность таймаутов
+        batch_size = int(os.getenv("RAG_ENRICH_BATCH_SIZE", "5"))  # Уменьшено с 10 до 5 для лучшего качества
+        batch_concurrency = int(os.getenv("RAG_ENRICH_CONCURRENCY", "2"))  # Увеличено с 1 до 2 для ускорения
+        batch_size = max(1, batch_size)
+        batch_concurrency = max(1, min(batch_concurrency, 4))  # Максимум 4 параллельных запроса
+
+        total_batches = (len(chunks_to_process) + batch_size - 1) // batch_size
+        print(f"   Обработка {len(chunks_to_process)} чанков (пропущено {len(chunks_to_skip)} чанков со страниц 1-3)")
+        print(f"   Батчи: размер={batch_size}, батчей={total_batches}, параллельность={batch_concurrency}")
+
+        all_enriched_chunks: List[Chunk] = chunks_to_skip.copy()
+
+        # Параллелим только батчи (а не каждый чанк), чтобы не убить Ollama сотнями одновременных запросов
+        start_time = time.time()
+        
+        # Счетчик для сброса контекста каждые 50 чанков
+        chunks_since_reset = 0
+        reset_interval = int(os.getenv("RAG_ENRICH_RESET_INTERVAL", "50"))  # Каждые 50 чанков по умолчанию
+        
+        with ThreadPoolExecutor(max_workers=min(batch_concurrency, total_batches)) as executor:
+            futures = []
+            for start in range(0, len(chunks_to_process), batch_size):
+                batch = chunks_to_process[start : start + batch_size]
+                fut = executor.submit(self._enrich_single_batch, pdf_name, batch)
+                # сохраняем, какой батч соответствует future + когда он был отправлен
+                fut._rag_submit_ts = time.time()  # type: ignore[attr-defined]
+                futures.append(fut)
+
+            completed_batches = 0
+            completed_chunks = 0
+            batch_to_future = {}
+            for i, fut in enumerate(futures):
+                batch_start_idx = i * batch_size
+                batch_end_idx = min(batch_start_idx + batch_size, len(chunks_to_process))
+                batch_to_future[fut] = chunks_to_process[batch_start_idx:batch_end_idx]
             
-            batch_num = batch_start // BATCH_SIZE + 1
-            total_batches = (len(chunks) + BATCH_SIZE - 1) // BATCH_SIZE
-            print(f"   Обработка батча {batch_num}/{total_batches} (чанки {batch_start+1}-{batch_end} из {total})")
-            
-            enriched_batch = self._enrich_batch_with_context(pdf_name, batch_chunks, chunks, toc_chunks)
-            all_enriched_chunks.extend(enriched_batch)
+            for fut in as_completed(futures):
+                original_batch = batch_to_future[fut]
+                try:
+                    enriched_batch = fut.result()
+                    submit_ts = getattr(fut, "_rag_submit_ts", None)
+                    batch_time = (time.time() - submit_ts) if submit_ts else 0.0
+                    all_enriched_chunks.extend(enriched_batch)
+                    completed_batches += 1
+                    completed_chunks += len(enriched_batch)
+                    chunks_since_reset += len(enriched_batch)
+                    
+                    # Сброс контекста каждые N чанков для предотвращения деградации производительности
+                    if chunks_since_reset >= reset_interval:
+                        print(f"   🔄 Сброс контекста модели после {completed_chunks} чанков...")
+                        self._llm.reset_context()
+                        chunks_since_reset = 0
+                        # Небольшая пауза после сброса
+                        time.sleep(0.5)
+                    
+                    elapsed = time.time() - start_time
+                    rate = completed_chunks / elapsed * 3600 if elapsed > 0 else 0
+                    print(f"   Батч {completed_batches}/{total_batches}: {len(enriched_batch)} чанков за {batch_time:.1f}с | Всего: {completed_chunks}/{len(chunks_to_process)} | Скорость: {rate:.0f} чанков/час")
+                except Exception as e:
+                    submit_ts = getattr(fut, "_rag_submit_ts", None)
+                    batch_time = (time.time() - submit_ts) if submit_ts else 0.0
+                    completed_batches += 1
+                    print(f"   ⚠️  Ошибка при обработке батча {completed_batches}/{total_batches} (время: {batch_time:.1f}с): {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # Fallback: добавляем чанки без обогащения
+                    for ch in original_batch:
+                        if not ch.context:
+                            ch.context = ch.text[:200] if ch.text else "нет текста"
+                    all_enriched_chunks.extend(original_batch)
+                    completed_chunks += len(original_batch)
+                    chunks_since_reset += len(original_batch)
+        
+        # Сортируем по исходному порядку
+        chunk_order = {ch.id: i for i, ch in enumerate(chunks)}
+        all_enriched_chunks.sort(key=lambda ch: chunk_order.get(ch.id, 999999))
         
         return all_enriched_chunks
     
-    def _enrich_batch_with_context(self, pdf_name: str, target_chunks: List[Chunk], all_chunks: List[Chunk], toc_chunks: List[Chunk]) -> List[Chunk]:
-        """
-        Обогащение батча чанков с контекстом (3 до, 3 после, страницы 3-8).
-        """
-        enriched_results: List[Chunk] = []
-        
-        for target_chunk in target_chunks:
-            # Находим индекс текущего чанка
-            target_idx = next((i for i, ch in enumerate(all_chunks) if ch.id == target_chunk.id), -1)
-            if target_idx == -1:
-                enriched_results.append(target_chunk)
-                continue
-            
-            # Получаем контекстные чанки (3 до и 3 после)
-            context_before = all_chunks[max(0, target_idx - 3):target_idx]
-            context_after = all_chunks[target_idx + 1:min(len(all_chunks), target_idx + 4)]
-            
-            # Формируем данные для промпта
-            context_data = {
-                "toc": [{"page": ch.page, "text": ch.text[:200]} for ch in toc_chunks[:10]],  # Первые 10 чанков из содержания
-                "before": [{"page": ch.page, "text": ch.text[:200]} for ch in context_before],
-                "target": {
-                    "chunk_id": target_chunk.id,
-                    "page": target_chunk.page,
-                    "text": target_chunk.text
-                },
-                "after": [{"page": ch.page, "text": ch.text[:200]} for ch in context_after]
-            }
-            
-            # Обогащаем один чанк с контекстом
-            enriched = self._enrich_single_with_context(pdf_name, target_chunk, context_data)
-            enriched_results.append(enriched)
-        
-        return enriched_results
     
     def _enrich_single_with_context(self, pdf_name: str, chunk: Chunk, context_data: Dict[str, Any]) -> Chunk:
         """
@@ -287,23 +340,22 @@ class KnowledgeBaseBuilder:
         
         prompt = (
             f"Документ: {pdf_name}\n\n"
-            "СОДЕРЖАНИЕ ДОКУМЕНТА (страницы 3-8):\n"
-            f"{json.dumps(context_data['toc'], ensure_ascii=False, indent=2)}\n\n"
-            "КОНТЕКСТ ДО ТЕКУЩЕГО ЧАНКА (3 предыдущих чанка):\n"
+            "КОНТЕКСТ ДО ТЕКУЩЕГО ЧАНКА (1 предыдущих чанка):\n"
             f"{json.dumps(context_data['before'], ensure_ascii=False, indent=2)}\n\n"
             "ТЕКУЩИЙ ЧАНК ДЛЯ ОБОГАЩЕНИЯ:\n"
             f"ID: {context_data['target']['chunk_id']}\n"
             f"Страница: {context_data['target']['page']}\n"
             f"Текст: {context_data['target']['text']}\n\n"
-            "КОНТЕКСТ ПОСЛЕ ТЕКУЩЕГО ЧАНКА (3 следующих чанка):\n"
+            "КОНТЕКСТ ПОСЛЕ ТЕКУЩЕГО ЧАНКА (1 следующих чанка):\n"
             f"{json.dumps(context_data['after'], ensure_ascii=False, indent=2)}\n\n"
             "Задача: опиши ТЕКУЩИЙ ЧАНК на основе его текста и контекста.\n"
             "Верни JSON-объект с полями:\n"
             "- chunk_id: точно такой же как ID выше\n"
-            "- context: краткое описание чанка (1-2 предложения) на основе контекста\n"
-            "- geo: географический объект или null\n"
-            "- metrics: список показателей или null\n"
-            "- years: список годов или null\n"
+            "- context: краткое, точное описание содержания чанка на русском языке (1-2 предложения), отражающее основную тему и данные\n"
+            "- geo: географический объект (название региона, города, области) или null, если не указан\n"
+            "- metrics: список названий метрик/показателей в нижнем регистре на русском языке (например: ['удой молока', 'инвестиции в основной капитал', 'доля домашних хозяйств, имеющих компьютер']) или null. "
+            "Извлекай только реальные названия метрик из текста, не придумывай. Каждое название должно быть в нижнем регистре.\n"
+            "- years: список годов (только целые числа, например [2023, 2024]) или null\n"
             "- time_granularity: 'year'/'quarter'/'month'/'day' или null\n"
             "- oked: код ОКЭД или null\n\n"
             "ВАЖНО: Верни ТОЛЬКО JSON-объект {}, НЕ массив!"
@@ -325,7 +377,20 @@ class KnowledgeBaseBuilder:
                 if "geo" in enriched_data:
                     chunk.geo = enriched_data["geo"]
                 if "metrics" in enriched_data:
-                    chunk.metrics = enriched_data["metrics"]
+                    # Нормализуем метрики: приводим к нижнему регистру и фильтруем только русские строки
+                    metrics = enriched_data["metrics"]
+                    if metrics and isinstance(metrics, list):
+                        normalized_metrics = []
+                        for m in metrics:
+                            if isinstance(m, str) and m.strip():
+                                # Приводим к нижнему регистру
+                                normalized = m.strip().lower()
+                                # Проверяем, что это русский текст (содержит кириллицу)
+                                if any('\u0400' <= char <= '\u04FF' for char in normalized):
+                                    normalized_metrics.append(normalized)
+                        chunk.metrics = normalized_metrics if normalized_metrics else None
+                    else:
+                        chunk.metrics = None
                 if "years" in enriched_data:
                     chunk.years = self._normalize_years(enriched_data["years"])
                 if "time_granularity" in enriched_data:
@@ -352,16 +417,19 @@ class KnowledgeBaseBuilder:
         for i, ch in enumerate(chunks):
             chunks_data.append({
                 "chunk_id": ch.id,
-                "text": ch.text,
+                # ВАЖНО: режем текст, чтобы ускорить генерацию и снизить нагрузку на контекст.
+                # Для извлечения метрик/лет/гео обычно достаточно первых ~350 символов.
+                "text": (ch.text or "")[:350],
                 "page": ch.page,
             })
 
-        # System prompt для строгого контроля формата
+        # System prompt для строгого контроля формата (и для ускорения — жёсткие ограничения)
         system_prompt = (
             "Ты — аналитик по официальной статистике Республики Беларусь. "
             "Твоя задача — обогатить чанки документа структурированными метаданными. "
-            "ОБЯЗАТЕЛЬНО верни JSON-массив, который начинается с символа '[' и заканчивается ']'. "
-            "НЕ возвращай объект '{...}'. НЕ добавляй пояснений. Только JSON-массив."
+            "КРИТИЧЕСКИ ВАЖНО: верни ТОЛЬКО валидный JSON-массив, который начинается с '[' и заканчивается ']'. "
+            "НЕ возвращай объект {}. НЕ добавляй пояснений, markdown, комментариев. Только чистый JSON-массив. "
+            "Ограничения: context <= 180 символов; metrics максимум 3 элемента; years максимум 4 элемента."
         )
         
         # Упрощенный промпт для одного или нескольких чанков
@@ -374,51 +442,110 @@ class KnowledgeBaseBuilder:
                 f"ID: {chunk['chunk_id']}\n"
                 f"Страница: {chunk['page']}\n"
                 f"Текст: {chunk['text'][:500]}...\n\n"
-                "Верни JSON-объект с полями:\n"
-                "- chunk_id: \"{chunk_id}\" (точно такой же как выше)\n"
-                "- context: краткое описание чанка (1-2 предложения)\n"
-                "- geo: географический объект или null\n"
-                "- metrics: список показателей или null\n"
-                "- years: список годов или null\n"
+                "Верни JSON-массив с одним объектом. Формат:\n"
+                "[{\"chunk_id\":\"...\",\"context\":\"...\",\"geo\":null,\"metrics\":null,\"years\":null,\"time_granularity\":null,\"oked\":null}]\n\n"
+                "Поля:\n"
+                "- chunk_id: точно такой же как ID выше\n"
+                "- context: краткое описание (до 180 символов) на русском языке\n"
+                "- geo: название региона/города/области или null\n"
+                "- metrics: список метрик в нижнем регистре на русском (максимум 3) или null\n"
+                "- years: список годов (максимум 4) или null\n"
                 "- time_granularity: 'year'/'quarter'/'month'/'day' или null\n"
                 "- oked: код ОКЭД или null\n\n"
-                "ВАЖНО: Верни ТОЛЬКО JSON-объект в фигурных скобках {}, НЕ массив!"
+                "КРИТИЧЕСКИ ВАЖНО: Верни массив [{}], НЕ объект {}!"
             )
         else:
-            # Для нескольких чанков
+            # Для нескольких чанков — максимально четкий промпт с примером
             prompt = (
                 f"Документ: {pdf_name}\n\n"
-                "Задача: для каждого чанка верни объект с полями:\n"
-                "- chunk_id: идентификатор чанка (обязательно)\n"
-                "- context: краткое описание (1-2 предложения)\n"
-                "- geo: географический объект или null\n"
-                "- metrics: список показателей или null\n"
-                "- years: список годов или null\n"
+                f"Обработай {len(chunks_data)} чанков. Верни JSON-массив из РОВНО {len(chunks_data)} объектов.\n\n"
+                "Формат ответа (пример для 2 чанков):\n"
+                "[{\"chunk_id\":\"...\",\"context\":\"...\",\"geo\":null,\"metrics\":null,\"years\":null,\"time_granularity\":null,\"oked\":null},"
+                "{\"chunk_id\":\"...\",\"context\":\"...\",\"geo\":null,\"metrics\":null,\"years\":null,\"time_granularity\":null,\"oked\":null}]\n\n"
+                "Правила для каждого объекта:\n"
+                "- chunk_id: точно как в входных данных (обязательно!)\n"
+                "- context: до 180 символов, русский язык\n"
+                "- metrics: только реальные названия из текста, нижний регистр, русский, максимум 3\n"
+                "- years: только целые числа, максимум 4\n"
+                "- geo: название региона/города/области или null\n"
                 "- time_granularity: 'year'/'quarter'/'month'/'day' или null\n"
                 "- oked: код ОКЭД или null\n\n"
-                "ФОРМАТ ОТВЕТА: JSON-массив объектов. Начинай с '[' и заканчивай ']'.\n"
-                "Пример: [{\"chunk_id\": \"id1\", \"context\": \"...\", \"geo\": null, ...}, ...]\n\n"
-                f"Чанки для обработки ({len(chunks_data)} шт.):\n"
-                f"{json.dumps(chunks_data, ensure_ascii=False, indent=2)}\n\n"
-                "Верни массив результатов для ВСЕХ чанков выше."
+                "Входные чанки:\n"
+                f"{json.dumps(chunks_data, ensure_ascii=False, separators=(',',':'))}\n\n"
+                "КРИТИЧЕСКИ ВАЖНО:\n"
+                "1. Верни МАССИВ [{}, {}, ...], начинается с '[' и заканчивается ']'\n"
+                "2. НЕ возвращай объект {}\n"
+                f"3. В массиве должно быть РОВНО {len(chunks_data)} объектов\n"
+                "4. Каждый объект должен содержать chunk_id из входных данных"
             )
+
+        req_options = {
+            "temperature": 0,
+            "top_p": 1,
+            # ограничиваем длину вывода (важно: иначе модель может “разливаться” на сотни секунд)
+            "num_predict": min(250 * len(chunks_data) + 100, 3000),  # ~250 токенов на чанк, макс 3000
+        }
+
+        # Логируем, что отправляем в LLM (для отладки)
+        self._log_llm_io(
+            {
+                "event": "request",
+                "ts": time.time(),
+                "pdf_name": pdf_name,
+                "chunks_count": len(chunks_data),
+                "chunk_ids": [c["chunk_id"] for c in chunks_data],
+                "pages": [c["page"] for c in chunks_data],
+                "system_prompt": system_prompt,
+                "prompt": prompt,
+                "ollama": {
+                    "model": getattr(getattr(self._llm, "config", None), "model", None),
+                    "base_url": getattr(getattr(self._llm, "config", None), "base_url", None),
+                    "timeout": getattr(getattr(self._llm, "config", None), "timeout", None),
+                    "format": "json",
+                    "options": req_options,
+                },
+            }
+        )
 
         # Вызываем LLM с форсированием JSON формата
         # Ollama поддерживает параметр format для форсирования JSON
         raw_response = self._llm.generate(
-            prompt, 
+            prompt,
             system_prompt=system_prompt,
-            format="json"  # Форсируем JSON формат
+            format="json",
+            # Параметры для ускорения/стабильности (Ollama options)
+            options=req_options,
         )
 
         # Парсим JSON‑ответ
         enriched_data = self._parse_llm_batch_enrichment(raw_response)
+
+        # Логируем ответ LLM (сырой) + результат парсинга
+        valid_enriched_data_for_log = [item for item in enriched_data if isinstance(item, dict)]
+        parsed_with_chunk_id = sum(
+            1 for item in valid_enriched_data_for_log if item.get("chunk_id")
+        )
+        self._log_llm_io(
+            {
+                "event": "response",
+                "ts": time.time(),
+                "pdf_name": pdf_name,
+                "chunks_count": len(chunks_data),
+                "chunk_ids": [c["chunk_id"] for c in chunks_data],
+                "raw_response": raw_response,
+                "parsed_items": len(valid_enriched_data_for_log),
+                "parsed_with_chunk_id": parsed_with_chunk_id,
+            }
+        )
         
         # Отладочная информация
         if not enriched_data:
             print(f"⚠️  WARNING: LLM не вернул данные для обогащения чанков документа {pdf_name}")
             print(f"   Количество чанков: {len(chunks)}")
-            print(f"   Первые 500 символов ответа LLM: {raw_response[:500]}")
+            print(f"   Длина ответа LLM: {len(raw_response)} символов")
+            print(f"   Первые 1000 символов ответа LLM:\n{raw_response[:1000]}")
+            if len(raw_response) > 1000:
+                print(f"   Последние 500 символов ответа LLM:\n{raw_response[-500:]}")
 
         # Фильтруем только словари из enriched_data
         valid_enriched_data = [item for item in enriched_data if isinstance(item, dict)]
@@ -442,6 +569,41 @@ class KnowledgeBaseBuilder:
 
         # Обогащаем чанки данными от LLM
         enriched_chunks: List[Chunk] = []
+        
+        # Если LLM вернул данные, но не все чанки найдены по ID, пытаемся сопоставить по порядку
+        if len(enriched_map) < len(chunks) and valid_enriched_data:
+            # Специальная обработка: если LLM вернул только 1 объект вместо массива
+            # (частая проблема с маленькими моделями)
+            if len(valid_enriched_data) == 1 and len(chunks) > 1:
+                # LLM вернул только один объект - используем его для первого чанка
+                # и создаем пустые объекты для остальных
+                first_chunk = chunks[0]
+                if first_chunk.id not in enriched_map:
+                    enriched_map[first_chunk.id] = valid_enriched_data[0].copy()
+                    enriched_map[first_chunk.id]["chunk_id"] = first_chunk.id
+                # Для остальных чанков создаем пустые объекты (будут использованы fallback значения)
+            # Пытаемся сопоставить по порядку (если количество совпадает)
+            elif len(valid_enriched_data) == len(chunks):
+                for i, ch in enumerate(chunks):
+                    if ch.id not in enriched_map and i < len(valid_enriched_data):
+                        enriched_map[ch.id] = valid_enriched_data[i]
+                        # Убеждаемся, что chunk_id установлен правильно
+                        enriched_map[ch.id]["chunk_id"] = ch.id
+            # Если количество не совпадает, но есть данные - пытаемся сопоставить по порядку
+            # для тех чанков, которые еще не обогащены
+            elif len(valid_enriched_data) > 0:
+                # Используем данные по порядку для необогащенных чанков
+                used_indices = set()
+                for i, ch in enumerate(chunks):
+                    if ch.id not in enriched_map:
+                        # Ищем первый неиспользованный элемент из valid_enriched_data
+                        for j, data in enumerate(valid_enriched_data):
+                            if j not in used_indices:
+                                enriched_map[ch.id] = data.copy()
+                                enriched_map[ch.id]["chunk_id"] = ch.id
+                                used_indices.add(j)
+                                break
+        
         for ch in chunks:
             enriched = enriched_map.get(ch.id, {})
             
@@ -472,7 +634,20 @@ class KnowledgeBaseBuilder:
             if "geo" in enriched:
                 ch.geo = enriched["geo"]
             if "metrics" in enriched:
-                ch.metrics = enriched["metrics"]
+                # Нормализуем метрики: приводим к нижнему регистру и фильтруем только русские строки
+                metrics = enriched["metrics"]
+                if metrics and isinstance(metrics, list):
+                    normalized_metrics = []
+                    for m in metrics:
+                        if isinstance(m, str) and m.strip():
+                            # Приводим к нижнему регистру
+                            normalized = m.strip().lower()
+                            # Проверяем, что это русский текст (содержит кириллицу)
+                            if any('\u0400' <= char <= '\u04FF' for char in normalized):
+                                normalized_metrics.append(normalized)
+                    ch.metrics = normalized_metrics if normalized_metrics else None
+                else:
+                    ch.metrics = None
             if "years" in enriched:
                 ch.years = self._normalize_years(enriched["years"])
             if "time_granularity" in enriched:
@@ -483,6 +658,29 @@ class KnowledgeBaseBuilder:
             enriched_chunks.append(ch)
 
         return enriched_chunks
+
+    @staticmethod
+    def _llm_log_path() -> Path:
+        """
+        Пишем лог в корень проекта: .../rag-bseu/test-LLM-input-out.json
+        """
+        try:
+            return Path(__file__).resolve().parents[2] / "test-LLM-input-out.json"
+        except Exception:
+            return Path("test-LLM-input-out.json")
+
+    @classmethod
+    def _log_llm_io(cls, record: Dict[str, Any]) -> None:
+        """
+        Пишет одну запись в test-LLM-input-out.json в формате JSONL
+        (1 JSON-объект на строку). Это удобно для append во время долгого прогона.
+        """
+        path = cls._llm_log_path()
+        line = json.dumps(record, ensure_ascii=False)
+        with _LLM_LOG_LOCK:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(line + "\n")
 
     @staticmethod
     def _parse_llm_single_enrichment(raw: str, expected_chunk_id: str) -> Optional[Dict[str, Any]]:
@@ -596,12 +794,13 @@ class KnowledgeBaseBuilder:
 
         Ищет JSON‑массив в ответе и пытается его распарсить.
         Если найден объект вместо массива, пытается извлечь из него данные.
+        Обрабатывает случаи, когда LLM возвращает несколько объектов подряд (конкатенированные).
         При ошибке возвращает пустой список.
         """
         if not raw:
             return []
 
-        # Стратегия 1: Удаление markdown code blocks
+        # Стратегия 1: Удаление markdown code blocks и очистка от мусорных символов
         cleaned = raw.strip()
         if cleaned.startswith("```json"):
             cleaned = cleaned[7:]  # Удаляем ```json
@@ -610,6 +809,35 @@ class KnowledgeBaseBuilder:
         if cleaned.endswith("```"):
             cleaned = cleaned[:-3]  # Удаляем закрывающий ```
         cleaned = cleaned.strip()
+        
+        # Очистка от мусорных символов в начале (иногда LLM возвращает "{  "["...)
+        # Удаляем пробелы и переносы строк перед первым значимым символом
+        while cleaned and cleaned[0] in [' ', '\n', '\r', '\t']:
+            cleaned = cleaned[1:]
+        
+        # Если ответ начинается с "{  "[" - это объект, содержащий строку с массивом
+        # Пытаемся извлечь массив из строки
+        if cleaned.startswith('{') and '"[{' in cleaned:
+            # Ищем начало массива внутри строки
+            array_start = cleaned.find('"[{')
+            if array_start != -1:
+                # Извлекаем строку с массивом
+                array_str_start = array_start + 1  # Пропускаем кавычку
+                # Ищем конец строки (закрывающая кавычка перед })
+                array_str_end = cleaned.find('"', array_str_start + 1)
+                if array_str_end != -1:
+                    # Извлекаем и декодируем escape-последовательности
+                    array_str = cleaned[array_str_start:array_str_end]
+                    # Заменяем экранированные кавычки и другие escape-последовательности
+                    try:
+                        import codecs
+                        array_str = codecs.decode(array_str, 'unicode_escape')
+                        # Пытаемся распарсить как JSON
+                        data = json.loads(array_str)
+                        if isinstance(data, list):
+                            return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(data)
+                    except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+                        pass
 
         # Стратегия 2: Попытка прямого парсинга всего ответа
         try:
@@ -622,8 +850,9 @@ class KnowledgeBaseBuilder:
                 for key in ["chunks", "data", "results", "items", "array"]:
                     if key in data and isinstance(data[key], list):
                         return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(data[key])
-                # Если объект содержит chunk_id, возможно это один элемент - оборачиваем в массив
-                if "chunk_id" in data:
+                # Если объект содержит chunk_id или нужные поля - это один элемент
+                # Оборачиваем в массив (вызывающий код должен обработать случай, когда вернулся 1 объект вместо N)
+                if "chunk_id" in data or any(key in data for key in ["context", "geo", "metrics", "years"]):
                     return KnowledgeBaseBuilder._validate_and_fix_enrichment_data([data])
         except json.JSONDecodeError:
             pass
@@ -640,7 +869,45 @@ class KnowledgeBaseBuilder:
             except json.JSONDecodeError:
                 pass
 
-        # Стратегия 4: Поиск JSON-объекта и попытка извлечь из него данные
+        # Стратегия 4: Поиск нескольких JSON объектов в тексте (конкатенированные объекты)
+        # Это критично - LLM часто возвращает {"chunk_id":"...",...}{"chunk_id":"...",...} без массива
+        objects = []
+        i = 0
+        while i < len(cleaned):
+            if cleaned[i] == '{':
+                # Находим закрывающую скобку для этого объекта
+                depth = 0
+                j = i
+                while j < len(cleaned):
+                    if cleaned[j] == '{':
+                        depth += 1
+                    elif cleaned[j] == '}':
+                        depth -= 1
+                        if depth == 0:
+                            # Нашли полный объект
+                            try:
+                                obj_str = cleaned[i:j+1]
+                                obj = json.loads(obj_str)
+                                if isinstance(obj, dict):
+                                    # Принимаем объект если есть chunk_id или хотя бы одно из нужных полей
+                                    if "chunk_id" in obj or any(key in obj for key in ["context", "geo", "metrics", "years"]):
+                                        objects.append(obj)
+                            except json.JSONDecodeError:
+                                # Пропускаем невалидный JSON
+                                pass
+                            i = j + 1  # Продолжаем поиск после этого объекта
+                            break
+                    j += 1
+                else:
+                    # Не нашли закрывающую скобку - пропускаем этот символ
+                    i += 1
+            else:
+                i += 1
+        
+        if objects:
+            return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(objects)
+
+        # Стратегия 5: Попытка найти один JSON-объект и обернуть в массив
         start = cleaned.find("{")
         end = cleaned.rfind("}")
         if start != -1 and end != -1 and end > start:
@@ -653,44 +920,10 @@ class KnowledgeBaseBuilder:
                         if key in data and isinstance(data[key], list):
                             return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(data[key])
                     # Если объект содержит chunk_id, оборачиваем в массив
-                    if "chunk_id" in data:
-                        return KnowledgeBaseBuilder._validate_and_fix_enrichment_data([data])
-                    # Если это один объект без chunk_id, но с нужными полями - тоже принимаем
-                    if any(key in data for key in ["context", "geo", "metrics", "years"]):
-                        # Пытаемся создать объект с chunk_id из первого чанка в запросе
-                        # Но это не идеально, лучше вернуть как есть и обработать позже
+                    if "chunk_id" in data or any(key in data for key in ["context", "geo", "metrics", "years"]):
                         return KnowledgeBaseBuilder._validate_and_fix_enrichment_data([data])
             except json.JSONDecodeError:
                 pass
-
-        # Стратегия 5: Попытка найти несколько JSON объектов в тексте
-        # Иногда LLM возвращает несколько объектов подряд
-        objects = []
-        i = 0
-        while i < len(cleaned):
-            if cleaned[i] == '{':
-                # Находим закрывающую скобку
-                depth = 0
-                j = i
-                while j < len(cleaned):
-                    if cleaned[j] == '{':
-                        depth += 1
-                    elif cleaned[j] == '}':
-                        depth -= 1
-                        if depth == 0:
-                            try:
-                                obj = json.loads(cleaned[i:j+1])
-                                if isinstance(obj, dict) and "chunk_id" in obj:
-                                    objects.append(obj)
-                            except json.JSONDecodeError:
-                                pass
-                            i = j
-                            break
-                    j += 1
-            i += 1
-        
-        if objects:
-            return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(objects)
 
         # Если ничего не сработало
         print(f"⚠️  WARNING: Не найден JSON-массив в ответе LLM. Первые 500 символов: {raw[:500]}")

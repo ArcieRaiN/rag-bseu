@@ -37,6 +37,29 @@ class OllamaClient:
     def __init__(self, config: Optional[OllamaConfig] = None):
         self.config = config or OllamaConfig()
 
+    def reset_context(self) -> None:
+        """
+        Сбрасывает контекст модели через очистку кеша.
+        
+        В Ollama это делается через параметр keep_alive: "0" в запросе,
+        который очищает кеш модели в памяти.
+        """
+        url = f"{self.config.base_url}/api/generate"
+        # Делаем минимальный запрос с keep_alive: "0" для очистки кеша
+        payload: Dict[str, Any] = {
+            "model": self.config.model,
+            "prompt": "",  # Пустой промпт
+            "stream": False,
+            "keep_alive": "0",  # Очищает кеш модели
+            "num_predict": 1,  # Минимальная генерация
+        }
+        try:
+            resp = requests.post(url, json=payload, timeout=5.0)
+            resp.raise_for_status()
+        except Exception:
+            # Игнорируем ошибки при сбросе - это не критично
+            pass
+
     def generate(self, prompt: str, *, system_prompt: str | None = None, max_retries: int = 3, **params: Any) -> str:
         """
         Получить текстовую completion от Ollama.
