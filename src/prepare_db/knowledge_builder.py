@@ -428,7 +428,8 @@ class KnowledgeBaseBuilder:
             "Ты — аналитик по официальной статистике Республики Беларусь. "
             "Твоя задача — обогатить чанки документа структурированными метаданными. "
             "КРИТИЧЕСКИ ВАЖНО: верни ТОЛЬКО валидный JSON-массив, который начинается с '[' и заканчивается ']'. "
-            "НЕ возвращай объект {}. НЕ добавляй пояснений, markdown, комментариев. Только чистый JSON-массив. "
+            "НЕ возвращай объект {}. НЕ добавляй пояснений, markdown, комментариев, escape-последовательностей. "
+            "Только чистый JSON-массив без unicode escape-последовательностей (\\u0412 и т.д.). "
             "Ограничения: context <= 180 символов; metrics максимум 3 элемента; years максимум 4 элемента."
         )
         
@@ -456,17 +457,19 @@ class KnowledgeBaseBuilder:
             )
         else:
             # Для нескольких чанков — максимально четкий промпт с примером
+            # Создаем упрощенный пример входных данных для промпта
+            example_chunks = chunks_data[:2] if len(chunks_data) >= 2 else chunks_data
             prompt = (
                 f"Документ: {pdf_name}\n\n"
                 f"Обработай {len(chunks_data)} чанков. Верни JSON-массив из РОВНО {len(chunks_data)} объектов.\n\n"
                 "Формат ответа (пример для 2 чанков):\n"
-                "[{\"chunk_id\":\"...\",\"context\":\"...\",\"geo\":null,\"metrics\":null,\"years\":null,\"time_granularity\":null,\"oked\":null},"
-                "{\"chunk_id\":\"...\",\"context\":\"...\",\"geo\":null,\"metrics\":null,\"years\":null,\"time_granularity\":null,\"oked\":null}]\n\n"
+                "[{\"chunk_id\":\"doc.pdf::page1::chunk0\",\"context\":\"Краткое описание\",\"geo\":null,\"metrics\":[\"метрика1\"],\"years\":[2024],\"time_granularity\":null,\"oked\":null},"
+                "{\"chunk_id\":\"doc.pdf::page1::chunk1\",\"context\":\"Другое описание\",\"geo\":\"Минск\",\"metrics\":null,\"years\":null,\"time_granularity\":\"year\",\"oked\":null}]\n\n"
                 "Правила для каждого объекта:\n"
                 "- chunk_id: точно как в входных данных (обязательно!)\n"
-                "- context: до 180 символов, русский язык\n"
-                "- metrics: только реальные названия из текста, нижний регистр, русский, максимум 3\n"
-                "- years: только целые числа, максимум 4\n"
+                "- context: до 180 символов, русский язык, БЕЗ unicode escape (\\u0412 и т.д.)\n"
+                "- metrics: только реальные названия из текста, нижний регистр, русский, максимум 3, или null\n"
+                "- years: только целые числа, максимум 4, или null\n"
                 "- geo: название региона/города/области или null\n"
                 "- time_granularity: 'year'/'quarter'/'month'/'day' или null\n"
                 "- oked: код ОКЭД или null\n\n"
@@ -476,9 +479,14 @@ class KnowledgeBaseBuilder:
                 "1. Верни МАССИВ [{}, {}, ...], начинается с '[' и заканчивается ']'\n"
                 "2. НЕ возвращай объект {}\n"
                 f"3. В массиве должно быть РОВНО {len(chunks_data)} объектов\n"
-                "4. Каждый объект должен содержать chunk_id из входных данных"
+                "4. Каждый объект должен содержать chunk_id из входных данных\n"
+                "5. НЕ используй unicode escape-последовательности (\\u0412) - пиши русский текст напрямую"
             )
 
+        # keep_alive: держит модель в памяти GPU между запросами для более равномерной нагрузки
+        # "5m" = 5 минут (можно настроить через RAG_OLLAMA_KEEP_ALIVE)
+        keep_alive = os.getenv("RAG_OLLAMA_KEEP_ALIVE", "5m")
+        
         req_options = {
             "temperature": 0,
             "top_p": 1,
@@ -509,16 +517,34 @@ class KnowledgeBaseBuilder:
 
         # Вызываем LLM с форсированием JSON формата
         # Ollama поддерживает параметр format для форсирования JSON
-        raw_response = self._llm.generate(
-            prompt,
-            system_prompt=system_prompt,
-            format="json",
-            # Параметры для ускорения/стабильности (Ollama options)
-            options=req_options,
-        )
+        # Делаем до 2 попыток при плохом качестве ответа
+        max_retries_for_quality = 2
+        enriched_data = []
+        raw_response = ""
+        
+        for attempt in range(max_retries_for_quality):
+            raw_response = self._llm.generate(
+                prompt,
+                system_prompt=system_prompt,
+                format="json",
+                # keep_alive передается на верхнем уровне payload в Ollama API
+                keep_alive=keep_alive,
+                # Параметры для ускорения/стабильности (Ollama options)
+                options=req_options,
+            )
 
-        # Парсим JSON‑ответ
-        enriched_data = self._parse_llm_batch_enrichment(raw_response)
+            # Парсим JSON‑ответ
+            enriched_data = self._parse_llm_batch_enrichment(raw_response)
+            
+            # Проверяем качество ответа
+            valid_items = [item for item in enriched_data if isinstance(item, dict)]
+            if len(valid_items) >= len(chunks_data) * 0.8:  # Хотя бы 80% чанков обогащено
+                break  # Качество приемлемое, выходим
+            
+            # Если качество плохое и это не последняя попытка - повторяем
+            if attempt < max_retries_for_quality - 1:
+                print(f"   ⚠️  Низкое качество ответа ({len(valid_items)}/{len(chunks_data)}), повторная попытка {attempt + 2}/{max_retries_for_quality}...")
+                time.sleep(1)  # Небольшая пауза перед повтором
 
         # Логируем ответ LLM (сырой) + результат парсинга
         valid_enriched_data_for_log = [item for item in enriched_data if isinstance(item, dict)]
@@ -623,7 +649,15 @@ class KnowledgeBaseBuilder:
             
             # Обновляем context (с fallback на text)
             if enriched.get("context"):
-                ch.context = str(enriched.get("context"))[:200]
+                context_str = str(enriched.get("context"))
+                # Декодируем unicode escape-последовательности если они есть
+                if "\\u" in context_str:
+                    try:
+                        import codecs
+                        context_str = codecs.decode(context_str, 'unicode_escape')
+                    except (UnicodeDecodeError, ValueError):
+                        pass  # Если не получилось декодировать - оставляем как есть
+                ch.context = context_str[:200]
             elif ch.text:
                 ch.context = ch.text[:200]
             else:
@@ -855,7 +889,18 @@ class KnowledgeBaseBuilder:
                 if "chunk_id" in data or any(key in data for key in ["context", "geo", "metrics", "years"]):
                     return KnowledgeBaseBuilder._validate_and_fix_enrichment_data([data])
         except json.JSONDecodeError:
-            pass
+            # Пытаемся декодировать unicode escape-последовательности перед парсингом
+            try:
+                import codecs
+                decoded = codecs.decode(cleaned, 'unicode_escape')
+                data = json.loads(decoded)
+                if isinstance(data, list):
+                    return KnowledgeBaseBuilder._validate_and_fix_enrichment_data(data)
+                elif isinstance(data, dict):
+                    if "chunk_id" in data or any(key in data for key in ["context", "geo", "metrics", "years"]):
+                        return KnowledgeBaseBuilder._validate_and_fix_enrichment_data([data])
+            except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+                pass
 
         # Стратегия 3: Поиск JSON-массива в тексте
         start = cleaned.find("[")
