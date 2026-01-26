@@ -2,14 +2,11 @@ from __future__ import annotations
 
 """
 Высокоуровневый пайплайн обработки пользовательского запроса (PIPELINE 2–4).
-
-ВАЖНО:
-- пайплайн ОСТАНАВЛИВАЕТСЯ на Top‑3 чанках после reranking
-- генерация финального ответа (LLM Answer Generation) здесь сознательно не реализована
 """
 
 from pathlib import Path
 from typing import List
+import time
 
 from src.main.context_enrichment import QueryContextEnricher
 from src.main.hybrid_search import HybridSearcher
@@ -25,15 +22,6 @@ from src.main.reranker import LLMReranker
 
 
 class QueryPipelineV2:
-    """
-    Архитектурный фасад над:
-    - QueryContextEnricher (PIPELINE 2)
-    - HybridSearcher (PIPELINE 3)
-    - LLMReranker (PIPELINE 4)
-
-    Используется CLI и любыми внешними потребителями.
-    """
-
     def __init__(
         self,
         base_dir: Path,
@@ -43,18 +31,23 @@ class QueryPipelineV2:
         retrieval_config: RetrievalConfig | None = None,
         rerank_config: RerankConfig | None = None,
     ):
-        self._base_dir = Path(base_dir)
+        print("[INIT] QueryPipelineV2: init started")
+        t0 = time.perf_counter()
 
-        # Настройка компонентов
+        self._base_dir = Path(base_dir)
         self._ollama = ollama_client or OllamaClient()
         self._vectorizer = HashVectorizer(dimension=vector_dim)
 
-        # Vector store (FAISS + data.json)
         vector_store_dir = self._base_dir / "prepare_db" / "vector_store"
         index_path = vector_store_dir / "index.faiss"
         data_path = vector_store_dir / "data.json"
 
-        self._semantic = FaissSemanticSearcher(index_path=index_path, data_path=data_path)
+        print("[INIT] Loading FAISS index...")
+        self._semantic = FaissSemanticSearcher(
+            index_path=index_path,
+            data_path=data_path,
+        )
+
         self._retrieval_config = retrieval_config or RetrievalConfig()
         self._hybrid = HybridSearcher(
             semantic_searcher=self._semantic,
@@ -72,20 +65,45 @@ class QueryPipelineV2:
             config=self._rerank_config,
         )
 
-    # -------------------- Публичный интерфейс -------------------- #
+        print(f"[INIT] QueryPipelineV2 ready in {time.perf_counter() - t0:.2f}s")
+
+    # -------------------- #
 
     def run(self, query: str) -> PipelineResult:
-        """
-        Выполнить полный пайплайн без генерации ответа:
-        1. Обогатить запрос (enrichment + embedding)
-        2. Получить Top‑10 кандидатов гибридным поиском
-        3. Переранжировать кандидатов через LLM‑reranker до Top‑3
-        """
+        print()
+        print(f"[PIPELINE] Start query: {query!r}")
+        t_pipeline = time.perf_counter()
+
+        # 1. Enrichment
+        print("[STEP 1] Enrichment started")
+        t0 = time.perf_counter()
         enriched = self._enricher.enrich(query)
+        print(
+            f"[STEP 1] Enrichment done in {time.perf_counter() - t0:.2f}s"
+        )
+
+        # 2. Hybrid search
+        print("[STEP 2] Hybrid search started")
+        t0 = time.perf_counter()
         hybrid_result = self._hybrid.search(enriched)
         candidates = hybrid_result.candidates
+        print(
+            f"[STEP 2] Hybrid search done in {time.perf_counter() - t0:.2f}s "
+            f"(candidates={len(candidates)})"
+        )
 
+        # 3. Rerank
+        print("[STEP 3] Rerank started")
+        t0 = time.perf_counter()
         top_chunks = self._reranker.rerank(enriched, candidates.copy())
+        print(
+            f"[STEP 3] Rerank done in {time.perf_counter() - t0:.2f}s "
+            f"(top_chunks={len(top_chunks)})"
+        )
+
+        print(
+            f"[PIPELINE] Finished in {time.perf_counter() - t_pipeline:.2f}s"
+        )
 
         return PipelineResult(
             query=query,
@@ -93,4 +111,3 @@ class QueryPipelineV2:
             candidates=candidates,
             top_chunks=top_chunks,
         )
-
