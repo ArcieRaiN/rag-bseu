@@ -278,9 +278,9 @@ class KnowledgeBaseBuilder:
         # ВАЖНО: маленькие модели (llama3.2:3b) лучше работают с меньшими батчами (5 вместо 10)
         # Это повышает качество и снижает вероятность таймаутов
         batch_size = int(os.getenv("RAG_ENRICH_BATCH_SIZE", "5"))  # Уменьшено с 10 до 5 для лучшего качества
-        batch_concurrency = int(os.getenv("RAG_ENRICH_CONCURRENCY", "2"))  # Увеличено с 1 до 2 для ускорения
+        batch_concurrency = int(os.getenv("RAG_ENRICH_CONCURRENCY", "4"))  # Увеличено с 1 до 2 для ускорения
         batch_size = max(1, batch_size)
-        batch_concurrency = max(1, min(batch_concurrency, 4))  # Максимум 4 параллельных запроса
+        batch_concurrency = max(1, min(batch_concurrency, 8))  # Максимум 4 параллельных запроса
 
         total_batches = (len(chunks_to_process) + batch_size - 1) // batch_size
         print(f"   Обработка {len(chunks_to_process)} чанков (пропущено {len(chunks_to_skip)} чанков со страниц 1-3)")

@@ -57,12 +57,6 @@ def main() -> None:
 
         print(f"📊 Всего чанков проиндексировано: {len(chunks)}")
 
-        # Полезный дебаг: примеры context
-        print("\n🧪 Примеры context (первые 10-13 чанки):")
-        for ch in chunks[10:14]:
-            context_preview = ch.get("context", "")[:100]
-            print(f" • {context_preview}...")
-
 
 if __name__ == "__main__":
     main()
