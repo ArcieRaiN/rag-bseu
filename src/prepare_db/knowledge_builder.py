@@ -36,8 +36,7 @@ from llama_index.core.node_parser import SimpleNodeParser
 from src.main.models import Chunk
 from src.main.ollama_client import OllamaClient
 from src.main.vectorizer import HashVectorizer
-
-_LLM_LOG_LOCK = threading.Lock()
+from src.logs.logger import get_logger
 
 
 @dataclass
@@ -60,6 +59,7 @@ class KnowledgeBaseBuilder:
         self._config = config
         self._llm = llm_client or OllamaClient()
         self._vectorizer = HashVectorizer(dimension=config.vector_dim)
+        self._logger = get_logger()
 
     # -------------------- Публичный интерфейс -------------------- #
 
@@ -74,11 +74,18 @@ class KnowledgeBaseBuilder:
         - сохранить JSON и построить FAISS‑индекс
         """
         self._config.output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Логируем начало процесса
+        self._logger.log_prepare_db("start", total_pdfs=len(list(self._config.documents_dir.glob("*.pdf"))))
+        build_start_time = time.time()
 
         all_chunks: List[Chunk] = []
         chunk_id_counter = 0
 
         for pdf_path in sorted(self._config.documents_dir.glob("*.pdf")):
+            pdf_start_time = time.time()
+            self._logger.log_prepare_db("pdf_start", pdf_name=pdf_path.name)
+            
             # 1–2. Чанкинг PDF через LlamaIndex (skeleton)
             raw_chunks = self._chunk_pdf_with_llamaindex(pdf_path)
 
@@ -87,9 +94,22 @@ class KnowledgeBaseBuilder:
                 ch.id = f"{pdf_path.name}::page{ch.page}::chunk{chunk_id_counter}"
                 chunk_id_counter += 1
 
-            # 3. LLM‑enrichment для чанков ОДНИМ запросом
-            enriched_chunks = self._enrich_chunks_with_llm_batch(pdf_path.name, raw_chunks)
+            # 3. LLM‑enrichment для чанков с контекстом предыдущих страниц
+            # Передаем all_chunks для получения контекста предыдущих страниц
+            enriched_chunks = self._enrich_chunks_with_llm_batch(
+                pdf_path.name,
+                raw_chunks,
+                all_chunks=all_chunks + raw_chunks  # Все чанки до текущего PDF + текущие
+            )
             all_chunks.extend(enriched_chunks)
+            
+            pdf_elapsed = time.time() - pdf_start_time
+            self._logger.log_prepare_db(
+                "pdf_end",
+                pdf_name=pdf_path.name,
+                chunks_count=len(enriched_chunks),
+                elapsed_time=pdf_elapsed
+            )
 
         # 4. Сохранение data.json
         data_json_path = self._config.output_dir / "data.json"
@@ -131,6 +151,14 @@ class KnowledgeBaseBuilder:
                 ensure_ascii=False,
                 indent=2,
             )
+        
+        # Логируем завершение процесса
+        build_elapsed = time.time() - build_start_time
+        self._logger.log_prepare_db(
+            "end",
+            total_chunks=len(all_chunks),
+            elapsed_time=build_elapsed
+        )
 
     # -------------------- Skeleton‑методы для интеграции -------------------- #
 
@@ -211,7 +239,7 @@ class KnowledgeBaseBuilder:
 
         return chunks
 
-    def _enrich_chunks_with_llm_batch(self, pdf_name: str, chunks: List[Chunk]) -> List[Chunk]:
+    def _enrich_chunks_with_llm_batch(self, pdf_name: str, chunks: List[Chunk], all_chunks: List[Chunk] | None = None) -> List[Chunk]:
         """
         Батчевое LLM‑обогащение чанков с контекстом.
 
@@ -267,11 +295,41 @@ class KnowledgeBaseBuilder:
         chunks_since_reset = 0
         reset_interval = int(os.getenv("RAG_ENRICH_RESET_INTERVAL", "50"))  # Каждые 50 чанков по умолчанию
         
+        # Сохраняем ссылку на исходный список всех чанков для получения контекста
+        all_chunks_ref = all_chunks if all_chunks is not None else chunks
+        
         with ThreadPoolExecutor(max_workers=min(batch_concurrency, total_batches)) as executor:
             futures = []
             for start in range(0, len(chunks_to_process), batch_size):
                 batch = chunks_to_process[start : start + batch_size]
-                fut = executor.submit(self._enrich_single_batch, pdf_name, batch)
+                # Получаем контекст предыдущих страниц для батча
+                # Берем чанки до текущего батча из исходного списка all_chunks_ref
+                # Это важно для получения контекста даже если предыдущие батчи еще не обработаны
+                previous_chunks_for_batch = None
+                if start > 0:
+                    # Берем последние 2 чанка из исходного списка chunks (до текущего батча)
+                    # Используем исходный список all_chunks_ref, чтобы получить контекст даже в параллельном режиме
+                    prev_end = start
+                    prev_start = max(0, prev_end - 2)
+                    # Находим соответствующие чанки в исходном списке chunks
+                    prev_chunk_indices = []
+                    for i in range(prev_start, prev_end):
+                        if i < len(chunks_to_process):
+                            # Находим соответствующий чанк в исходном списке chunks
+                            # chunks_to_process содержит чанки начиная с индекса len(chunks_to_skip)
+                            chunk_idx = len(chunks_to_skip) + i
+                            if chunk_idx < len(all_chunks_ref):
+                                prev_chunk_indices.append(chunk_idx)
+                    
+                    if prev_chunk_indices:
+                        previous_chunks_for_batch = [all_chunks_ref[idx] for idx in prev_chunk_indices]
+                
+                fut = executor.submit(
+                    self._enrich_single_batch,
+                    pdf_name,
+                    batch,
+                    previous_chunks_for_batch
+                )
                 # сохраняем, какой батч соответствует future + когда он был отправлен
                 fut._rag_submit_ts = time.time()  # type: ignore[attr-defined]
                 futures.append(fut)
@@ -306,6 +364,18 @@ class KnowledgeBaseBuilder:
                     elapsed = time.time() - start_time
                     rate = completed_chunks / elapsed * 3600 if elapsed > 0 else 0
                     print(f"   Батч {completed_batches}/{total_batches}: {len(enriched_batch)} чанков за {batch_time:.1f}с | Всего: {completed_chunks}/{len(chunks_to_process)} | Скорость: {rate:.0f} чанков/час")
+                    
+                    # Логируем прогресс батча
+                    self._logger.log_prepare_db(
+                        "batch",
+                        pdf_name=pdf_name,
+                        batch_number=completed_batches,
+                        total_batches=total_batches,
+                        chunks_in_batch=len(enriched_batch),
+                        elapsed_time=batch_time,
+                        total_chunks_processed=completed_chunks,
+                        rate_per_hour=rate
+                    )
                 except Exception as e:
                     submit_ts = getattr(fut, "_rag_submit_ts", None)
                     batch_time = (time.time() - submit_ts) if submit_ts else 0.0
@@ -405,9 +475,19 @@ class KnowledgeBaseBuilder:
         
         return chunk
     
-    def _enrich_single_batch(self, pdf_name: str, chunks: List[Chunk]) -> List[Chunk]:
+    def _enrich_single_batch(
+        self,
+        pdf_name: str,
+        chunks: List[Chunk],
+        previous_chunks: List[Chunk] | None = None
+    ) -> List[Chunk]:
         """
-        Обогащение одного батча чанков.
+        Обогащение одного батча чанков с учетом контекста предыдущих страниц.
+        
+        Args:
+            pdf_name: Имя PDF файла
+            chunks: Список чанков для обогащения
+            previous_chunks: Список чанков с предыдущих страниц для контекста
         """
         if not chunks:
             return []
@@ -422,6 +502,17 @@ class KnowledgeBaseBuilder:
                 "text": (ch.text or "")[:350],
                 "page": ch.page,
             })
+        
+        # Подготавливаем контекст предыдущих страниц
+        previous_context = None
+        if previous_chunks:
+            # Берем последние 1-2 чанка с предыдущих страниц для контекста
+            prev_texts = []
+            for prev_ch in previous_chunks[-2:]:  # Последние 2 чанка
+                if prev_ch.text:
+                    prev_texts.append(f"Страница {prev_ch.page}: {prev_ch.text[:200]}")
+            if prev_texts:
+                previous_context = "\n".join(prev_texts)
 
         # System prompt для строгого контроля формата (и для ускорения — жёсткие ограничения)
         system_prompt = (
@@ -435,10 +526,18 @@ class KnowledgeBaseBuilder:
         
         # Упрощенный промпт для одного или нескольких чанков
         if len(chunks_data) == 1:
-            # Для одного чанка - более простой промпт
+            # Для одного чанка - более простой промпт с контекстом предыдущих страниц
             chunk = chunks_data[0]
+            context_section = ""
+            if previous_context:
+                context_section = (
+                    f"\nКОНТЕКСТ ПРЕДЫДУЩИХ СТРАНИЦ (для понимания общего контекста документа):\n"
+                    f"{previous_context}\n\n"
+                )
+            
             prompt = (
                 f"Документ: {pdf_name}\n\n"
+                f"{context_section}"
                 f"Чанк для обработки:\n"
                 f"ID: {chunk['chunk_id']}\n"
                 f"Страница: {chunk['page']}\n"
@@ -447,7 +546,8 @@ class KnowledgeBaseBuilder:
                 "[{\"chunk_id\":\"...\",\"context\":\"...\",\"geo\":null,\"metrics\":null,\"years\":null,\"time_granularity\":null,\"oked\":null}]\n\n"
                 "Поля:\n"
                 "- chunk_id: точно такой же как ID выше\n"
-                "- context: краткое описание (до 180 символов) на русском языке\n"
+                "- context: краткое, точное описание содержания чанка на русском языке (1-2 предложения), "
+                "отражающее что находится в чанке с учётом предыдущих страниц\n"
                 "- geo: название региона/города/области или null\n"
                 "- metrics: список метрик в нижнем регистре на русском (максимум 3) или null\n"
                 "- years: список годов (максимум 4) или null\n"
@@ -456,18 +556,26 @@ class KnowledgeBaseBuilder:
                 "КРИТИЧЕСКИ ВАЖНО: Верни массив [{}], НЕ объект {}!"
             )
         else:
-            # Для нескольких чанков — максимально четкий промпт с примером
-            # Создаем упрощенный пример входных данных для промпта
-            example_chunks = chunks_data[:2] if len(chunks_data) >= 2 else chunks_data
+            # Для нескольких чанков — максимально четкий промпт с примером и контекстом
+            context_section = ""
+            if previous_context:
+                context_section = (
+                    f"\nКОНТЕКСТ ПРЕДЫДУЩИХ СТРАНИЦ (для понимания общего контекста документа):\n"
+                    f"{previous_context}\n\n"
+                )
+            
             prompt = (
                 f"Документ: {pdf_name}\n\n"
+                f"{context_section}"
                 f"Обработай {len(chunks_data)} чанков. Верни JSON-массив из РОВНО {len(chunks_data)} объектов.\n\n"
                 "Формат ответа (пример для 2 чанков):\n"
                 "[{\"chunk_id\":\"doc.pdf::page1::chunk0\",\"context\":\"Краткое описание\",\"geo\":null,\"metrics\":[\"метрика1\"],\"years\":[2024],\"time_granularity\":null,\"oked\":null},"
                 "{\"chunk_id\":\"doc.pdf::page1::chunk1\",\"context\":\"Другое описание\",\"geo\":\"Минск\",\"metrics\":null,\"years\":null,\"time_granularity\":\"year\",\"oked\":null}]\n\n"
                 "Правила для каждого объекта:\n"
                 "- chunk_id: точно как в входных данных (обязательно!)\n"
-                "- context: до 180 символов, русский язык, БЕЗ unicode escape (\\u0412 и т.д.)\n"
+                "- context: краткое, точное описание содержания чанка на русском языке (1-2 предложения), "
+                "отражающее что находится в чанке с учётом предыдущих страниц, например, "
+                "\"Производительность труда по ВВП, ВРП, ВВП, на одного занятого в экономике, рублей ВРП на одного занятого в экономике, рублей\"\n"
                 "- metrics: только реальные названия из текста, нижний регистр, русский, максимум 3, или null\n"
                 "- years: только целые числа, максимум 4, или null\n"
                 "- geo: название региона/города/области или null\n"
@@ -495,24 +603,23 @@ class KnowledgeBaseBuilder:
         }
 
         # Логируем, что отправляем в LLM (для отладки)
-        self._log_llm_io(
-            {
-                "event": "request",
-                "ts": time.time(),
-                "pdf_name": pdf_name,
-                "chunks_count": len(chunks_data),
-                "chunk_ids": [c["chunk_id"] for c in chunks_data],
-                "pages": [c["page"] for c in chunks_data],
-                "system_prompt": system_prompt,
-                "prompt": prompt,
-                "ollama": {
-                    "model": getattr(getattr(self._llm, "config", None), "model", None),
-                    "base_url": getattr(getattr(self._llm, "config", None), "base_url", None),
-                    "timeout": getattr(getattr(self._llm, "config", None), "timeout", None),
-                    "format": "json",
-                    "options": req_options,
-                },
-            }
+        ollama_config = {
+            "model": getattr(getattr(self._llm, "config", None), "model", None),
+            "base_url": getattr(getattr(self._llm, "config", None), "base_url", None),
+            "timeout": getattr(getattr(self._llm, "config", None), "timeout", None),
+            "format": "json",
+            "options": req_options,
+        }
+        
+        self._logger.log_llm_enrichment(
+            event="request",
+            pdf_name=pdf_name,
+            chunks_count=len(chunks_data),
+            chunk_ids=[c["chunk_id"] for c in chunks_data],
+            pages=[c["page"] for c in chunks_data],
+            system_prompt=system_prompt,
+            prompt=prompt,
+            ollama_config=ollama_config,
         )
 
         # Вызываем LLM с форсированием JSON формата
@@ -551,17 +658,14 @@ class KnowledgeBaseBuilder:
         parsed_with_chunk_id = sum(
             1 for item in valid_enriched_data_for_log if item.get("chunk_id")
         )
-        self._log_llm_io(
-            {
-                "event": "response",
-                "ts": time.time(),
-                "pdf_name": pdf_name,
-                "chunks_count": len(chunks_data),
-                "chunk_ids": [c["chunk_id"] for c in chunks_data],
-                "raw_response": raw_response,
-                "parsed_items": len(valid_enriched_data_for_log),
-                "parsed_with_chunk_id": parsed_with_chunk_id,
-            }
+        self._logger.log_llm_enrichment(
+            event="response",
+            pdf_name=pdf_name,
+            chunks_count=len(chunks_data),
+            chunk_ids=[c["chunk_id"] for c in chunks_data],
+            raw_response=raw_response,
+            parsed_items=len(valid_enriched_data_for_log),
+            parsed_with_chunk_id=parsed_with_chunk_id,
         )
         
         # Отладочная информация
@@ -693,28 +797,6 @@ class KnowledgeBaseBuilder:
 
         return enriched_chunks
 
-    @staticmethod
-    def _llm_log_path() -> Path:
-        """
-        Пишем лог в корень проекта: .../rag-bseu/test-LLM-input-out.json
-        """
-        try:
-            return Path(__file__).resolve().parents[2] / "test-LLM-input-out.json"
-        except Exception:
-            return Path("test-LLM-input-out.json")
-
-    @classmethod
-    def _log_llm_io(cls, record: Dict[str, Any]) -> None:
-        """
-        Пишет одну запись в test-LLM-input-out.json в формате JSONL
-        (1 JSON-объект на строку). Это удобно для append во время долгого прогона.
-        """
-        path = cls._llm_log_path()
-        line = json.dumps(record, ensure_ascii=False)
-        with _LLM_LOG_LOCK:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            with open(path, "a", encoding="utf-8") as f:
-                f.write(line + "\n")
 
     @staticmethod
     def _parse_llm_single_enrichment(raw: str, expected_chunk_id: str) -> Optional[Dict[str, Any]]:
