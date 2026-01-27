@@ -520,9 +520,9 @@ class KnowledgeBaseBuilder:
             "Ты — аналитик по официальной статистике Республики Беларусь. "
             "Твоя задача — обогатить чанки документа структурированными метаданными. "
             "STRICT RULES:- Output ONLY a valid JSON array of exactly 5 objects - No text before or after JSON - No markdown, comments, explanations - chunk_id must exactly match input"
-            "Ограничения: context <= 180 символов; metrics максимум 3 элемента; years максимум 4 элемента."
+            "Ограничения: context <= 256 символов; metrics максимум 5 элементов; years максимум 5 элементов."
         )
-        
+
         # Упрощенный промпт для одного или нескольких чанков
         if len(chunks_data) == 1:
             # Для одного чанка - более простой промпт с контекстом предыдущих страниц

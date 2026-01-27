@@ -10,6 +10,7 @@ PIPELINE 1: подготовка базы знаний через новый п�
 from pathlib import Path
 
 from src.prepare_db.knowledge_builder import KnowledgeBaseBuilder, BuildConfig
+from src.main.ollama_client import OllamaClient, OllamaConfig
 
 
 def main() -> None:
@@ -41,8 +42,12 @@ def main() -> None:
         vector_dim=256,
     )
 
+    # Создаём Ollama клиент с моделью llama3-chatqa:8b
+    ollama_config = OllamaConfig(model="llama3-chatqa:8b")
+    llm_client = OllamaClient(config=ollama_config)
+
     # Строим базу знаний
-    builder = KnowledgeBaseBuilder(config=config)
+    builder = KnowledgeBaseBuilder(config=config, llm_client=llm_client)
     builder.build()
 
     print("✅ База знаний построена!")
