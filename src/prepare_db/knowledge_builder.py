@@ -31,7 +31,7 @@ import time
 import threading
 
 from llama_index.readers.file import PDFReader
-from llama_index.core.node_parser import SimpleNodeParser
+from llama_index.core.node_parser import SentenceSplitter
 
 from src.main.models import Chunk
 from src.main.ollama_client import OllamaClient
@@ -193,9 +193,10 @@ class KnowledgeBaseBuilder:
 
             # Парсим документы на ноды (чанки)
             # Используем разумные параметры для статистических документов
-            node_parser = SimpleNodeParser.from_defaults(
-                chunk_size=512,  # размер чанка в символах
-                chunk_overlap=50,  # перекрытие между чанками
+            node_parser = SentenceSplitter(
+                chunk_size=1500,
+                chunk_overlap=200,
+                paragraph_separator="\n\n",
             )
 
             chunks: List[Chunk] = []
@@ -278,7 +279,7 @@ class KnowledgeBaseBuilder:
         # ВАЖНО: маленькие модели (llama3.2:3b) лучше работают с меньшими батчами (5 вместо 10)
         # Это повышает качество и снижает вероятность таймаутов
         batch_size = int(os.getenv("RAG_ENRICH_BATCH_SIZE", "5"))  # Уменьшено с 10 до 5 для лучшего качества
-        batch_concurrency = int(os.getenv("RAG_ENRICH_CONCURRENCY", "4"))  # Увеличено с 1 до 2 для ускорения
+        batch_concurrency = int(os.getenv("RAG_ENRICH_CONCURRENCY", "1"))  # Увеличено с 1 до 2 для ускорения
         batch_size = max(1, batch_size)
         batch_concurrency = max(1, min(batch_concurrency, 8))  # Максимум 4 параллельных запроса
 
