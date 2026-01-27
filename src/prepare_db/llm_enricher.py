@@ -328,12 +328,11 @@ class LLMEnricher:
             # Парсим JSON-ответ (ожидаем один объект)
             enriched_data = self._parse_llm_single_enrichment(raw_response, chunk.id)
             
-        if enriched_data:
-            # ВСЕГДА перезаписываем chunk_id оригинальным значением
-            # LLM не является источником истины для ID - это критично для целостности данных
-            enriched_data["chunk_id"] = chunk.id
-                
-                # Если все проверки пройдены
+            if enriched_data:
+                # ВСЕГДА перезаписываем chunk_id оригинальным значением
+                # LLM не является источником истины для ID - это критично для целостности данных
+                enriched_data["chunk_id"] = chunk.id
+                # Если парсинг успешен - выходим из цикла
                 break
             elif attempt < max_retries - 1:
                 print(
