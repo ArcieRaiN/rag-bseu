@@ -519,9 +519,7 @@ class KnowledgeBaseBuilder:
         system_prompt = (
             "Ты — аналитик по официальной статистике Республики Беларусь. "
             "Твоя задача — обогатить чанки документа структурированными метаданными. "
-            "КРИТИЧЕСКИ ВАЖНО: верни ТОЛЬКО валидный JSON-массив, который начинается с '[' и заканчивается ']'. "
-            "НЕ возвращай объект {}. НЕ добавляй пояснений, markdown, комментариев, escape-последовательностей. "
-            "Только чистый JSON-массив без unicode escape-последовательностей (\\u0412 и т.д.). "
+            "STRICT RULES:- Output ONLY a valid JSON array of exactly 5 objects - No text before or after JSON - No markdown, comments, explanations - chunk_id must exactly match input"
             "Ограничения: context <= 180 символов; metrics максимум 3 элемента; years максимум 4 элемента."
         )
         

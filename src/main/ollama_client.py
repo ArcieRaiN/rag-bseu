@@ -18,9 +18,13 @@ import requests
 @dataclass
 class OllamaConfig:
     base_url: str = "http://localhost:11434"
-    model: str = "llama3.2:3b"
-    timeout: float = 300.0  # Увеличено до 5 минут для больших батчей
-
+    model: str = "qwen2.5:7b"
+    timeout: float = 120.0
+    temperature: float = 0.0
+    top_p: float = 0.9
+    repeat_penalty: float = 1.1
+    num_predict: int = 800
+    format: Optional[str] = None
 
 class OllamaClient:
     """
@@ -60,49 +64,87 @@ class OllamaClient:
             # Игнорируем ошибки при сбросе - это не критично
             pass
 
-    def generate(self, prompt: str, *, system_prompt: str | None = None, max_retries: int = 3, **params: Any) -> str:
+    class OllamaClient:
         """
-        Получить текстовую completion от Ollama.
-
-        Интерфейс специально упрощён: вызывающий код сам отвечает за формат prompt
-        и JSON‑схему ответа.
-        
-        Args:
-            prompt: Текст запроса
-            system_prompt: Системный промпт
-            max_retries: Максимальное количество повторных попыток при таймауте
-            **params: Дополнительные параметры для Ollama API
+        Обёртка над Ollama HTTP API.
         """
-        url = f"{self.config.base_url}/api/generate"
 
-        payload: Dict[str, Any] = {
-            "model": self.config.model,
-            "prompt": prompt,
-            # отключаем стриминг, чтобы вернуть цельный текст
-            "stream": False,
-        }
-        if system_prompt:
-            payload["system"] = system_prompt
-        payload.update(params)
+        def __init__(self, config: Optional[OllamaConfig] = None):
+            self.config = config or OllamaConfig()
 
-        # Retry логика для обработки таймаутов
-        import time
-        for attempt in range(max_retries):
+        def reset_context(self) -> None:
+            url = f"{self.config.base_url}/api/generate"
+            payload: Dict[str, Any] = {
+                "model": self.config.model,
+                "prompt": "",
+                "stream": False,
+                "keep_alive": "0",
+                "num_predict": 1,
+            }
             try:
-                resp = requests.post(url, json=payload, timeout=self.config.timeout)
+                resp = requests.post(url, json=payload, timeout=5.0)
                 resp.raise_for_status()
-                data = resp.json()
-                # Ollama по умолчанию возвращает поле "response" с текстом
-                return data.get("response", "")
-            except requests.exceptions.ReadTimeout as e:
-                if attempt < max_retries - 1:
-                    wait_time = (2 ** attempt) * 5  # Экспоненциальная задержка: 5, 10, 20 сек
-                    print(f"⚠️  Таймаут при запросе к LLM (попытка {attempt + 1}/{max_retries}). Повтор через {wait_time} сек...")
-                    time.sleep(wait_time)
-                else:
-                    print(f"❌ Ошибка: Превышено максимальное количество попыток. Таймаут: {self.config.timeout} сек")
+            except Exception:
+                pass
+
+        def generate(
+                self,
+                prompt: str,
+                *,
+                system_prompt: str | None = None,
+                max_retries: int = 3,
+                **params: Any,
+        ) -> str:
+            """
+            Получить текстовую completion от Ollama.
+            """
+            url = f"{self.config.base_url}/api/generate"
+
+            payload: Dict[str, Any] = {
+                "model": self.config.model,
+                "prompt": prompt,
+                "stream": False,
+
+                # 🔒 Дефолтные параметры генерации
+                "temperature": self.config.temperature,
+                "top_p": self.config.top_p,
+                "repeat_penalty": self.config.repeat_penalty,
+                "num_predict": self.config.num_predict,
+            }
+
+            if self.config.format:
+                payload["format"] = self.config.format
+
+            if system_prompt:
+                payload["system"] = system_prompt
+
+            # params имеют приоритет над конфигом
+            payload.update(params)
+
+            import time
+            for attempt in range(max_retries):
+                try:
+                    resp = requests.post(url, json=payload, timeout=self.config.timeout)
+                    resp.raise_for_status()
+                    data = resp.json()
+                    return data.get("response", "")
+                except requests.exceptions.ReadTimeout:
+                    if attempt < max_retries - 1:
+                        wait_time = (2 ** attempt) * 5
+                        print(
+                            f"⚠️  Таймаут при запросе к LLM "
+                            f"(попытка {attempt + 1}/{max_retries}). "
+                            f"Повтор через {wait_time} сек..."
+                        )
+                        time.sleep(wait_time)
+                    else:
+                        print(
+                            f"❌ Превышено максимальное количество попыток. "
+                            f"Таймаут: {self.config.timeout} сек"
+                        )
+                        raise
+                except requests.exceptions.RequestException as e:
+                    print(f"❌ Ошибка при запросе к Ollama: {e}")
                     raise
-            except requests.exceptions.RequestException as e:
-                print(f"❌ Ошибка при запросе к Ollama: {e}")
-                raise
+
 

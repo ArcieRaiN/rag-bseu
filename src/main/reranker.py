@@ -112,8 +112,7 @@ class LLMReranker:
         return (
             "Ты — эксперт по оценке релевантности документов для статистических запросов. "
             "Твоя задача — точно оценить, насколько каждый чанк документа помогает ответить на запрос пользователя. "
-            "КРИТИЧЕСКИ ВАЖНО: верни ТОЛЬКО валидный JSON-массив, который начинается с '[' и заканчивается ']'. "
-            "НЕ возвращай объект {}. НЕ добавляй пояснений, markdown, комментариев."
+            "STRICT RULES:- Output ONLY a valid JSON array of exactly 5 objects - No text before or after JSON - No markdown, comments, explanations - chunk_id must exactly match input"
         )
 
     def _build_prompt(self, enriched_query: EnrichedQuery, candidates: List[ScoredChunk]) -> str:
