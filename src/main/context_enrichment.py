@@ -106,7 +106,8 @@ class QueryContextEnricher:
             "Верни ТОЛЬКО один JSON‑объект без пояснений.\n\n"
             f"Запрос: \"{query}\""
         )
-        return self._llm_client.generate(prompt)
+        # Ожидаем строгий JSON-ответ → явно запрашиваем format="json"
+        return self._llm_client.generate(prompt, format="json")
 
     # -------------------- Вспомогательные методы -------------------- #
 

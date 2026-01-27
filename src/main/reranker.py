@@ -72,10 +72,12 @@ class LLMReranker:
             ollama_config=ollama_config,
         )
         
+        # Ответ должен быть JSON‑массивом → явно запрашиваем format="json"
         raw = self._llm.generate(
             prompt,
             system_prompt=system_prompt,
-            temperature=self._config.temperature
+            temperature=self._config.temperature,
+            format="json",
         )
         
         scores_by_id = self._parse_llm_rerank_scores(raw)
