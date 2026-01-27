@@ -108,7 +108,8 @@ class RerankConfig:
     """
 
     top_k: int = 3
-    model_name: str = "qwen2.5:7b"
+    # Отдельная модель для LLM‑reranking этапа
+    model_name: str = "dengcao/Qwen3-Reranker-8B:Q3_K_M"
     temperature: float = 0.0
     # Максимальное число попыток LLM‑оценки одного чанка
     max_retries: int = 2

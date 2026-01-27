@@ -195,7 +195,8 @@ class LLMReranker:
         ch_id = scored_chunk.chunk.id
 
         ollama_config = {
-            "model": getattr(getattr(self._llm, "config", None), "model", None),
+            # Для reranking всегда используем специализированную модель из конфигурации
+            "model": self._config.model_name,
             "base_url": getattr(getattr(self._llm, "config", None), "base_url", None),
             "timeout": getattr(getattr(self._llm, "config", None), "timeout", None),
             "temperature": self._config.temperature,
@@ -223,6 +224,8 @@ class LLMReranker:
                 prompt,
                 system_prompt=system_prompt,
                 temperature=self._config.temperature,
+                 # Переопределяем модель на специализированный reranker
+                 model=self._config.model_name,
                 format="json",
             )
             last_raw = raw
