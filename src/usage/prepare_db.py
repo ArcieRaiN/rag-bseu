@@ -42,8 +42,8 @@ def main() -> None:
         vector_dim=256,
     )
 
-    # Создаём Ollama клиент с моделью llama3-chatqa:8b
-    ollama_config = OllamaConfig(model="llama3-chatqa:8b")
+    # Создаём Ollama клиент с моделью llama3-chatqa:latest
+    ollama_config = OllamaConfig(model="llama3-chatqa:latest")
     llm_client = OllamaClient(config=ollama_config)
 
     # Строим базу знаний
