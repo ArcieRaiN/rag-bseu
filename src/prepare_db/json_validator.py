@@ -35,7 +35,7 @@ class ChunkValidator:
 
     MAX_CONTEXT_LENGTH = 256
     MAX_METRICS_COUNT = 5
-    MAX_YEARS_COUNT = 5
+    MAX_YEARS_COUNT = 9  # Увеличено для поддержки временных рядов (2016-2024)
 
     def __init__(self):
         """Инициализация валидатора."""
@@ -156,23 +156,119 @@ class ChunkValidator:
     def validate_batch(
         self,
         chunks_data: List[Dict[str, Any]],
+        expected_chunk_ids: Optional[List[str]] = None,
         check_uniqueness: bool = True,
-    ) -> List[ValidationResult]:
+    ) -> tuple[List[ValidationResult], bool]:
         """
-        Валидирует батч чанков.
+        Валидирует батч чанков с строгой проверкой формата.
         
         Args:
             chunks_data: Список словарей с данными чанков
+            expected_chunk_ids: Ожидаемые chunk_id для точного сравнения
             check_uniqueness: Проверять ли уникальность chunk_id
             
         Returns:
-            Список ValidationResult для каждого чанка
+            Кортеж (results, is_valid_format):
+            - results: список ValidationResult для каждого чанка
+            - is_valid_format: True если формат корректен (массив нужной длины)
         """
+        # Проверка формата: должен быть список
+        if not isinstance(chunks_data, list):
+            # Возвращаем пустой результат с ошибкой
+            return [ValidationResult(
+                is_valid=False,
+                errors=["Ответ должен быть массивом, получен объект"],
+                warnings=[],
+            )], False
+        
+        # Проверка количества элементов
+        if expected_chunk_ids:
+            if len(chunks_data) != len(expected_chunk_ids):
+                # Добавляем ошибку в первый результат
+                first_result = ValidationResult(
+                    is_valid=False,
+                    errors=[
+                        f"Неверное количество элементов: ожидалось {len(expected_chunk_ids)}, "
+                        f"получено {len(chunks_data)}"
+                    ],
+                    warnings=[],
+                )
+                return [first_result], False
+        
         results = []
-        for chunk_data in chunks_data:
+        for i, chunk_data in enumerate(chunks_data):
+            # Проверка exact chunk_id match
+            if expected_chunk_ids and i < len(expected_chunk_ids):
+                expected_id = expected_chunk_ids[i]
+                actual_id = chunk_data.get("chunk_id")
+                
+                if actual_id != expected_id:
+                    # Нормализуем для сравнения
+                    from src.prepare_db.chunk_filter import ChunkFilter
+                    normalized_expected = ChunkFilter.normalize_chunk_id(expected_id)
+                    normalized_actual = ChunkFilter.normalize_chunk_id(actual_id) if actual_id else ""
+                    
+                    if normalized_actual != normalized_expected:
+                        chunk_data = chunk_data.copy()
+                        chunk_data["chunk_id"] = expected_id  # Исправляем chunk_id
+                        result = self.validate_chunk(chunk_data, check_uniqueness=check_uniqueness)
+                        result.errors.insert(0, f"chunk_id не совпадает: ожидался '{expected_id}', получен '{actual_id}'")
+                        results.append(result)
+                        continue
+            
             result = self.validate_chunk(chunk_data, check_uniqueness=check_uniqueness)
             results.append(result)
-        return results
+        
+        is_valid_format = len(chunks_data) == len(expected_chunk_ids) if expected_chunk_ids else True
+        return results, is_valid_format
+    
+    def validate_metrics_quality(self, metrics: Optional[List[str]], chunk_text: Optional[str] = None) -> List[str]:
+        """
+        Проверяет качество metrics: должны быть реальными метриками, а не определениями.
+        
+        Args:
+            metrics: Список метрик для проверки
+            chunk_text: Текст чанка для контекста (опционально)
+            
+        Returns:
+            Список предупреждений о качестве метрик
+        """
+        warnings = []
+        if not metrics:
+            return warnings
+        
+        # Паттерны для определения "не метрик"
+        non_metric_patterns = [
+            r"^коммерческие организации$",
+            r"^цифровые технологии$",
+            r"^организации$",
+            r"^технологии$",
+            r"^определение",
+            r"^понятие",
+            r"^термин",
+            r"\.\.\.",
+            r"^[А-ЯЁ\s]{20,}",  # Длинные заголовки (более 20 символов заглавными)
+        ]
+        
+        import re
+        for i, metric in enumerate(metrics):
+            metric_lower = metric.lower().strip()
+            
+            # Проверка на слишком длинные "метрики" (вероятно, это определения)
+            if len(metric) > 50:
+                warnings.append(
+                    f"metrics[{i}] слишком длинный (возможно, это определение, а не метрика): '{metric[:50]}...'"
+                )
+            
+            # Проверка на паттерны "не метрик"
+            for pattern in non_metric_patterns:
+                if re.search(pattern, metric_lower, re.IGNORECASE):
+                    warnings.append(
+                        f"metrics[{i}] похож на определение, а не метрику: '{metric}'"
+                    )
+                    break
+        
+        return warnings
 
     def reset(self) -> None:
         """Сбрасывает состояние валидатора (очищает seen_chunk_ids)."""
@@ -238,6 +334,7 @@ class ChunkValidator:
             return None
         
         normalized = []
+        # Ограничиваем максимум MAX_YEARS_COUNT годов (9 для поддержки временных рядов)
         for year in years[:self.MAX_YEARS_COUNT]:
             if isinstance(year, int):
                 normalized.append(year)

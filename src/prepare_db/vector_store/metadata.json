@@ -1,5 +1,5 @@
 {
   "vectorizer": "HashVectorizer",
   "dimension": 256,
-  "chunks": 308
+  "chunks": 70
 }

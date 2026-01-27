@@ -22,6 +22,8 @@ from src.main.models import Chunk
 from src.main.ollama_client import OllamaClient
 from src.logs.logger import get_logger
 from src.prepare_db.json_validator import ChunkValidator
+from src.prepare_db.chunk_filter import ChunkFilter, ChunkType
+from src.prepare_db.post_processor import EnrichmentPostProcessor
 
 
 class RollingContextBuffer:
@@ -103,6 +105,8 @@ class LLMEnricher:
         self._reset_interval = reset_interval
         self._logger = get_logger()
         self._validator = ChunkValidator()
+        self._chunk_filter = ChunkFilter(skip_first_pages=3)
+        self._post_processor = EnrichmentPostProcessor()
         
         # Rolling context buffer
         self._context_buffer = RollingContextBuffer(max_size=context_buffer_size)
@@ -130,17 +134,19 @@ class LLMEnricher:
         if not chunks:
             return []
 
-        # Разделяем чанки на те, что нужно обработать LLM и те, что можно пропустить
-        chunks_to_process: List[Chunk] = []
-        chunks_to_skip: List[Chunk] = []
-
-        for chunk in chunks:
-            if chunk.page <= skip_first_pages:
-                # Для первых страниц просто используем text как context
-                chunk.context = chunk.text[:200] if chunk.text else "нет текста"
-                chunks_to_skip.append(chunk)
-            else:
-                chunks_to_process.append(chunk)
+        # Используем ChunkFilter для классификации чанков
+        data_chunks, metadata_chunks, skip_chunks = self._chunk_filter.filter_chunks(chunks)
+        
+        # Для metadata чанков используем упрощённое обогащение
+        for chunk in metadata_chunks:
+            chunk.context = chunk.text[:200] if chunk.text else "нет текста"
+        
+        # Для skip чанков просто пропускаем
+        for chunk in skip_chunks:
+            chunk.context = chunk.text[:200] if chunk.text else "нет текста"
+        
+        chunks_to_process = data_chunks
+        chunks_to_skip = metadata_chunks + skip_chunks
 
         if not chunks_to_process:
             return chunks
@@ -151,14 +157,12 @@ class LLMEnricher:
         batch_size = max(1, batch_size)
         batch_concurrency = max(1, min(batch_concurrency, 8))
 
-        total_batches = (len(chunks_to_process) + batch_size - 1) // batch_size
         print(
             f"   Обработка {len(chunks_to_process)} чанков "
-            f"(пропущено {len(chunks_to_skip)} чанков со страниц 1-{skip_first_pages})"
+            f"(пропущено {len(chunks_to_skip)} служебных чанков)"
         )
         print(
-            f"   Батчи: размер={batch_size}, батчей={total_batches}, "
-            f"параллельность={batch_concurrency}"
+            f"   Режим: 1 чанк = 1 запрос, параллельность={batch_concurrency * batch_size}"
         )
 
         all_enriched_chunks: List[Chunk] = chunks_to_skip.copy()
@@ -166,40 +170,45 @@ class LLMEnricher:
         # Параллелим только батчи (а не каждый чанк)
         start_time = time.time()
 
-        with ThreadPoolExecutor(max_workers=min(batch_concurrency, total_batches)) as executor:
+        # Параллельная обработка: 1 чанк = 1 запрос
+        # Батчинг остаётся на уровне параллелизма (несколько запросов одновременно)
+        with ThreadPoolExecutor(max_workers=min(batch_concurrency * batch_size, len(chunks_to_process))) as executor:
             futures = []
-            for start in range(0, len(chunks_to_process), batch_size):
-                batch = chunks_to_process[start : start + batch_size]
-                
+            for chunk in chunks_to_process:
                 # Получаем контекст из rolling buffer (последние 2 чанка)
                 previous_chunks = self._context_buffer.get_context(num_chunks=2)
                 
                 fut = executor.submit(
-                    self._enrich_single_batch,
+                    self._enrich_single_chunk,
                     pdf_name,
-                    batch,
+                    chunk,
                     previous_chunks,
                 )
                 fut._rag_submit_ts = time.time()  # type: ignore[attr-defined]
-                futures.append((fut, batch))
+                futures.append((fut, chunk))
 
-            completed_batches = 0
             completed_chunks = 0
+            total_chunks = len(chunks_to_process)
 
-            for fut, original_batch in futures:
+            for fut, original_chunk in futures:
                 try:
-                    enriched_batch = fut.result()
+                    enriched_chunk = fut.result()
                     submit_ts = getattr(fut, "_rag_submit_ts", None)
-                    batch_time = (time.time() - submit_ts) if submit_ts else 0.0
+                    chunk_time = (time.time() - submit_ts) if submit_ts else 0.0
                     
-                    all_enriched_chunks.extend(enriched_batch)
+                    if enriched_chunk:
+                        all_enriched_chunks.append(enriched_chunk)
+                        # Добавляем обогащенный чанк в rolling buffer
+                        self._context_buffer.add(enriched_chunk)
+                    else:
+                        # Fallback: добавляем чанк без обогащения
+                        if not original_chunk.context:
+                            original_chunk.context = original_chunk.text[:200] if original_chunk.text else "нет текста"
+                        all_enriched_chunks.append(original_chunk)
+                        self._context_buffer.add(original_chunk)
                     
-                    # Добавляем обогащенные чанки в rolling buffer
-                    self._context_buffer.add_batch(enriched_batch)
-                    
-                    completed_batches += 1
-                    completed_chunks += len(enriched_batch)
-                    self._chunks_since_reset += len(enriched_batch)
+                    completed_chunks += 1
+                    self._chunks_since_reset += 1
 
                     # Сброс контекста каждые N чанков
                     if self._chunks_since_reset >= self._reset_interval:
@@ -210,43 +219,30 @@ class LLMEnricher:
                         self._chunks_since_reset = 0
                         time.sleep(0.5)
 
-                    elapsed = time.time() - start_time
-                    rate = completed_chunks / elapsed * 3600 if elapsed > 0 else 0
-                    print(
-                        f"   Батч {completed_batches}/{total_batches}: "
-                        f"{len(enriched_batch)} чанков за {batch_time:.1f}с | "
-                        f"Всего: {completed_chunks}/{len(chunks_to_process)} | "
-                        f"Скорость: {rate:.0f} чанков/час"
-                    )
+                    # Периодический вывод прогресса (каждые 10 чанков или в конце)
+                    if completed_chunks % 10 == 0 or completed_chunks == total_chunks:
+                        elapsed = time.time() - start_time
+                        rate = completed_chunks / elapsed * 3600 if elapsed > 0 else 0
+                        print(
+                            f"   Прогресс: {completed_chunks}/{total_chunks} чанков | "
+                            f"Скорость: {rate:.0f} чанков/час"
+                        )
 
-                    # Логируем прогресс батча
-                    self._logger.log_prepare_db(
-                        "batch",
-                        pdf_name=pdf_name,
-                        batch_number=completed_batches,
-                        total_batches=total_batches,
-                        chunks_in_batch=len(enriched_batch),
-                        elapsed_time=batch_time,
-                        total_chunks_processed=completed_chunks,
-                        rate_per_hour=rate,
-                    )
                 except Exception as e:
                     submit_ts = getattr(fut, "_rag_submit_ts", None)
-                    batch_time = (time.time() - submit_ts) if submit_ts else 0.0
-                    completed_batches += 1
+                    chunk_time = (time.time() - submit_ts) if submit_ts else 0.0
                     print(
-                        f"   ⚠️  Ошибка при обработке батча {completed_batches}/{total_batches} "
-                        f"(время: {batch_time:.1f}с): {e}"
+                        f"   ⚠️  Ошибка при обработке чанка {original_chunk.id} "
+                        f"(время: {chunk_time:.1f}с): {e}"
                     )
                     import traceback
                     traceback.print_exc()
-                    # Fallback: добавляем чанки без обогащения
-                    for ch in original_batch:
-                        if not ch.context:
-                            ch.context = ch.text[:200] if ch.text else "нет текста"
-                    all_enriched_chunks.extend(original_batch)
-                    completed_chunks += len(original_batch)
-                    self._chunks_since_reset += len(original_batch)
+                    # Fallback: добавляем чанк без обогащения
+                    if not original_chunk.context:
+                        original_chunk.context = original_chunk.text[:200] if original_chunk.text else "нет текста"
+                    all_enriched_chunks.append(original_chunk)
+                    completed_chunks += 1
+                    self._chunks_since_reset += 1
 
         # Сортируем по исходному порядку
         chunk_order = {ch.id: i for i, ch in enumerate(chunks)}
@@ -254,36 +250,23 @@ class LLMEnricher:
 
         return all_enriched_chunks
 
-    def _enrich_single_batch(
+    def _enrich_single_chunk(
         self,
         pdf_name: str,
-        chunks: List[Chunk],
+        chunk: Chunk,
         previous_chunks: List[Chunk] | None = None,
-    ) -> List[Chunk]:
+    ) -> Optional[Chunk]:
         """
-        Обогащает один батч чанков с учетом контекста предыдущих страниц.
+        Обогащает один чанк с учетом контекста предыдущих страниц.
         
         Args:
             pdf_name: Имя PDF файла
-            chunks: Список чанков для обогащения
+            chunk: Чанк для обогащения
             previous_chunks: Список чанков с предыдущих страниц для контекста
             
         Returns:
-            Список обогащенных чанков
+            Обогащенный чанк или None при ошибке
         """
-        if not chunks:
-            return []
-
-        # Формируем данные чанков для промпта
-        chunks_data = []
-        for ch in chunks:
-            chunks_data.append({
-                "chunk_id": ch.id,
-                # Режем текст для ускорения генерации
-                "text": (ch.text or "")[:350],
-                "page": ch.page,
-            })
-
         # Подготавливаем контекст предыдущих страниц
         previous_context = None
         if previous_chunks:
@@ -294,25 +277,18 @@ class LLMEnricher:
             if prev_texts:
                 previous_context = "\n".join(prev_texts)
 
-        # System prompt
-        system_prompt = (
-            "Ты — аналитик по официальной статистике Республики Беларусь. "
-            "Твоя задача — обогатить чанки документа структурированными метаданными. "
-            "STRICT RULES: Output ONLY a valid JSON array - No text before or after JSON - "
-            "No markdown, comments, explanations - chunk_id must exactly match input. "
-            "Ограничения: context <= 256 символов; metrics максимум 5 элементов; "
-            "years максимум 5 элементов."
-        )
+        # Упрощенный system prompt для одного объекта
+        system_prompt = self._build_system_prompt_single()
 
-        # Формируем промпт
-        prompt = self._build_prompt(pdf_name, chunks_data, previous_context)
+        # Формируем промпт для одного чанка
+        prompt = self._build_prompt_single(pdf_name, chunk, previous_context)
 
         # Параметры запроса
         keep_alive = os.getenv("RAG_OLLAMA_KEEP_ALIVE", "5m")
         req_options = {
             "temperature": 0,
             "top_p": 1,
-            "num_predict": min(250 * len(chunks_data) + 100, 3000),
+            "num_predict": 300,  # Один объект - меньше токенов
         }
 
         # Логируем запрос
@@ -327,20 +303,20 @@ class LLMEnricher:
         self._logger.log_llm_enrichment(
             event="request",
             pdf_name=pdf_name,
-            chunks_count=len(chunks_data),
-            chunk_ids=[c["chunk_id"] for c in chunks_data],
-            pages=[c["page"] for c in chunks_data],
+            chunks_count=1,
+            chunk_ids=[chunk.id],
+            pages=[chunk.page],
             system_prompt=system_prompt,
             prompt=prompt,
             ollama_config=ollama_config,
         )
 
-        # Вызываем LLM с повторными попытками
-        max_retries_for_quality = 2
-        enriched_data = []
+        # Вызываем LLM с упрощенным retry (один объект всегда валиден)
+        max_retries = 2
+        enriched_data = None
         raw_response = ""
 
-        for attempt in range(max_retries_for_quality):
+        for attempt in range(max_retries):
             raw_response = self._llm.generate(
                 prompt,
                 system_prompt=system_prompt,
@@ -349,50 +325,226 @@ class LLMEnricher:
                 options=req_options,
             )
 
-            # Парсим JSON-ответ
-            enriched_data = self._parse_llm_batch_enrichment(raw_response)
-
-            # Проверяем качество ответа
-            valid_items = [item for item in enriched_data if isinstance(item, dict)]
-            if len(valid_items) >= len(chunks_data) * 0.8:  # Хотя бы 80% чанков обогащено
+            # Парсим JSON-ответ (ожидаем один объект)
+            enriched_data = self._parse_llm_single_enrichment(raw_response, chunk.id)
+            
+        if enriched_data:
+            # ВСЕГДА перезаписываем chunk_id оригинальным значением
+            # LLM не является источником истины для ID - это критично для целостности данных
+            enriched_data["chunk_id"] = chunk.id
+                
+                # Если все проверки пройдены
                 break
-
-            if attempt < max_retries_for_quality - 1:
+            elif attempt < max_retries - 1:
                 print(
-                    f"   ⚠️  Низкое качество ответа ({len(valid_items)}/{len(chunks_data)}), "
-                    f"повторная попытка {attempt + 2}/{max_retries_for_quality}..."
+                    f"   ⚠️  Не удалось распарсить ответ для {chunk.id} "
+                    f"(попытка {attempt + 1}/{max_retries})"
                 )
-                time.sleep(1)
+                time.sleep(0.5)
 
         # Логируем ответ
-        valid_enriched_data_for_log = [
-            item for item in enriched_data if isinstance(item, dict)
-        ]
-        parsed_with_chunk_id = sum(
-            1 for item in valid_enriched_data_for_log if item.get("chunk_id")
-        )
+        parsed_successfully = enriched_data is not None
         self._logger.log_llm_enrichment(
             event="response",
             pdf_name=pdf_name,
-            chunks_count=len(chunks_data),
-            chunk_ids=[c["chunk_id"] for c in chunks_data],
+            chunks_count=1,
+            chunk_ids=[chunk.id],
             raw_response=raw_response,
-            parsed_items=len(valid_enriched_data_for_log),
-            parsed_with_chunk_id=parsed_with_chunk_id,
+            parsed_items=1 if parsed_successfully else 0,
+            parsed_with_chunk_id=1 if (parsed_successfully and enriched_data and enriched_data.get("chunk_id")) else 0,
         )
 
-        # Обогащаем чанки данными от LLM
-        enriched_chunks = self._apply_enrichment_data(chunks, enriched_data)
+        if not enriched_data:
+            return None
 
-        return enriched_chunks
+        # Применяем данные обогащения к чанку
+        enriched_chunk = self._apply_enrichment_data_single(chunk, enriched_data)
+        
+        # Post-processing: исправляем типичные ошибки LLM
+        enriched_chunk = self._post_processor.process_chunk(enriched_chunk)
 
-    def _build_prompt(
+        return enriched_chunk
+
+    def _build_system_prompt_single(self) -> str:
+        """
+        Строит упрощенный system prompt для одного объекта.
+        
+        Returns:
+            System prompt для одного чанка
+        """
+        return (
+            "Ты — аналитик по официальной статистике Республики Беларусь. "
+            "Твоя задача — обогатить чанк документа структурированными метаданными.\n\n"
+            "КРИТИЧЕСКИ ВАЖНО:\n"
+            "1. Верни ТОЛЬКО валидный JSON-объект {}, начинающийся с '{' и заканчивающийся '}'\n"
+            "2. НЕ возвращай массив [] - только объект {}\n"
+            "3. chunk_id должен точно совпадать с входными данными (побайтно, без изменений)\n"
+            "4. НЕ добавляй текст до или после JSON\n"
+            "5. НЕ используй markdown code blocks (```json)\n"
+            "6. НЕ добавляй префиксы типа 'ID:' к chunk_id - используй значение как есть\n\n"
+            "JSON Schema для объекта:\n"
+            "{\n"
+            '  "chunk_id": "string (точно как во входных данных, без изменений)",\n'
+            '  "context": "string (макс 256 символов, русский)",\n'
+            '  "geo": "string | null",\n'
+            '  "metrics": ["string"] | null (макс 5, только русские метрики, нижний регистр),\n'
+            '  "years": [int] | null (макс 5, только годы из текста),\n'
+            '  "time_granularity": "year" | "quarter" | "month" | "day" | null,\n'
+            '  "oked": "string | null"\n'
+            "}\n\n"
+            "Правила для metrics:\n"
+            "- Только реальные метрики из текста (например: 'удой молока', 'инвестиции')\n"
+            "- НЕ определения, НЕ объекты наблюдения, НЕ заголовки\n"
+            "- Только русский язык, нижний регистр\n"
+            "- Максимум 5 элементов\n\n"
+            "Правила для years:\n"
+            "- Только годы, которые явно упоминаются в тексте\n"
+            "- НЕ добавляй годы, если их нет в тексте (используй null)\n"
+            "- НЕ добавляй годы для методологии, определений, содержания\n"
+            "- Максимум 5 элементов\n"
+        )
+
+    def _build_system_prompt(
+        self,
+        chunks_count: int,
+        format_error: bool = False,
+        expected_count: Optional[int] = None,
+    ) -> str:
+        """
+        Строит улучшенный system prompt с JSON Schema.
+        
+        Args:
+            chunks_count: Количество чанков в батче
+            format_error: True если была ошибка формата в предыдущей попытке
+            expected_count: Ожидаемое количество элементов (для исправления ошибок)
+        """
+        base_prompt = (
+            "Ты — аналитик по официальной статистике Республики Беларусь. "
+            "Твоя задача — обогатить чанки документа структурированными метаданными.\n\n"
+            "КРИТИЧЕСКИ ВАЖНЫЕ ПРАВИЛА:\n"
+            "1. Верни ТОЛЬКО валидный JSON-массив, начинающийся с '[' и заканчивающийся ']'\n"
+            "2. НЕ возвращай объект {} - только массив []\n"
+            f"3. В массиве должно быть РОВНО {chunks_count} объектов\n"
+            "4. chunk_id должен точно совпадать с входными данными (побайтно)\n"
+            "5. НЕ добавляй текст до или после JSON\n"
+            "6. НЕ используй markdown code blocks (```json)\n\n"
+        )
+        
+        if format_error:
+            base_prompt += (
+                "⚠️ ОШИБКА ФОРМАТА В ПРЕДЫДУЩЕЙ ПОПЫТКЕ!\n"
+                "Ты вернул объект {} вместо массива [] или неправильное количество элементов.\n"
+                f"ОБЯЗАТЕЛЬНО верни массив из {expected_count or chunks_count} объектов.\n\n"
+            )
+        
+        base_prompt += (
+            "JSON Schema для каждого объекта:\n"
+            "{\n"
+            '  "chunk_id": "string (точно как во входных данных)",\n'
+            '  "context": "string (макс 256 символов, русский)",\n'
+            '  "geo": "string | null",\n'
+            '  "metrics": ["string"] | null (макс 5, только русские метрики),\n'
+            '  "years": [int] | null (макс 5, только годы из текста),\n'
+            '  "time_granularity": "year" | "quarter" | "month" | "day" | null,\n'
+            '  "oked": "string | null"\n'
+            "}\n\n"
+            "Правила для metrics:\n"
+            "- Только реальные метрики из текста (например: 'удой молока', 'инвестиции')\n"
+            "- НЕ определения, НЕ объекты наблюдения, НЕ заголовки\n"
+            "- Только русский язык, нижний регистр\n"
+            "- Максимум 5 элементов\n\n"
+            "Правила для years:\n"
+            "- Только годы, которые явно упоминаются в тексте\n"
+            "- НЕ добавляй годы, если их нет в тексте (используй null)\n"
+            "- НЕ добавляй годы для методологии, определений, содержания\n"
+            "- Максимум 5 элементов\n"
+        )
+        
+        return base_prompt
+
+    def _check_chunk_ids_match(
+        self,
+        enriched_items: List[Dict[str, Any]],
+        expected_chunk_ids: List[str],
+    ) -> bool:
+        """
+        Проверяет точное совпадение chunk_id (с нормализацией).
+        
+        Args:
+            enriched_items: Обогащенные данные от LLM
+            expected_chunk_ids: Ожидаемые chunk_id
+            
+        Returns:
+            True если все chunk_id совпадают
+        """
+        if len(enriched_items) != len(expected_chunk_ids):
+            return False
+        
+        for i, (item, expected_id) in enumerate(zip(enriched_items, expected_chunk_ids)):
+            actual_id = item.get("chunk_id", "")
+            # Нормализуем для сравнения
+            normalized_actual = ChunkFilter.normalize_chunk_id(actual_id)
+            normalized_expected = ChunkFilter.normalize_chunk_id(expected_id)
+            
+            if normalized_actual != normalized_expected:
+                return False
+        
+        return True
+
+    def _fix_format_error(
+        self,
+        enriched_data: Any,
+        expected_chunk_ids: List[str],
+    ) -> List[Dict[str, Any]]:
+        """
+        Пытается исправить ошибку формата (объект вместо массива).
+        
+        Args:
+            enriched_data: Данные от LLM (возможно, объект вместо массива)
+            expected_chunk_ids: Ожидаемые chunk_id
+            
+        Returns:
+            Исправленный список словарей
+        """
+        # Если это объект, пытаемся извлечь массив из него
+        if isinstance(enriched_data, dict):
+            # Ищем массив в ключах
+            for key in ["chunks", "data", "results", "items", "array"]:
+                if key in enriched_data and isinstance(enriched_data[key], list):
+                    return enriched_data[key]
+            
+            # Если объект содержит chunk_id, оборачиваем в массив
+            if "chunk_id" in enriched_data or any(
+                key in enriched_data for key in ["context", "geo", "metrics", "years"]
+            ):
+                # Исправляем chunk_id если нужно
+                if "chunk_id" not in enriched_data and expected_chunk_ids:
+                    enriched_data["chunk_id"] = expected_chunk_ids[0]
+                return [enriched_data]
+        
+        # Если это не список, возвращаем пустой список
+        if not isinstance(enriched_data, list):
+            return []
+        
+        return enriched_data
+
+    def _build_prompt_single(
         self,
         pdf_name: str,
-        chunks_data: List[Dict[str, Any]],
+        chunk: Chunk,
         previous_context: Optional[str],
     ) -> str:
-        """Строит промпт для LLM."""
+        """
+        Строит промпт для одного чанка.
+        
+        Args:
+            pdf_name: Имя PDF файла
+            chunk: Чанк для обогащения
+            previous_context: Контекст предыдущих страниц
+            
+        Returns:
+            Промпт для LLM
+        """
         context_section = ""
         if previous_context:
             context_section = (
@@ -401,62 +553,54 @@ class LLMEnricher:
                 f"{previous_context}\n\n"
             )
 
+        return (
+            f"Документ: {pdf_name}\n\n"
+            f"{context_section}"
+            f"Чанк для обработки:\n"
+            f"chunk_id: {chunk.id}\n"
+            f"Страница: {chunk.page}\n"
+            f"Текст: {(chunk.text or '')[:500]}\n\n"
+            "Верни JSON-объект (НЕ массив!). Формат:\n"
+            '{"chunk_id":"...","context":"...","geo":null,"metrics":null,'
+            '"years":null,"time_granularity":null,"oked":null}\n\n'
+            "Поля:\n"
+            f"- chunk_id: точно такой же как выше: '{chunk.id}' (без изменений, без префиксов)\n"
+            "- context: краткое, точное описание содержания чанка на русском языке "
+            "(1-2 предложения), отражающее что находится в чанке с учётом предыдущих страниц\n"
+            "- geo: название региона/города/области или null\n"
+            "- metrics: список метрик в нижнем регистре на русском (максимум 5) или null. "
+            "Только реальные метрики из текста, не определения\n"
+            "- years: список годов (максимум 9) или null. Только годы, явно упомянутые в тексте\n"
+            "- time_granularity: 'year'/'quarter'/'month'/'day' или null\n"
+            "- oked: код ОКЭД или null\n\n"
+            "КРИТИЧЕСКИ ВАЖНО:\n"
+            "1. Верни ОБЪЕКТ {}, НЕ массив []\n"
+            "2. chunk_id должен быть точно таким же как выше (без 'ID:', без изменений)\n"
+            "3. НЕ используй unicode escape-последовательности (\\u0412) - пиши русский текст напрямую"
+        )
+
+    def _build_prompt(
+        self,
+        pdf_name: str,
+        chunks_data: List[Dict[str, Any]],
+        previous_context: Optional[str],
+    ) -> str:
+        """Строит промпт для LLM (legacy метод для обратной совместимости)."""
+        # Этот метод больше не используется, но оставлен для совместимости
         if len(chunks_data) == 1:
-            chunk = chunks_data[0]
-            return (
-                f"Документ: {pdf_name}\n\n"
-                f"{context_section}"
-                f"Чанк для обработки:\n"
-                f"ID: {chunk['chunk_id']}\n"
-                f"Страница: {chunk['page']}\n"
-                f"Текст: {chunk['text'][:500]}...\n\n"
-                "Верни JSON-массив с одним объектом. Формат:\n"
-                '[{"chunk_id":"...","context":"...","geo":null,"metrics":null,'
-                '"years":null,"time_granularity":null,"oked":null}]\n\n'
-                "Поля:\n"
-                "- chunk_id: точно такой же как ID выше\n"
-                "- context: краткое, точное описание содержания чанка на русском языке "
-                "(1-2 предложения), отражающее что находится в чанке с учётом предыдущих страниц\n"
-                "- geo: название региона/города/области или null\n"
-                "- metrics: список метрик в нижнем регистре на русском (максимум 5) или null\n"
-                "- years: список годов (максимум 5) или null\n"
-                "- time_granularity: 'year'/'quarter'/'month'/'day' или null\n"
-                "- oked: код ОКЭД или null\n\n"
-                "КРИТИЧЕСКИ ВАЖНО: Верни массив [{}], НЕ объект {}!"
+            chunk_data = chunks_data[0]
+            # Создаем временный чанк для использования нового метода
+            temp_chunk = Chunk(
+                id=chunk_data["chunk_id"],
+                context="",
+                text=chunk_data["text"],
+                source=pdf_name,
+                page=chunk_data["page"],
             )
+            return self._build_prompt_single(pdf_name, temp_chunk, previous_context)
         else:
-            return (
-                f"Документ: {pdf_name}\n\n"
-                f"{context_section}"
-                f"Обработай {len(chunks_data)} чанков. "
-                f"Верни JSON-массив из РОВНО {len(chunks_data)} объектов.\n\n"
-                "Формат ответа (пример для 2 чанков):\n"
-                '[{"chunk_id":"doc.pdf::page1::chunk0","context":"Краткое описание",'
-                '"geo":null,"metrics":["метрика1"],"years":[2024],"time_granularity":null,'
-                '"oked":null},'
-                '{"chunk_id":"doc.pdf::page1::chunk1","context":"Другое описание",'
-                '"geo":"Минск","metrics":null,"years":null,"time_granularity":"year",'
-                '"oked":null}]\n\n'
-                "Правила для каждого объекта:\n"
-                "- chunk_id: точно как в входных данных (обязательно!)\n"
-                "- context: краткое, точное описание содержания чанка на русском языке "
-                "(1-2 предложения), отражающее что находится в чанке с учётом предыдущих страниц\n"
-                "- metrics: только реальные названия из текста, нижний регистр, русский, "
-                "максимум 5, или null\n"
-                "- years: только целые числа, максимум 5, или null\n"
-                "- geo: название региона/города/области или null\n"
-                "- time_granularity: 'year'/'quarter'/'month'/'day' или null\n"
-                "- oked: код ОКЭД или null\n\n"
-                "Входные чанки:\n"
-                f"{json.dumps(chunks_data, ensure_ascii=False, separators=(',', ':'))}\n\n"
-                "КРИТИЧЕСКИ ВАЖНО:\n"
-                "1. Верни МАССИВ [{}, {}, ...], начинается с '[' и заканчивается ']'\n"
-                "2. НЕ возвращай объект {}\n"
-                f"3. В массиве должно быть РОВНО {len(chunks_data)} объектов\n"
-                "4. Каждый объект должен содержать chunk_id из входных данных\n"
-                "5. НЕ используй unicode escape-последовательности (\\u0412) - "
-                "пиши русский текст напрямую"
-            )
+            # Fallback для множественных чанков (не должно использоваться)
+            return f"Обработай {len(chunks_data)} чанков..."
 
     def _apply_enrichment_data(
         self,
@@ -469,12 +613,16 @@ class LLMEnricher:
             item for item in enriched_data if isinstance(item, dict)
         ]
 
-        # Создаём словарь chunk_id -> enriched_data
+        # Создаём словарь chunk_id -> enriched_data (с нормализацией)
         enriched_map: Dict[str, Dict[str, Any]] = {}
         for item in valid_enriched_data:
             chunk_id = item.get("chunk_id")
             if chunk_id:
-                enriched_map[str(chunk_id)] = item
+                # Нормализуем chunk_id для сравнения
+                normalized_id = ChunkFilter.normalize_chunk_id(str(chunk_id))
+                enriched_map[normalized_id] = item
+                # Сохраняем оригинальный chunk_id в данных
+                item["chunk_id"] = normalized_id
 
         # Если не все чанки найдены по ID, пытаемся сопоставить по порядку
         if len(enriched_map) < len(chunks) and valid_enriched_data:
@@ -489,10 +637,12 @@ class LLMEnricher:
                     enriched_map[first_chunk.id] = valid_enriched_data[0].copy()
                     enriched_map[first_chunk.id]["chunk_id"] = first_chunk.id
 
-        # Применяем данные к чанкам
+        # Применяем данные к чанкам (с нормализацией chunk_id)
         enriched_chunks: List[Chunk] = []
         for ch in chunks:
-            enriched = enriched_map.get(ch.id, {})
+            # Нормализуем chunk_id чанка для поиска
+            normalized_chunk_id = ChunkFilter.normalize_chunk_id(ch.id)
+            enriched = enriched_map.get(normalized_chunk_id, {})
 
             # Если для одного чанка не нашли по ID, но есть один объект - используем его
             if not enriched and len(chunks) == 1 and valid_enriched_data:
@@ -502,6 +652,18 @@ class LLMEnricher:
 
             # Валидируем и нормализуем данные
             validation_result = self._validator.validate_chunk(enriched, check_uniqueness=False)
+            
+            # Проверка качества metrics
+            if enriched.get("metrics"):
+                metrics_warnings = self._validator.validate_metrics_quality(
+                    enriched["metrics"],
+                    chunk_text=ch.text,
+                )
+                if metrics_warnings:
+                    # Логируем предупреждения о качестве metrics
+                    for warning in metrics_warnings:
+                        print(f"   ⚠️  {warning}")
+            
             if not validation_result.is_valid:
                 # Применяем нормализацию для исправления ошибок
                 if enriched.get("context"):
@@ -545,6 +707,138 @@ class LLMEnricher:
             enriched_chunks.append(ch)
 
         return enriched_chunks
+
+    def _apply_enrichment_data_single(
+        self,
+        chunk: Chunk,
+        enriched_data: Dict[str, Any],
+    ) -> Chunk:
+        """
+        Применяет данные обогащения к одному чанку.
+        
+        Args:
+            chunk: Чанк для обогащения
+            enriched_data: Данные от LLM
+            
+        Returns:
+            Обогащенный чанк
+        """
+        # КРИТИЧНО: всегда перезаписываем chunk_id оригинальным значением
+        # LLM не является источником истины для ID - это гарантирует целостность данных
+        enriched_data["chunk_id"] = chunk.id
+        
+        # Валидируем и нормализуем данные
+        validation_result = self._validator.validate_chunk(enriched_data, check_uniqueness=False)
+        
+        # Проверка качества metrics
+        if enriched_data.get("metrics"):
+            metrics_warnings = self._validator.validate_metrics_quality(
+                enriched_data["metrics"],
+                chunk_text=chunk.text,
+            )
+            if metrics_warnings:
+                for warning in metrics_warnings:
+                    print(f"   ⚠️  {warning}")
+        
+        if not validation_result.is_valid:
+            # Применяем нормализацию для исправления ошибок
+            if enriched_data.get("context"):
+                enriched_data["context"] = self._validator.normalize_context(
+                    str(enriched_data["context"])
+                )
+            if enriched_data.get("metrics"):
+                enriched_data["metrics"] = self._validator.normalize_metrics(
+                    enriched_data["metrics"]
+                )
+            if enriched_data.get("years"):
+                enriched_data["years"] = self._validator.normalize_years(enriched_data["years"])
+
+        # Обновляем context
+        if enriched_data.get("context"):
+            context_str = str(enriched_data["context"])
+            # Декодируем unicode escape-последовательности если они есть
+            if "\\u" in context_str:
+                try:
+                    context_str = codecs.decode(context_str, 'unicode_escape')
+                except (UnicodeDecodeError, ValueError):
+                    pass
+            chunk.context = context_str[:200]
+        elif chunk.text:
+            chunk.context = chunk.text[:200]
+        else:
+            chunk.context = "нет текста"
+
+        # Обновляем метаданные
+        if "geo" in enriched_data:
+            chunk.geo = enriched_data["geo"]
+        if "metrics" in enriched_data:
+            chunk.metrics = self._validator.normalize_metrics(enriched_data["metrics"])
+        if "years" in enriched_data:
+            chunk.years = self._validator.normalize_years(enriched_data["years"])
+        if "time_granularity" in enriched_data:
+            chunk.time_granularity = enriched_data["time_granularity"]
+        if "oked" in enriched_data:
+            chunk.oked = enriched_data["oked"]
+
+        return chunk
+
+    @staticmethod
+    def _parse_llm_single_enrichment(raw: str, expected_chunk_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Парсит JSON-ответ от LLM для одного чанка (ожидает объект).
+        
+        Args:
+            raw: Сырой ответ от LLM
+            expected_chunk_id: Ожидаемый chunk_id
+            
+        Returns:
+            Словарь с данными обогащения или None при ошибке
+        """
+        if not raw:
+            return None
+
+        # Удаление markdown code blocks
+        cleaned = raw.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
+
+        # Очистка от мусорных символов
+        while cleaned and cleaned[0] in [' ', '\n', '\r', '\t']:
+            cleaned = cleaned[1:]
+
+        # Прямой парсинг объекта
+        try:
+            data = json.loads(cleaned)
+            if isinstance(data, dict):
+                # Проверяем, что это объект с нужными полями
+                if "chunk_id" in data or any(
+                    key in data for key in ["context", "geo", "metrics", "years"]
+                ):
+                    # Нормализуем chunk_id если нужно
+                    if "chunk_id" not in data:
+                        data["chunk_id"] = expected_chunk_id
+                    return data
+        except json.JSONDecodeError:
+            # Пытаемся найти объект в тексте
+            start = cleaned.find("{")
+            end = cleaned.rfind("}")
+            if start != -1 and end != -1 and end > start:
+                snippet = cleaned[start : end + 1]
+                try:
+                    data = json.loads(snippet)
+                    if isinstance(data, dict):
+                        if "chunk_id" not in data:
+                            data["chunk_id"] = expected_chunk_id
+                        return data
+                except json.JSONDecodeError:
+                    pass
+
+        return None
 
     @staticmethod
     def _parse_llm_batch_enrichment(raw: str) -> List[Dict[str, Any]]:
