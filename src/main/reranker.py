@@ -15,6 +15,7 @@ LLM‑based reranking (PIPELINE 4).
 from typing import List
 import json
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from src.main.models import EnrichedQuery, ScoredChunk, RerankConfig
 from src.main.ollama_client import OllamaClient
@@ -40,18 +41,12 @@ class LLMReranker:
             return []
 
         rerank_start_time = time.time()
-        
-        prompt = self._build_prompt(enriched_query, candidates)
         system_prompt = self._build_system_prompt()
-        
-        # Логируем запрос
-        ollama_config = {
-            "model": getattr(getattr(self._llm, "config", None), "model", None),
-            "base_url": getattr(getattr(self._llm, "config", None), "base_url", None),
-            "timeout": getattr(getattr(self._llm, "config", None), "timeout", None),
-            "temperature": self._config.temperature,
-        }
-        
+
+        # Сохраняем исходный порядок кандидатов (по hybrid_score)
+        original_order = {sc.chunk.id: i for i, sc in enumerate(candidates)}
+
+        # Общий снэпшот обогащённого запроса (для логов)
         enriched_query_dict = {
             "query": enriched_query.query,
             "geo": enriched_query.geo,
@@ -60,49 +55,74 @@ class LLMReranker:
             "time_granularity": enriched_query.time_granularity,
             "oked": enriched_query.oked,
         }
-        
-        self._logger.log_llm_reranking(
-            event="request",
-            query=enriched_query.query,
-            enriched_query=enriched_query_dict,
-            candidates_count=len(candidates),
-            candidate_ids=[sc.chunk.id for sc in candidates],
-            system_prompt=system_prompt,
-            prompt=prompt,
-            ollama_config=ollama_config,
-        )
-        
-        # Ответ должен быть JSON‑массивом → явно запрашиваем format="json"
-        raw = self._llm.generate(
-            prompt,
-            system_prompt=system_prompt,
-            temperature=self._config.temperature,
-            format="json",
-        )
-        
-        scores_by_id = self._parse_llm_rerank_scores(raw)
 
-        for sc in candidates:
-            sc.rerank_score = float(scores_by_id.get(sc.chunk.id, 0.0))
+        # Параллельная оценка чанков (per‑chunk scoring)
+        max_workers = max(1, min(self._config.max_workers, len(candidates)))
+        metadata_buckets: dict[str, str] = {}
 
-        # Сортируем ТОЛЬКО по rerank_score
-        candidates.sort(key=lambda x: x.rerank_score, reverse=True)
-        top_chunks = candidates[: self._config.top_k]
-        
-        # Логируем ответ
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_chunk = {
+                executor.submit(
+                    self._score_single_chunk,
+                    enriched_query,
+                    sc,
+                    system_prompt,
+                    enriched_query_dict,
+                ): sc
+                for sc in candidates
+            }
+
+            for future in as_completed(future_to_chunk):
+                sc = future_to_chunk[future]
+                try:
+                    score = future.result()
+                except Exception as e:
+                    # На всякий случай логируем и считаем score=0.0
+                    self._logger.log_llm_reranking(
+                        event="error",
+                        query=enriched_query.query,
+                        candidates_count=1,
+                        candidate_ids=[sc.chunk.id],
+                        error=str(e),
+                    )
+                    score = 0.0
+
+                # Применяем жёсткие priors по метаданным и классифицируем bucket
+                adjusted_score, bucket = self._apply_metadata_caps(
+                    enriched_query, sc, float(score)
+                )
+                sc.rerank_score = adjusted_score
+                metadata_buckets[sc.chunk.id] = bucket
+
+        # Решаем, использовать ли rerank или оставить hybrid‑порядок
+        max_score = max((sc.rerank_score for sc in candidates), default=0.0)
+        if max_score < self._config.min_relevance_score:
+            # Reranker «ничего не нашёл» — сохраняем hybrid‑порядок
+            candidates_sorted = sorted(
+                candidates, key=lambda sc: original_order.get(sc.chunk.id, 1_000_000)
+            )
+        else:
+            # Используем только rerank_score
+            candidates_sorted = sorted(
+                candidates, key=lambda sc: sc.rerank_score, reverse=True
+            )
+
+        top_chunks = candidates_sorted[: self._config.top_k]
+
+        # Логируем финальный результат
         elapsed_time = time.time() - rerank_start_time
         self._logger.log_llm_reranking(
-            event="response",
+            event="final",
             query=enriched_query.query,
             enriched_query=enriched_query_dict,
             candidates_count=len(candidates),
-            candidate_ids=[sc.chunk.id for sc in candidates],
-            raw_response=raw,
-            rerank_scores=scores_by_id,
+            candidate_ids=[sc.chunk.id for sc in candidates_sorted],
+            rerank_scores={sc.chunk.id: sc.rerank_score for sc in candidates_sorted},
+            buckets=metadata_buckets,
             top_k=len(top_chunks),
             elapsed_time=elapsed_time,
         )
-        
+
         return top_chunks
 
     # -------------------- Prompt & Parsing -------------------- #
@@ -112,125 +132,236 @@ class LLMReranker:
         Системный промпт для reranker.
         """
         return (
-            "Ты — эксперт по оценке релевантности документов для статистических запросов. "
-            "Твоя задача — точно оценить, насколько каждый чанк документа помогает ответить на запрос пользователя. "
-            "STRICT RULES:- Output ONLY a valid JSON array of exactly 5 objects - No text before or after JSON - No markdown, comments, explanations - chunk_id must exactly match input"
+            "Ты оцениваешь, помогает ли ОДИН фрагмент документа ответить на статистический запрос.\n"
+            "Отвечай ТОЛЬКО одним JSON-объектом вида {\"id\": \"...\", \"score\": 0.0-1.0}.\n"
+            "Не пиши ничего кроме JSON. Не используй markdown, комментарии и пояснения."
         )
 
-    def _build_prompt(self, enriched_query: EnrichedQuery, candidates: List[ScoredChunk]) -> str:
+    def _build_prompt_for_chunk(
+        self,
+        enriched_query: EnrichedQuery,
+        scored_chunk: ScoredChunk,
+    ) -> str:
         """
-        Подготовка промпта для LLM‑reranker‑а.
-
-        Модель видит:
-        - структурированное описание enriched_query
-        - список чанков с метаданными
-        и должна вернуть JSON:
-        [
-          {"id": "chunk_id", "score": 0.0–1.0},
-          ...
-        ]
+        Короткий промпт для оценки ОДНОГО чанка.
         """
+        ch = scored_chunk.chunk
         query_block = {
             "query": enriched_query.query,
             "geo": enriched_query.geo,
             "metrics": enriched_query.metrics,
             "years": enriched_query.years,
-            "time_granularity": enriched_query.time_granularity,
-            "oked": enriched_query.oked,
         }
 
-        chunks_block = []
-        for sc in candidates:
-            ch = sc.chunk
-            chunks_block.append(
-                {
-                    "id": ch.id,
-                    "context": ch.context,
-                    "text": ch.text[:500] if ch.text else "",  # Ограничиваем длину для ускорения
-                    "geo": ch.geo,
-                    "metrics": ch.metrics,
-                    "years": ch.years,
-                    "time_granularity": ch.time_granularity,
-                    "oked": ch.oked,
-                }
-            )
+        chunk_block = {
+            "id": ch.id,
+            "context": ch.context,
+            "geo": ch.geo,
+            "metrics": ch.metrics,
+            "years": ch.years,
+            "time_granularity": ch.time_granularity,
+            "oked": ch.oked,
+        }
 
         instruction = (
-            "Ты работаешь как reranker для статистических документов Республики Беларусь.\n"
-            "Твоя задача — ОЦЕНИТЬ, насколько каждый чанк помогает ответить на запрос пользователя.\n\n"
-            "КРИТИЧЕСКИ ВАЖНО при оценке:\n"
-            "1. МЕТРИКА: Чанк должен содержать данные по запрашиваемой метрике (например, 'удой молока', "
-            "'инвестиции в основной капитал'). Игнорируй поверхностные совпадения слов — важна смысловая релевантность.\n"
-            "2. ГЕОГРАФИЯ: Если в запросе указан регион/город/область, чанк должен содержать данные именно по этому региону. "
-            "Если география не указана, приоритет отдавай чанкам с общереспубликанскими данными.\n"
-            "3. ПЕРИОД (years): Чанк должен содержать данные за запрашиваемые годы. "
-            "Если годы не указаны, приоритет отдавай чанкам с актуальными данными (2023-2024).\n"
-            "4. УРОВЕНЬ АГРЕГАЦИИ (time_granularity): Если указан уровень (year/quarter/month/day), "
-            "чанк должен соответствовать этому уровню. Если не указан, приоритет отдавай годовым данным.\n"
-            "5. ОКЭД: Если указан код ОКЭД, чанк должен относиться к соответствующей отрасли.\n\n"
-            "ИГНОРИРУЙ:\n"
-            "- Поверхностные совпадения слов без смысловой связи\n"
-            "- Шуточные/шумовые фрагменты (оглавления, титульные страницы, контакты)\n"
-            "- Чанки, которые не содержат фактических данных по запросу\n\n"
-            "Верни JSON‑массив, где для каждого чанка указан score от 0.0 до 1.0.\n"
-            "Score 1.0 = идеальное соответствие всем критериям\n"
-            "Score 0.5-0.9 = хорошее соответствие, но есть незначительные несоответствия\n"
-            "Score 0.1-0.4 = слабое соответствие, только частично релевантен\n"
-            "Score 0.0 = не релевантен запросу\n\n"
-            "Формат ответа:\n"
-            "[\n"
-            '  {"id": "chunk_id", "score": 0.0},\n'
-            "  ...\n"
-            "]\n\n"
-            "В массиве должно быть РОВНО столько объектов, сколько кандидатов в списке ниже. "
-            "Каждый объект должен содержать id из списка кандидатов."
+            "Оцени, насколько этот фрагмент помогает ответить на запрос.\n"
+            "Используй следующую шкалу:\n"
+            "- 0.0: фрагмент не относится к запросу.\n"
+            "- около 0.3: тема рядом, но не та метрика или нет конкретных данных.\n"
+            "- около 0.6: нужная метрика есть, но не те годы/география/уровень агрегации.\n"
+            "- около 0.9: фрагмент содержит именно те данные, которые нужны запросу.\n"
+            "Если фрагмент частично полезен, используй промежуточные значения между этими примерами.\n"
+            "Верни один JSON-объект с полями \"id\" и \"score\" (0.0–1.0)."
         )
 
         prompt = (
             f"{instruction}\n\n"
-            f"Запрос пользователя:\n{json.dumps(query_block, ensure_ascii=False, indent=2)}\n\n"
-            f"Кандидаты для ранжирования ({len(chunks_block)} чанков):\n"
-            f"{json.dumps(chunks_block, ensure_ascii=False, indent=2)}\n"
+            f"Запрос:\n{json.dumps(query_block, ensure_ascii=False, indent=2)}\n\n"
+            f"Фрагмент:\n{json.dumps(chunk_block, ensure_ascii=False, indent=2)}\n"
         )
         return prompt
 
-    @staticmethod
-    def _parse_llm_rerank_scores(raw: str) -> dict[str, float]:
+    def _score_single_chunk(
+        self,
+        enriched_query: EnrichedQuery,
+        scored_chunk: ScoredChunk,
+        system_prompt: str,
+        enriched_query_dict: dict,
+    ) -> float:
         """
-        Робастный парсер JSON‑ответа reranker‑а.
-        При ошибке парсинга все скоринги будут нулевыми.
+        Оценка одного чанка через LLM. Возвращает score в диапазоне [0,1].
+        При любой ошибке/невалидном ответе возвращает 0.0.
+        """
+        ch_id = scored_chunk.chunk.id
+
+        ollama_config = {
+            "model": getattr(getattr(self._llm, "config", None), "model", None),
+            "base_url": getattr(getattr(self._llm, "config", None), "base_url", None),
+            "timeout": getattr(getattr(self._llm, "config", None), "timeout", None),
+            "temperature": self._config.temperature,
+        }
+
+        last_raw = ""
+        for attempt in range(1, self._config.max_retries + 1):
+            prompt = self._build_prompt_for_chunk(enriched_query, scored_chunk)
+
+            # Логируем запрос
+            self._logger.log_llm_reranking(
+                event="request",
+                query=enriched_query.query,
+                enriched_query=enriched_query_dict,
+                candidates_count=1,
+                candidate_ids=[ch_id],
+                system_prompt=system_prompt,
+                prompt=prompt,
+                ollama_config=ollama_config,
+                attempt=attempt,
+                prompt_type="per_chunk",
+            )
+
+            raw = self._llm.generate(
+                prompt,
+                system_prompt=system_prompt,
+                temperature=self._config.temperature,
+                format="json",
+            )
+            last_raw = raw
+
+            score = self._parse_single_score(raw, ch_id)
+            if score is not None:
+                # Логируем успешный ответ
+                self._logger.log_llm_reranking(
+                    event="response",
+                    query=enriched_query.query,
+                    enriched_query=enriched_query_dict,
+                    candidates_count=1,
+                    candidate_ids=[ch_id],
+                    raw_response=raw,
+                    rerank_scores={ch_id: score},
+                    top_k=1,
+                )
+                return score
+
+        # Логируем неудачный парсинг после всех попыток
+        self._logger.log_llm_reranking(
+            event="response_parse_failed",
+            query=enriched_query.query,
+            enriched_query=enriched_query_dict,
+            candidates_count=1,
+            candidate_ids=[ch_id],
+            raw_response=last_raw,
+        )
+        return 0.0
+
+    @staticmethod
+    def _parse_single_score(raw: str, expected_id: str) -> float | None:
+        """
+        Парсит JSON-объект {id, score} из ответа LLM.
+        Возвращает float в [0,1] или None при неуспехе.
         """
         if not raw:
-            return {}
+            return None
 
-        start = raw.find("[")
-        end = raw.rfind("]")
+        text = raw.strip()
+
+        # Удаляем возможные ```json ... ``` обёртки
+        if text.startswith("```"):
+            first_newline = text.find("\n")
+            if first_newline != -1:
+                text = text[first_newline + 1 :]
+            if text.endswith("```"):
+                text = text[:-3]
+            text = text.strip()
+
+        # Пытаемся найти объект в тексте
+        start = text.find("{")
+        end = text.rfind("}")
         if start == -1 or end == -1 or end <= start:
-            return {}
+            return None
 
-        snippet = raw[start : end + 1]
+        snippet = text[start : end + 1]
         try:
             data = json.loads(snippet)
         except json.JSONDecodeError:
-            return {}
+            return None
 
-        if not isinstance(data, list):
-            return {}
+        if not isinstance(data, dict):
+            return None
 
-        result: dict[str, float] = {}
-        for item in data:
-            if not isinstance(item, dict):
-                continue
-            cid = item.get("id")
-            score = item.get("score")
-            if cid is None:
-                continue
-            try:
-                val = float(score)
-            except (TypeError, ValueError):
-                continue
-            # жёстко ограничиваем диапазон [0,1]
-            val = max(0.0, min(1.0, val))
-            result[str(cid)] = val
-        return result
+        cid = str(data.get("id") or expected_id)
+        if cid != expected_id:
+            # Модель могла не вернуть id, но это не критично — подставляем expected_id
+            cid = expected_id
+
+        score = data.get("score")
+        try:
+            val = float(score)
+        except (TypeError, ValueError):
+            return None
+
+        # Жёстко ограничиваем диапазон [0,1]
+        val = max(0.0, min(1.0, val))
+        return val
+
+    # -------------------- Метаданные как жёсткие priors -------------------- #
+
+    def _apply_metadata_caps(
+        self,
+        enriched_query: EnrichedQuery,
+        scored_chunk: ScoredChunk,
+        raw_score: float,
+    ) -> tuple[float, str]:
+        """
+        Применяет жёсткие ограничения по метаданным (metrics/geo/years)
+        и возвращает (скор после ограничений, bucket‑метку для логов).
+
+        Bucket может быть:
+        - "no_metric"      — метрика не совпадает с запросом
+        - "geo_mismatch"   — география противоречит запросу
+        - "missing_years"  — в запросе есть годы, а в чанке нет
+        - "partial"        — частично полезный фрагмент
+        - "good"           — хороший кандидат
+        """
+        bucket = "good"
+        score = float(max(0.0, min(1.0, raw_score)))
+
+        ch = scored_chunk.chunk
+
+        # --- Метрика как строгий фильтр ---
+        if enriched_query.metrics:
+            q_metrics = {m.lower() for m in enriched_query.metrics if isinstance(m, str)}
+            ch_metrics = {
+                m.lower() for m in (ch.metrics or []) if isinstance(m, str)
+            }
+            if not q_metrics.intersection(ch_metrics):
+                # Совсем другая тема — не выше 0.3
+                score = min(score, 0.3)
+                bucket = "no_metric"
+
+        # --- География: если явно не совпадает ---
+        if enriched_query.geo and ch.geo:
+            q_geo = enriched_query.geo.lower()
+            c_geo = ch.geo.lower()
+            if q_geo not in c_geo and c_geo not in q_geo:
+                score = min(score, 0.3)
+                # Не затираем более строгий bucket "no_metric"
+                if bucket == "good":
+                    bucket = "geo_mismatch"
+
+        # --- Годы: если в запросе есть, а в чанке нет ---
+        if enriched_query.years and not ch.years:
+            score = min(score, 0.5)
+            if bucket == "good":
+                bucket = "missing_years"
+
+        # Финальная классификация bucket по итоговому score, если он не был переопределён
+        if bucket == "good":
+            if score < 0.05:
+                bucket = "no_metric"
+            elif score < 0.4:
+                bucket = "partial"
+            else:
+                bucket = "good"
+
+        return score, bucket
 

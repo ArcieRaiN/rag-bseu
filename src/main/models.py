@@ -108,8 +108,15 @@ class RerankConfig:
     """
 
     top_k: int = 3
-    model_name: str = "llama3.2:3b"
+    model_name: str = "qwen2.5:7b"
     temperature: float = 0.0
+    # Максимальное число попыток LLM‑оценки одного чанка
+    max_retries: int = 2
+    # Количество воркеров для параллельной оценки чанков
+    max_workers: int = 4
+    # Порог «осмысленной» релевантности: если max(score) ниже этого значения,
+    # считаем, что reranker ничего не нашёл, и сохраняем порядок hybrid_score.
+    min_relevance_score: float = 0.2
 
 
 @dataclass
