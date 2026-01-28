@@ -66,13 +66,6 @@ class QueryContextEnricher:
         years = self._normalize_years(parsed.get("years")) or DEFAULT_ENRICHMENT["years"]
 
         metrics = self._normalize_list(parsed.get("metrics"))
-        # Эвристики поверх LLM: если LLM "поплыл", добиваем метрики из текста запроса.
-        # Критичный кейс: запросы про студентов должны всегда иметь metric "численность студентов".
-        metrics = self._merge_metrics(
-            primary=self._heuristic_metrics_from_query(query),
-            secondary=metrics,
-            limit=5,
-        )
         time_granularity = parsed.get("time_granularity") or DEFAULT_ENRICHMENT["time_granularity"]
         oked = parsed.get("oked") or DEFAULT_ENRICHMENT["oked"]
 
@@ -195,22 +188,6 @@ class QueryContextEnricher:
             parts = [str(v).strip() for v in value if str(v).strip()]
             return ", ".join(parts) if parts else None
         return str(value).strip() or None
-
-    @staticmethod
-    def _heuristic_metrics_from_query(query: str) -> Optional[List[str]]:
-        """
-        Быстрые эвристики для метрик, чтобы не зависеть полностью от LLM.
-        """
-        q = (query or "").lower()
-        # типичная опечатка из логов
-        q = q.replace("струдент", "студент")
-
-        metrics: List[str] = []
-        if "студент" in q:
-            # "сколько/число/численность студентов" -> одна целевая метрика
-            metrics.append("численность студентов")
-
-        return metrics or None
 
     @staticmethod
     def _merge_metrics(

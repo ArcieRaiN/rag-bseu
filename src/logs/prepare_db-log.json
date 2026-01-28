@@ -1,6 +1,0 @@
-{"event": "start", "total_pdfs": 2, "ts": 1769610007.3387358}
-{"event": "pdf_start", "pdf_name": "Беларусь и Россия, 2024.pdf", "ts": 1769610007.3397377}
-{"event": "pdf_end", "pdf_name": "Беларусь и Россия, 2024.pdf", "chunks_count": 243, "elapsed_time": 1194.7792553901672, "ts": 1769611202.118993}
-{"event": "pdf_start", "pdf_name": "Регионы Республики Беларусь, 2024 (том 1).pdf", "ts": 1769611202.119997}
-{"event": "pdf_end", "pdf_name": "Регионы Республики Беларусь, 2024 (том 1).pdf", "chunks_count": 849, "elapsed_time": 7713.3710350990295, "ts": 1769618915.4910321}
-{"event": "end", "total_chunks": 1092, "elapsed_time": 8908.208984375, "ts": 1769618915.548722}
