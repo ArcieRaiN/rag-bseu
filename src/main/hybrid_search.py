@@ -122,8 +122,10 @@ class HybridSearcher:
     @staticmethod
     def _normalize_scores(candidates: List[ScoredChunk]) -> None:
         """
-        - semantic_score → min‑max
-        - lexical_score → log + min‑max
+        Нормализация скоринговых компонент.
+
+        - semantic_score → min‑max (только если разброс достаточно большой)
+        - lexical_score → log + min‑max (также с порогом по разбросу)
         - metadata_score уже [0,1]
         """
         if not candidates:
@@ -132,16 +134,20 @@ class HybridSearcher:
         sem = np.array([c.semantic_score for c in candidates], dtype=float)
         lex = np.array([c.lexical_score for c in candidates], dtype=float)
 
-        # semantic: min‑max
-        if sem.max() > sem.min():
-            sem_n = (sem - sem.min()) / (sem.max() - sem.min() + 1e-9)
+        # semantic: min‑max только при достаточном разбросе.
+        # Это снижает эффект "рандомного" ранжирования, когда все скоры почти одинаковые.
+        sem_range = sem.max() - sem.min()
+        if sem_range > 1e-3:
+            sem_n = (sem - sem.min()) / (sem_range + 1e-9)
         else:
-            sem_n = sem
+            # Если разброс слишком мал, считаем все semantic_score равными среднему.
+            sem_n = np.full_like(sem, fill_value=float(sem.mean() if sem.size else 0.0))
 
-        # lexical: log(1+x) + min‑max
+        # lexical: log(1+x) + min‑max при достаточном разбросе.
         lex_log = np.log1p(np.maximum(lex, 0.0))
-        if lex_log.max() > lex_log.min():
-            lex_n = (lex_log - lex_log.min()) / (lex_log.max() - lex_log.min() + 1e-9)
+        lex_range = lex_log.max() - lex_log.min()
+        if lex_range > 1e-3:
+            lex_n = (lex_log - lex_log.min()) / (lex_range + 1e-9)
         else:
             lex_n = lex_log
 

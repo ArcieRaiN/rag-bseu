@@ -74,6 +74,30 @@ class EnrichmentPostProcessor:
             elif len(chunk.years) == 1:
                 # Если один год - тоже годовая гранулярность
                 chunk.time_granularity = "year"
+
+        # Усиление семантики: добавляем краткое описание показателей в context.
+        # Это помогает привести "мир чанков" ближе к "миру запросов".
+        if chunk.metrics or chunk.geo or chunk.years:
+            parts = []
+            if chunk.metrics:
+                metrics_str = ", ".join(chunk.metrics[:3])
+                parts.append(f"показатели: {metrics_str}")
+            if chunk.geo:
+                parts.append(f"география: {chunk.geo}")
+            if chunk.years:
+                years_sorted = sorted(chunk.years)
+                if len(years_sorted) > 1:
+                    years_repr = f"{years_sorted[0]}-{years_sorted[-1]}"
+                else:
+                    years_repr = str(years_sorted[0])
+                parts.append(f"годы: {years_repr}")
+
+            if parts:
+                semantic_summary = "; ".join(parts)
+                if chunk.context:
+                    chunk.context = f"{chunk.context} | {semantic_summary}"
+                else:
+                    chunk.context = semantic_summary
         
         # Очистка context от мусора (ALL CAPS заголовки, дубли RU/EN)
         if chunk.context:

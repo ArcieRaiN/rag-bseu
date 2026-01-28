@@ -74,11 +74,34 @@ class InMemoryBM25:
 
     def _build(self) -> None:
         """
-        Строим обратный индекс по объединённому тексту: `context + " " + text`.
+        Строим обратный индекс по объединённому тексту:
+        `context + " " + text + query_hints(geo/metrics/years)`.
         """
         total_len = 0
         for doc_id, ch in enumerate(self._chunks):
+            # Базовый текст: обогащённый context + сырой text
             combined = f"{ch.context}\n{ch.text}"
+
+            # Добавляем псевдо‑запросы (query hints), построенные из метаданных.
+            # Это не полноценные вопросы, а нормализованные фразы вида:
+            # "розничный товарооборот по областям беларуси 2015-2023".
+            hints_parts: list[str] = []
+            if ch.metrics:
+                # Берём первые 2‑3 метрики, чтобы не раздувать документ.
+                hints_parts.append(" ".join(ch.metrics[:3]))
+            if ch.geo:
+                hints_parts.append(ch.geo)
+            if ch.years:
+                years_sorted = sorted(ch.years)
+                if len(years_sorted) > 1:
+                    years_repr = f"{years_sorted[0]}-{years_sorted[-1]}"
+                else:
+                    years_repr = str(years_sorted[0])
+                hints_parts.append(years_repr)
+
+            if hints_parts:
+                combined += "\n" + " ".join(hints_parts)
+
             norm = normalize_text_lemmatized(combined)
             tokens = [t for t in norm.split() if t]
             self._doc_len.append(len(tokens))
