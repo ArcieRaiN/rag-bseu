@@ -61,6 +61,20 @@ class EnrichmentPostProcessor:
         # Фильтрация неправильных metrics
         if chunk.metrics:
             chunk.metrics = self._filter_valid_metrics(chunk.metrics, chunk.text)
+
+        # Довыделение metrics из сырого текста (таблицы/OCR часто содержат нужную формулировку,
+        # даже если LLM вернул слишком общий ответ вроде "обучение").
+        inferred_metrics = self._infer_metrics_from_text(chunk.text or "")
+        if inferred_metrics:
+            merged: List[str] = []
+            # inferred ставим первыми (они обычно ближе к запросу пользователя)
+            for m in inferred_metrics:
+                if m not in merged:
+                    merged.append(m)
+            for m in (chunk.metrics or []):
+                if m not in merged:
+                    merged.append(m)
+            chunk.metrics = self._filter_valid_metrics(merged, chunk.text)
         
         # Проверка на галлюцинации годов
         if chunk.years:
@@ -108,6 +122,62 @@ class EnrichmentPostProcessor:
             chunk.context = cleaned_context or original_context
         
         return chunk
+
+    @staticmethod
+    def _infer_metrics_from_text(text: str) -> List[str]:
+        """
+        Эвристически извлекает названия показателей из сырого текста чанка.
+
+        Цель: поднять recall retrieval (BM25/metadata) для табличных чанков, где LLM
+        часто возвращает слишком общий metrics.
+        """
+        if not text:
+            return []
+
+        t = text.lower()
+        out: List[str] = []
+
+        def _add(metric: str) -> None:
+            m = metric.strip().lower()
+            if not m:
+                return
+            # ограничиваем длину, чтобы не протаскивать целые определения
+            if len(m) > 60:
+                m = m[:60].rstrip()
+            if m and m not in out:
+                out.append(m)
+
+        # Частые целевые метрики (в т.ч. кейс "численность студентов")
+        if "численность студентов" in t or "число студентов" in t:
+            _add("численность студентов")
+
+        # Обучение/образование: охват, квалификация, ПК и т.п.
+        if "охват детей дошкольным образованием" in t or "охват дошкольным образованием" in t:
+            _add("охват детей дошкольным образованием")
+        if "персональные компьютеры" in t and "учебн" in t:
+            _add("персональные компьютеры в учебных целях")
+        if "доля учителей" in t and "квалификац" in t:
+            _add("доля учителей с минимальной требуемой квалификацией")
+
+        # Обобщённый паттерн для табличных заголовков показателей:
+        # "Численность ...", "Доля ...", "Уровень ...", "Индекс ..."
+        # Берём короткую фразу до скобки/перевода строки.
+        header_re = re.compile(
+            r"(?:(?:^)|(?:\n))\s*(численность|число|доля|уровень|индекс)\s+([^\n(]{3,80})",
+            re.IGNORECASE,
+        )
+        for m in header_re.finditer(text):
+            head = (m.group(1) or "").strip().lower()
+            tail = (m.group(2) or "").strip().lower()
+            # убираем мусорные хвосты
+            tail = re.sub(r"\s{2,}", " ", tail)
+            candidate = f"{head} {tail}".strip()
+            # слишком длинные/похожее на методологию не берём
+            if len(candidate) <= 60 and "показател" not in candidate:
+                _add(candidate)
+
+        # Держим максимум 5 — дальше всё равно обрежется валидатором.
+        return out[:5]
     
     def _clean_context(self, context: str) -> str:
         """

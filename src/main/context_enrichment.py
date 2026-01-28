@@ -62,10 +62,17 @@ class QueryContextEnricher:
         parsed = self._safe_parse_llm_response(llm_raw)
 
         # Применяем значения по умолчанию
-        geo = parsed.get("geo") or DEFAULT_ENRICHMENT["geo"]
+        geo = self._normalize_geo(parsed.get("geo")) or DEFAULT_ENRICHMENT["geo"]
         years = self._normalize_years(parsed.get("years")) or DEFAULT_ENRICHMENT["years"]
 
         metrics = self._normalize_list(parsed.get("metrics"))
+        # Эвристики поверх LLM: если LLM "поплыл", добиваем метрики из текста запроса.
+        # Критичный кейс: запросы про студентов должны всегда иметь metric "численность студентов".
+        metrics = self._merge_metrics(
+            primary=self._heuristic_metrics_from_query(query),
+            secondary=metrics,
+            limit=5,
+        )
         time_granularity = parsed.get("time_granularity") or DEFAULT_ENRICHMENT["time_granularity"]
         oked = parsed.get("oked") or DEFAULT_ENRICHMENT["oked"]
 
@@ -171,4 +178,57 @@ class QueryContextEnricher:
             out = [str(v).strip() for v in value if str(v).strip()]
             return out or None
         return None
+
+    @staticmethod
+    def _normalize_geo(value: Any) -> Optional[str]:
+        """
+        Нормализует geo из LLM:
+        - строка -> строка
+        - список -> "A, B"
+        """
+        if value is None:
+            return None
+        if isinstance(value, str):
+            v = value.strip()
+            return v or None
+        if isinstance(value, list):
+            parts = [str(v).strip() for v in value if str(v).strip()]
+            return ", ".join(parts) if parts else None
+        return str(value).strip() or None
+
+    @staticmethod
+    def _heuristic_metrics_from_query(query: str) -> Optional[List[str]]:
+        """
+        Быстрые эвристики для метрик, чтобы не зависеть полностью от LLM.
+        """
+        q = (query or "").lower()
+        # типичная опечатка из логов
+        q = q.replace("струдент", "студент")
+
+        metrics: List[str] = []
+        if "студент" in q:
+            # "сколько/число/численность студентов" -> одна целевая метрика
+            metrics.append("численность студентов")
+
+        return metrics or None
+
+    @staticmethod
+    def _merge_metrics(
+        primary: Optional[List[str]],
+        secondary: Optional[List[str]],
+        limit: int = 5,
+    ) -> Optional[List[str]]:
+        out: List[str] = []
+        for src in (primary or []), (secondary or []):
+            for m in src:
+                mm = str(m).strip().lower()
+                if not mm:
+                    continue
+                if mm not in out:
+                    out.append(mm)
+                if len(out) >= limit:
+                    break
+            if len(out) >= limit:
+                break
+        return out or None
 

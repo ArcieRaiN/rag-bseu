@@ -89,6 +89,16 @@ class HybridSearcher:
             else:
                 merged[key] = sc
 
+        # 3.2b Metadata recall (важно для табличных чанков):
+        # если нужный чанк не попал ни в FAISS, ни в BM25, мы всё равно можем
+        # вытащить его по совпадению metrics/years/geo.
+        if enriched_query.metrics:
+            meta_seed = self._metadata_recall(enriched_query, top_k=max(50, self._config.final_top_k * 10))
+            for sc in meta_seed:
+                key = _key(sc)
+                if key not in merged:
+                    merged[key] = sc
+
         candidates = list(merged.values())
 
         # 3.3 Metadata Scoring
@@ -114,8 +124,30 @@ class HybridSearcher:
             "semantic_count": len(sem_results),
             "lexical_count": len(lex_results),
             "merged_count": len(candidates),
+            "metadata_seed_count": len(meta_seed) if enriched_query.metrics else 0,
         }
         return HybridSearchResult(candidates=final, debug_info=debug)
+
+    def _metadata_recall(self, enriched_query: EnrichedQuery, top_k: int) -> List[ScoredChunk]:
+        """
+        Возвращает кандидатов только по metadata_score (без FAISS/BM25).
+        Это повышает recall для кейсов, где:
+        - текст табличный/шумный
+        - нужные термины есть в metrics/years, но плохо присутствуют в raw text/context
+        """
+        chunks = getattr(self._semantic, "_chunks", None)
+        if not chunks:
+            return []
+
+        scored: List[ScoredChunk] = []
+        for ch in chunks:
+            ms = self._metadata_scorer.score(ch, enriched_query)
+            if ms <= 0.0:
+                continue
+            scored.append(ScoredChunk(chunk=ch, metadata_score=float(ms)))
+
+        scored.sort(key=lambda sc: sc.metadata_score, reverse=True)
+        return scored[:top_k]
 
     # -------------------- Вспомогательная нормализация -------------------- #
 
