@@ -108,8 +108,9 @@ class RerankConfig:
     """
 
     top_k: int = 3
-    # Отдельная модель для LLM‑reranking этапа
-    model_name: str = "dengcao/Qwen3-Reranker-8B:Q3_K_M"
+    # Модель reranker-а (cross-encoder HF model id)
+    # Пример: multilingual MS MARCO cross-encoder.
+    model_name: str = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
     temperature: float = 0.0
     # Максимальное число попыток LLM‑оценки одного чанка
     max_retries: int = 2

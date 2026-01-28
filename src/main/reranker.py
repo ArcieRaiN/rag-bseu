@@ -12,7 +12,7 @@ LLM‑based reranking (PIPELINE 4).
 - модуль не занимается генерацией финального ответа RAG
 """
 
-from typing import List
+from typing import List, Optional
 import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -367,4 +367,102 @@ class LLMReranker:
                 bucket = "good"
 
         return score, bucket
+
+
+class CrossEncoderReranker:
+    """
+    Cross-encoder reranker (HF sentence-transformers CrossEncoder).
+
+    На вход:
+    - EnrichedQuery
+    - список ScoredChunk (Top-K от HybridSearcher)
+
+    На выход:
+    - Top-N по cross-encoder score (с сохранением metadata caps)
+    """
+
+    def __init__(self, config: RerankConfig):
+        self._config = config
+        self._logger = get_logger()
+        self._model = None  # lazy init
+
+    def _get_model(self):
+        if self._model is None:
+            from sentence_transformers import CrossEncoder
+
+            # device можно переопределить через env (cpu/cuda)
+            import os
+
+            device = os.getenv("RAG_RERANK_DEVICE")
+            if device:
+                self._model = CrossEncoder(self._config.model_name, device=device)
+            else:
+                self._model = CrossEncoder(self._config.model_name)
+        return self._model
+
+    def rerank(self, enriched_query: EnrichedQuery, candidates: List[ScoredChunk]) -> List[ScoredChunk]:
+        if not candidates:
+            return []
+
+        rerank_start_time = time.time()
+
+        # Сохраняем исходный порядок кандидатов (по hybrid_score)
+        original_order = {sc.chunk.id: i for i, sc in enumerate(candidates)}
+
+        enriched_query_dict = {
+            "query": enriched_query.query,
+            "geo": enriched_query.geo,
+            "metrics": enriched_query.metrics,
+            "years": enriched_query.years,
+            "time_granularity": enriched_query.time_granularity,
+            "oked": enriched_query.oked,
+        }
+
+        # Собираем пары (query, passage)
+        pairs: List[list[str]] = []
+        for sc in candidates:
+            ch = sc.chunk
+            # Для cross-encoder лучше давать компактный passage:
+            # context + первые N символов текста
+            passage = (ch.context or "").strip()
+            raw = (ch.text or "").strip()
+            if raw:
+                passage = f"{passage}\n\n{raw[:800]}" if passage else raw[:800]
+            pairs.append([enriched_query.query, passage])
+
+        model = self._get_model()
+        # predict возвращает float scores
+        scores = model.predict(pairs)
+
+        metadata_buckets: dict[str, str] = {}
+        for sc, score in zip(candidates, scores):
+            adjusted_score, bucket = LLMReranker._apply_metadata_caps(self, enriched_query, sc, float(score))  # type: ignore[misc]
+            sc.rerank_score = adjusted_score
+            metadata_buckets[sc.chunk.id] = bucket
+
+        max_score = max((sc.rerank_score for sc in candidates), default=0.0)
+        if max_score < self._config.min_relevance_score:
+            candidates_sorted = sorted(
+                candidates, key=lambda sc: original_order.get(sc.chunk.id, 1_000_000)
+            )
+        else:
+            candidates_sorted = sorted(candidates, key=lambda sc: sc.rerank_score, reverse=True)
+
+        top_chunks = candidates_sorted[: self._config.top_k]
+
+        elapsed_time = time.time() - rerank_start_time
+        # Логируем через существующий logger (без prompt/system_prompt)
+        self._logger.log_llm_reranking(
+            event="final_cross_encoder",
+            query=enriched_query.query,
+            enriched_query=enriched_query_dict,
+            candidates_count=len(candidates),
+            candidate_ids=[sc.chunk.id for sc in candidates_sorted],
+            rerank_scores={sc.chunk.id: sc.rerank_score for sc in candidates_sorted},
+            buckets=metadata_buckets,
+            top_k=len(top_chunks),
+            elapsed_time=elapsed_time,
+        )
+
+        return top_chunks
 

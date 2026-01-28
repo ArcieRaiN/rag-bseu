@@ -18,7 +18,7 @@ from src.main.models import (
 from src.main.ollama_client import OllamaClient
 from src.main.vectorizer import HashVectorizer
 from src.main.semantic_search import FaissSemanticSearcher
-from src.main.reranker import LLMReranker
+from src.main.reranker import CrossEncoderReranker
 
 
 class QueryPipelineV2:
@@ -60,10 +60,7 @@ class QueryPipelineV2:
         )
 
         self._rerank_config = rerank_config or RerankConfig()
-        self._reranker = LLMReranker(
-            llm_client=self._ollama,
-            config=self._rerank_config,
-        )
+        self._reranker = CrossEncoderReranker(config=self._rerank_config)
 
         print(f"[INIT] QueryPipelineV2 ready in {time.perf_counter() - t0:.2f}s")
 
