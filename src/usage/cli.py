@@ -1,88 +1,126 @@
+"""
+CLI для нового пайплайна запросов (PIPELINE 2–4).
+
+Требования:
+- два режима через флаги запуска:
+  * --predefined-queries  (запуск набора предопределённых запросов)
+  * --user-queries       (интерактивный режим)
+- НЕТ генерации ответа LLM — только Top-3 чанка.
+"""
+
+from __future__ import annotations
+
+import os
+import argparse
 from pathlib import Path
-from src.main.retriever import TableRetriever
-from src.main.vectorizer import HashVectorizer
+from typing import List
 
-# Флаги запуска
-predefined_queries_flag = True   # запустить в начале предопределённые запросы
-user_queries_flag = False         # дать пользователю возможность вводить запросы
+from src.main.models import ScoredChunk
 
-def main() -> None:
-    # Базовая директория src/
-    base_dir = Path(__file__).resolve().parents[1]
 
-    # Папка с уже построенным индексом
-    vector_store_dir = base_dir / "prepare_db" / "vector_store"
-
-    vectorizer = HashVectorizer(dimension=32)
-
-    retriever = TableRetriever(
-        vectorizer=vectorizer,
-        index_path=vector_store_dir / "index.faiss",
-        metadata_path=vector_store_dir / "metadata.json",
-        data_path=vector_store_dir / "data.json",
+def _build_argparser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        description="RAG-BSEU CLI v2 (hybrid retrieval + reranking)."
     )
 
-    print("RAG CLI запущен.\n")
+    group = p.add_mutually_exclusive_group()
+    group.add_argument(
+        "--predefined-queries",
+        action="store_true",
+        help="Запустить набор предопределённых запросов (по умолчанию).",
+    )
+    group.add_argument(
+        "--user-queries",
+        action="store_true",
+        help="Интерактивный режим ввода запросов пользователя.",
+    )
 
-    # Список предопределённых запросов
+    return p
+
+
+def _format_top_chunks(chunks: List[ScoredChunk]) -> str:
+    if not chunks:
+        return "Ничего не найдено."
+
+    lines: List[str] = []
+    for i, sc in enumerate(chunks, start=1):
+        ch = sc.chunk
+        lines.append(f"{i}. [source={ch.source}, page={ch.page}, id={ch.id}]")
+
+        meta_parts = []
+        if ch.geo:
+            meta_parts.append(f"geo={ch.geo}")
+        if ch.years:
+            meta_parts.append(f"years={ch.years}")
+        if ch.metrics:
+            meta_parts.append(f"metrics={ch.metrics}")
+        if ch.time_granularity:
+            meta_parts.append(f"time={ch.time_granularity}")
+        if ch.oked:
+            meta_parts.append(f"oked={ch.oked}")
+
+        if meta_parts:
+            lines.append("   " + "; ".join(meta_parts))
+
+        lines.append(f"   context: {ch.context}")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def main() -> None:
+    # Настройки окружения до импорта тяжёлых библиотек (FAISS, Torch и т.п.)
+    # KMP_DUPLICATE_LIB_OK позволяет продолжить работу при дублирующихся OpenMP-рантаймах.
+    os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+    # Ограничиваем число потоков OpenMP, чтобы снизить вероятность конфликтов и нагрузку на CPU.
+    os.environ.setdefault("OMP_NUM_THREADS", "1")
+
+    # Импортируем пайплайн только после установки переменных окружения
+    from src.main.query_pipeline_v2 import QueryPipelineV2
+
+    args = _build_argparser().parse_args()
+
+    # по умолчанию — predefined
+    run_predefined = not args.user_queries
+
+    base_dir = Path(__file__).resolve().parents[1]
+    pipeline = QueryPipelineV2(base_dir=base_dir)
+
     predefined_queries = [
-        "Население РБ",
-        "Сколько человек в Беларуси",
-        "Сколько человек в Минске было в 2025 году"
+        "производство резиновых и пластмассовых изделий",
+        "численности студентов в Беларуси и России",
+        "число студентов в Беларуси и России",
+        "сколько студентов в Беларуси и России",
+        "сколько студентов в Беларуси",
+        "сколько студентов в РБ",
+        "студенты число",
+        "струденты число"
+        # "Численность населения по областям Беларуси",
+        # "Производство молока",
+        # "Число учреждений здравоохранения",
+        # "Добыча нефти в Беларуси",
     ]
 
-    if not predefined_queries_flag and not user_queries_flag:
-        print("Оба режима выключены. Задайте хотя бы один режим: predefined_queries=True или user_queries=True")
-        return
+    if run_predefined:
+        for q in predefined_queries:
+            print(f'Запрос: "{q}"')
+            result = pipeline.run(q)
+            print(_format_top_chunks(result.top_chunks))
 
-    try:
-        # Предопределённые запросы
-        if predefined_queries_flag:
-            for query in predefined_queries:
-                print(f"> {query}")
-                results = retriever.search_by_table_title(query, top_k=3)
+    if args.user_queries:
+        print("Интерактивный режим. Введите запрос (Ctrl+C для выхода).")
 
-                if not results:
-                    print("Ничего не найдено.\n")
-                    continue
-
-                print("Топ-3 совпадения:")
-                for i, r in enumerate(results, start=1):
-                    print(f"\n{i}. {r['title']}")
-                    print(f"   score: {r['score']:.2f}")
-                    print(f"   source: {r['source']}")
-                    print(f"   page: {r['page']}")
-                    print("result:")
-                    for row in r["data"]:
-                        print("\t".join(map(str, row)))
-                print()
-
-        # Пользовательский интерактив
-        if user_queries_flag:
-            print("Теперь можно вводить свои запросы (Ctrl+C для выхода):\n")
+        try:
             while True:
                 query = input("> ").strip()
                 if not query:
                     continue
 
-                results = retriever.search_by_table_title(query, top_k=3)
-                if not results:
-                    print("Ничего не найдено.\n")
-                    continue
-
-                print("Топ-3 совпадения:")
-                for i, r in enumerate(results, start=1):
-                    print(f"\n{i}. {r['title']}")
-                    print(f"   score: {r['score']:.2f}")
-                    print(f"   source: {r['source']}")
-                    print(f"   page: {r['page']}")
-                    print("result:")
-                    for row in r["data"]:
-                        print("\t".join(map(str, row)))
-                print()
-
-    except KeyboardInterrupt:
-        print("\nВыход из программы.")
+                result = pipeline.run(query)
+                print(f'Запрос: "{query}"')
+                print(_format_top_chunks(result.top_chunks))
+        except KeyboardInterrupt:
+            print("Выход из программы.")
 
 
 if __name__ == "__main__":
