@@ -53,7 +53,7 @@ class FaissSemanticSearcher:
         else:
             query_vec = embedded_query.astype("float32")
 
-        # Предполагаем, что вектор уже нормализован (HashVectorizer нормализует).
+        # Предполагаем, что вектор уже нормализован (SentenceVectorizer нормализует).
         scores, indices = self._index.search(query_vec, top_k)
         scores = scores[0]
         indices = indices[0]

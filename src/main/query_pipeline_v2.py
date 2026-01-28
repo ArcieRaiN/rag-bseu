@@ -16,7 +16,7 @@ from src.main.models import (
     RerankConfig,
 )
 from src.main.ollama_client import OllamaClient
-from src.main.vectorizer import HashVectorizer
+from src.main.vectorizer import SentenceVectorizer
 from src.main.semantic_search import FaissSemanticSearcher
 from src.main.reranker import CrossEncoderReranker
 
@@ -36,7 +36,7 @@ class QueryPipelineV2:
 
         self._base_dir = Path(base_dir)
         self._ollama = ollama_client or OllamaClient()
-        self._vectorizer = HashVectorizer(dimension=vector_dim)
+        self._vectorizer = SentenceVectorizer(dimension=vector_dim)
 
         vector_store_dir = self._base_dir / "prepare_db" / "vector_store"
         index_path = vector_store_dir / "index.faiss"

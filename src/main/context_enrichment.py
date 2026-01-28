@@ -4,7 +4,7 @@ from __future__ import annotations
 Context enrichment (PIPELINE 2) для пользовательских запросов.
 
 Ответственность:
-- построить embedding запроса (HashVectorizer)
+- построить embedding запроса (SentenceVectorizer)
 - запросить LLM (Ollama) для извлечения:
   geo / metrics / years / time_granularity / oked
 - применить default_enrichment, если каких‑то полей нет
@@ -18,7 +18,7 @@ import numpy as np
 
 from src.main.models import EnrichedQuery
 from src.main.ollama_client import OllamaClient
-from src.main.vectorizer import HashVectorizer
+from src.main.vectorizer import SentenceVectorizer
 
 
 DEFAULT_ENRICHMENT: Dict[str, Any] = {
@@ -41,7 +41,7 @@ class QueryContextEnricher:
 
     def __init__(
         self,
-        vectorizer: HashVectorizer,
+        vectorizer: SentenceVectorizer,
         llm_client: OllamaClient,
     ):
         self._vectorizer = vectorizer

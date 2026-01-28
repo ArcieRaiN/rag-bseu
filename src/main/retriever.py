@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Dict, Set
 import numpy as np
 
-from src.main.vectorizer import HashVectorizer
+from src.main.vectorizer import SentenceVectorizer
 from src.main.input_normalizer import normalize_text_lemmatized
 
 
@@ -15,7 +15,7 @@ class SemanticRetriever:
 
     def __init__(
         self,
-        vectorizer: HashVectorizer,
+        vectorizer: SentenceVectorizer,
         data_path: Path,
     ):
         self.vectorizer = vectorizer

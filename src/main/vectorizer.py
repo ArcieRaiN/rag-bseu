@@ -6,6 +6,8 @@ from typing import Iterable, Optional
 
 import numpy as np
 
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
 try:
     from sentence_transformers import SentenceTransformer
 except Exception as e:  # pragma: no cover
@@ -15,12 +17,12 @@ else:
     _SENTENCE_TRANSFORMERS_IMPORT_ERROR = None
 
 
-class HashVectorizer:
+class SentenceVectorizer:
     """
     Sentence-transformers based vectorizer (drop-in replacement).
 
     Why the name is kept:
-    - the rest of the codebase imports `HashVectorizer`
+    - the rest of the codebase imports `SentenceVectorizer`
     - we keep interface compatibility: `embed`, `embed_many`, `dimension`
 
     Notes:

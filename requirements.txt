@@ -11,4 +11,4 @@ natasha==1.6.0
 llama-index==0.10.56
 llama-index-readers-file==0.1.19
 sentence-transformers==3.4.1
-
+hf-xet==1.2.0

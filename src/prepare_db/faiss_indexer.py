@@ -15,18 +15,18 @@ from typing import List
 import faiss
 
 from src.main.models import Chunk
-from src.main.vectorizer import HashVectorizer
+from src.main.vectorizer import SentenceVectorizer
 
 
 class FAISSIndexer:
     """
     Класс для построения FAISS индекса из чанков.
     
-    Использует HashVectorizer для генерации embeddings поля context.
-    IndexFlatIP используется для cosine similarity (HashVectorizer нормализует вектора).
+    Использует SentenceVectorizer для генерации embeddings поля context.
+    IndexFlatIP используется для cosine similarity (SentenceVectorizer нормализует вектора).
     """
 
-    def __init__(self, vectorizer: HashVectorizer):
+    def __init__(self, vectorizer: SentenceVectorizer):
         """
         Инициализация индексера.
         

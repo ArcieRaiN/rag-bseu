@@ -20,7 +20,7 @@ import time
 
 from src.main.models import Chunk
 from src.main.ollama_client import OllamaClient
-from src.main.vectorizer import HashVectorizer
+from src.main.vectorizer import SentenceVectorizer
 from src.logs.logger import get_logger
 
 from src.prepare_db.pdf_chunker import PDFChunker
@@ -56,7 +56,7 @@ class KnowledgeBaseBuilder:
         """
         self._config = config
         self._llm = llm_client or OllamaClient()
-        self._vectorizer = HashVectorizer(dimension=config.vector_dim)
+        self._vectorizer = SentenceVectorizer(dimension=config.vector_dim)
         self._logger = get_logger()
         
         # Инициализируем модули
