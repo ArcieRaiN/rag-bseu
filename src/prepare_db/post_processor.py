@@ -77,7 +77,11 @@ class EnrichmentPostProcessor:
         
         # Очистка context от мусора (ALL CAPS заголовки, дубли RU/EN)
         if chunk.context:
-            chunk.context = self._clean_context(chunk.context)
+            original_context = chunk.context
+            cleaned_context = self._clean_context(chunk.context)
+            # Гарантируем, что context не станет пустым:
+            # если после очистки ничего не осталось, откатываемся к исходному значению.
+            chunk.context = cleaned_context or original_context
         
         return chunk
     
