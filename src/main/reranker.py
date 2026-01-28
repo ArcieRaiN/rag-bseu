@@ -385,6 +385,7 @@ class CrossEncoderReranker:
         self._config = config
         self._logger = get_logger()
         self._model = None  # lazy init
+        self._device = None  # lazy init
 
     def _get_model(self):
         if self._model is None:
@@ -394,11 +395,117 @@ class CrossEncoderReranker:
             import os
 
             device = os.getenv("RAG_RERANK_DEVICE")
+            self._device = device
+            # Важно: не полагаться на predict(), т.к. он может применять activation/softmax.
+            # Мы будем извлекать raw logits напрямую через model.model(**inputs).logits.
             if device:
-                self._model = CrossEncoder(self._config.model_name, device=device)
+                self._model = CrossEncoder(self._config.model_name, device=device, max_length=512)
             else:
-                self._model = CrossEncoder(self._config.model_name)
+                self._model = CrossEncoder(self._config.model_name, max_length=512)
         return self._model
+
+    @staticmethod
+    def _sigmoid(x: float) -> float:
+        # стабильная сигмоида для логитов умеренной величины
+        import math
+
+        if x >= 0:
+            z = math.exp(-x)
+            return 1.0 / (1.0 + z)
+        z = math.exp(x)
+        return z / (1.0 + z)
+
+    def _predict_raw_logits(self, pairs: List[list[str]]) -> List[float]:
+        """
+        Возвращает raw logits cross-encoder'а без softmax/sigmoid.
+
+        Почему не model.predict():
+        sentence-transformers может применять activation (sigmoid) и/или softmax,
+        что схлопывает шкалу и ухудшает разделение релевантности.
+        """
+        model = self._get_model()
+        # CrossEncoder хранит HF модель/токенизатор
+        hf_model = getattr(model, "model", None)
+        tokenizer = getattr(model, "tokenizer", None)
+        if hf_model is None or tokenizer is None:
+            # fallback: используем predict как есть (лучше, чем упасть)
+            scores = model.predict(pairs)
+            return [float(s) for s in scores]
+
+        import torch
+
+        device = getattr(hf_model, "device", None) or torch.device("cpu")
+        encoded = tokenizer(
+            [p[0] for p in pairs],
+            [p[1] for p in pairs],
+            padding=True,
+            truncation=True,
+            max_length=512,
+            return_tensors="pt",
+        )
+        encoded = {k: v.to(device) for k, v in encoded.items()}
+
+        with torch.no_grad():
+            out = hf_model(**encoded)
+            logits = out.logits
+
+        # logits shape:
+        # - (batch, 1) for regression / single-label classification
+        # - (batch, 2) for binary classification (softmax)
+        if logits.dim() == 2 and logits.size(-1) == 1:
+            vals = logits.squeeze(-1)
+        elif logits.dim() == 2 and logits.size(-1) >= 2:
+            # Берём “positive class” логит (обычно индекс 1).
+            vals = logits[:, 1]
+        else:
+            vals = logits.view(-1)
+
+        return [float(x) for x in vals.detach().cpu().tolist()]
+
+    def _apply_metadata_penalties_logit(
+        self,
+        enriched_query: EnrichedQuery,
+        scored_chunk: ScoredChunk,
+        raw_logit: float,
+    ) -> tuple[float, str]:
+        """
+        Жёсткие priors по метаданным, но в logit-space (штрафы), без обрезки шкалы.
+
+        Важно: НЕ clamp в [0,1] — иначе убиваем смысл raw logits.
+        """
+        score = float(raw_logit)
+        bucket = "good"
+
+        ch = scored_chunk.chunk
+
+        # --- Метрика как строгий фильтр ---
+        if enriched_query.metrics:
+            q_metrics = {m.lower() for m in enriched_query.metrics if isinstance(m, str)}
+            ch_metrics = {m.lower() for m in (ch.metrics or []) if isinstance(m, str)}
+            if not q_metrics.intersection(ch_metrics):
+                # сильный штраф (переводит в “нерелевант” почти при любом базовом logit)
+                score -= 5.0
+                bucket = "no_metric"
+
+        # --- География: если явно не совпадает ---
+        if enriched_query.geo and ch.geo:
+            q_geo = enriched_query.geo.lower()
+            c_geo = ch.geo.lower()
+            if q_geo not in c_geo and c_geo not in q_geo:
+                score -= 3.0
+                if bucket == "good":
+                    bucket = "geo_mismatch"
+
+        # --- Годы: если в запросе есть, а в чанке нет ---
+        if enriched_query.years and not ch.years:
+            score -= 1.5
+            if bucket == "good":
+                bucket = "missing_years"
+
+        if bucket == "good":
+            bucket = "good"
+
+        return score, bucket
 
     def rerank(self, enriched_query: EnrichedQuery, candidates: List[ScoredChunk]) -> List[ScoredChunk]:
         if not candidates:
@@ -430,18 +537,20 @@ class CrossEncoderReranker:
                 passage = f"{passage}\n\n{raw[:800]}" if passage else raw[:800]
             pairs.append([enriched_query.query, passage])
 
-        model = self._get_model()
-        # predict возвращает float scores
-        scores = model.predict(pairs)
+        # Получаем raw logits без activation/softmax
+        scores = self._predict_raw_logits(pairs)
 
         metadata_buckets: dict[str, str] = {}
         for sc, score in zip(candidates, scores):
-            adjusted_score, bucket = LLMReranker._apply_metadata_caps(self, enriched_query, sc, float(score))  # type: ignore[misc]
-            sc.rerank_score = adjusted_score
+            adjusted_logit, bucket = self._apply_metadata_penalties_logit(enriched_query, sc, float(score))
+            sc.rerank_score = adjusted_logit
             metadata_buckets[sc.chunk.id] = bucket
 
-        max_score = max((sc.rerank_score for sc in candidates), default=0.0)
-        if max_score < self._config.min_relevance_score:
+        # Порог min_relevance_score оставляем в интерпретации [0..1] (probability),
+        # поэтому сравниваем через sigmoid(max_logit). Это монотонно и не ломает ранжирование.
+        max_logit = max((sc.rerank_score for sc in candidates), default=float("-inf"))
+        max_prob = self._sigmoid(max_logit) if max_logit != float("-inf") else 0.0
+        if max_prob < self._config.min_relevance_score:
             candidates_sorted = sorted(
                 candidates, key=lambda sc: original_order.get(sc.chunk.id, 1_000_000)
             )
@@ -452,6 +561,7 @@ class CrossEncoderReranker:
 
         elapsed_time = time.time() - rerank_start_time
         # Логируем через существующий logger (без prompt/system_prompt)
+        # Важно: rerank_scores тут — raw logits (после мета-штрафов), чтобы видеть реальный разброс.
         self._logger.log_llm_reranking(
             event="final_cross_encoder",
             query=enriched_query.query,
@@ -462,6 +572,11 @@ class CrossEncoderReranker:
             buckets=metadata_buckets,
             top_k=len(top_chunks),
             elapsed_time=elapsed_time,
+            extra={
+                "rerank_logit_min": float(min((sc.rerank_score for sc in candidates), default=0.0)),
+                "rerank_logit_max": float(max((sc.rerank_score for sc in candidates), default=0.0)),
+                "rerank_max_prob": float(max_prob),
+            },
         )
 
         return top_chunks

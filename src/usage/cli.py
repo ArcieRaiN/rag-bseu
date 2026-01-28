@@ -10,12 +10,12 @@ CLI для нового пайплайна запросов (PIPELINE 2–4).
 
 from __future__ import annotations
 
+import os
 import argparse
 from pathlib import Path
 from typing import List
 
 from src.main.models import ScoredChunk
-from src.main.query_pipeline_v2 import QueryPipelineV2
 
 
 def _build_argparser() -> argparse.ArgumentParser:
@@ -69,6 +69,15 @@ def _format_top_chunks(chunks: List[ScoredChunk]) -> str:
 
 
 def main() -> None:
+    # Настройки окружения до импорта тяжёлых библиотек (FAISS, Torch и т.п.)
+    # KMP_DUPLICATE_LIB_OK позволяет продолжить работу при дублирующихся OpenMP-рантаймах.
+    os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+    # Ограничиваем число потоков OpenMP, чтобы снизить вероятность конфликтов и нагрузку на CPU.
+    os.environ.setdefault("OMP_NUM_THREADS", "1")
+
+    # Импортируем пайплайн только после установки переменных окружения
+    from src.main.query_pipeline_v2 import QueryPipelineV2
+
     args = _build_argparser().parse_args()
 
     # по умолчанию — predefined

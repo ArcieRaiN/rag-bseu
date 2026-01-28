@@ -110,7 +110,7 @@ class RerankConfig:
     top_k: int = 3
     # Модель reranker-а (cross-encoder HF model id)
     # Пример: multilingual MS MARCO cross-encoder.
-    model_name: str = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
+    model_name: str = "DiTy/cross-encoder-russian-msmarco"
     temperature: float = 0.0
     # Максимальное число попыток LLM‑оценки одного чанка
     max_retries: int = 2
