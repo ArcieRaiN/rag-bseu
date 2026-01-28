@@ -4,6 +4,14 @@ from typing import List
 from natasha import MorphVocab, Doc
 from natasha import Segmenter, NewsEmbedding, NewsMorphTagger
 
+import warnings
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    module="pymorphy2"
+)
+
+
 # Инициализация Natasha (один раз)
 _segmenter = Segmenter()
 _emb = NewsEmbedding()
