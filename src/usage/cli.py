@@ -76,7 +76,7 @@ def main() -> None:
     os.environ.setdefault("OMP_NUM_THREADS", "1")
 
     # Импортируем пайплайн только после установки переменных окружения
-    from src.main.query_pipeline_v2 import QueryPipelineV2
+    from src.main.query_pipeline import QueryPipelineV2
 
     args = _build_argparser().parse_args()
 
