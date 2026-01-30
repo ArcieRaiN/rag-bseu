@@ -176,18 +176,25 @@ class QueryContextEnricher:
     def _normalize_geo(value: Any) -> Optional[str]:
         """
         Нормализует geo из LLM:
-        - строка -> строка
-        - список -> "A, B"
+        - строка -> строка без пробелов
+        - список строк -> "A, B"
+        - другое -> преобразуется в строку как fallback
         """
         if value is None:
             return None
+
         if isinstance(value, str):
             v = value.strip()
-            return v or None
+            return v if v else None
+
         if isinstance(value, list):
-            parts = [str(v).strip() for v in value if str(v).strip()]
-            return ", ".join(parts) if parts else None
-        return str(value).strip() or None
+            # фильтруем пустые и None, приводим к строке и убираем пробелы
+            cleaned = [str(v).strip() for v in value if v and str(v).strip()]
+            return ", ".join(cleaned) if cleaned else None
+
+        # fallback для других типов (числа, bool, etc.)
+        v = str(value).strip()
+        return v if v else None
 
     @staticmethod
     def _merge_metrics(

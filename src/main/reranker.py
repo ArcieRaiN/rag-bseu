@@ -12,14 +12,14 @@ LLM‑based reranking (PIPELINE 4).
 - модуль не занимается генерацией финального ответа RAG
 """
 
-from typing import List, Optional
+from typing import List
 import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from src.main.models import EnrichedQuery, ScoredChunk, RerankConfig
 from src.main.ollama_client import OllamaClient
-from src.logs.logger import get_logger
+from src.main.logger  import get_logger
 
 
 class LLMReranker:

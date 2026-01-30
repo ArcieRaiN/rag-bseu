@@ -21,7 +21,7 @@ import time
 from src.main.models import Chunk
 from src.main.ollama_client import OllamaClient
 from src.main.vectorizer import SentenceVectorizer
-from src.logs.logger import get_logger
+from src.main.logger import get_logger
 
 from src.prepare_db.pdf_chunker import PDFChunker
 from src.prepare_db.llm_enricher import LLMEnricher

@@ -18,7 +18,7 @@ _emb = NewsEmbedding()
 _morph_tagger = NewsMorphTagger(_emb)
 _vocab = MorphVocab()
 
-TOKEN_RE = re.compile(r"[а-яёіў]+|\d+", re.IGNORECASE)
+TOKEN_RE = re.compile(r"[а-яёіў]+(?:[-%][а-яёіў]+)*|\d+", re.IGNORECASE)
 
 
 def normalize_text_lemmatized(text: str) -> str:

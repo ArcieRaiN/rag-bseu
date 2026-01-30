@@ -19,7 +19,7 @@ def main() -> None:
     src_dir = Path(__file__).resolve().parent.parent  # rag-bseu/src
 
     # Папка с PDF-документами
-    docs_dir = src_dir / "prepare_db" / "documents"
+    docs_dir = src_dir / "usage" / "documents"
 
     pdf_files = list(docs_dir.glob("*.pdf"))
     if not pdf_files:

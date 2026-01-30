@@ -40,8 +40,8 @@ class MetadataScorer:
         w_geo = 0.35
         w_metrics = 0.30
         w_years = 0.20
-        w_tg = 0.10
-        w_oked = 0.05
+        w_tg = 0.05
+        w_oked = 0.10
 
         total = (
             w_geo * geo_score
