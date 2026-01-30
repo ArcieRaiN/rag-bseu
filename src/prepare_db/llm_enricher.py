@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import List, Dict, Any, Optional, Deque
 from collections import deque
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 import time
@@ -20,9 +20,9 @@ import codecs
 
 from src.main.models import Chunk
 from src.main.ollama_client import OllamaClient
-from src.logs.logger import get_logger
+from src.main.logger  import get_logger
 from src.prepare_db.json_validator import ChunkValidator
-from src.prepare_db.chunk_filter import ChunkFilter, ChunkType
+from src.prepare_db.chunk_filter import ChunkFilter
 from src.prepare_db.post_processor import EnrichmentPostProcessor
 
 
