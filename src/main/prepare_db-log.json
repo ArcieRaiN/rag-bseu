@@ -2,3 +2,7 @@
 {"event": "pdf_start", "pdf_name": "Беларусь и Россия, 2024.pdf", "ts": 1769800903.7961938}
 {"event": "pdf_end", "pdf_name": "Беларусь и Россия, 2024.pdf", "chunks_count": 243, "elapsed_time": 1116.591136932373, "ts": 1769802020.3873308}
 {"event": "end", "total_chunks": 243, "elapsed_time": 1118.6481304168701, "ts": 1769802022.4443243}
+{"event": "start", "total_pdfs": 1, "ts": 1769803237.0467792}
+{"event": "pdf_start", "pdf_name": "Беларусь и Россия, 2024.pdf", "ts": 1769803237.0477788}
+{"event": "pdf_end", "pdf_name": "Беларусь и Россия, 2024.pdf", "chunks_count": 243, "elapsed_time": 1222.9191086292267, "ts": 1769804459.9668875}
+{"event": "end", "total_chunks": 243, "elapsed_time": 1224.5901186466217, "ts": 1769804461.6378975}
