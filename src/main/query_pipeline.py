@@ -10,11 +10,8 @@ import time
 
 from src.main.context_enrichment import QueryContextEnricher
 from src.main.hybrid_search import HybridSearcher
-from src.main.models import (
-    PipelineResult,
-    RetrievalConfig,
-    RerankConfig,
-)
+from src.main.models import PipelineResult
+from src.main.config import RetrievalConfig, RerankConfig
 from src.main.ollama_client import OllamaClient
 from src.main.vectorizer import SentenceVectorizer
 from src.main.semantic_search import FaissSemanticSearcher

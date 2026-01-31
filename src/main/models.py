@@ -85,43 +85,6 @@ class ScoredChunk:
 
 
 @dataclass
-class RetrievalConfig:
-    """
-    Конфигурация весов и параметров гибридного поиска.
-    """
-
-    # Размер кандидатов перед reranking
-    semantic_top_k: int = 20
-    lexical_top_k: int = 20
-    final_top_k: int = 10
-
-    # Веса компонент hybrid score
-    w_semantic: float = 0.55
-    w_lexical: float = 0.25
-    w_metadata: float = 0.20
-
-
-@dataclass
-class RerankConfig:
-    """
-    Конфигурация reranking‑этапа.
-    """
-
-    top_k: int = 3
-    # Модель reranker-а (cross-encoder HF model id)
-    # Пример: multilingual MS MARCO cross-encoder.
-    model_name: str = "DiTy/cross-encoder-russian-msmarco"
-    temperature: float = 0.0
-    # Максимальное число попыток LLM‑оценки одного чанка
-    max_retries: int = 2
-    # Количество воркеров для параллельной оценки чанков
-    max_workers: int = 4
-    # Порог «осмысленной» релевантности: если max(score) ниже этого значения,
-    # считаем, что reranker ничего не нашёл, и сохраняем порядок hybrid_score.
-    min_relevance_score: float = 0.2
-
-
-@dataclass
 class PipelineResult:
     """
     Высокоуровневый результат пайплайна обработки запроса (без генерации ответа).
@@ -133,4 +96,3 @@ class PipelineResult:
     enriched_query: EnrichedQuery
     candidates: List[ScoredChunk]  # Top‑10 из hybrid retrieval
     top_chunks: List[ScoredChunk]  # Top‑3 после reranking
-

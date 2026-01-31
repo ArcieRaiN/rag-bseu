@@ -17,7 +17,8 @@ import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from src.main.models import EnrichedQuery, ScoredChunk, RerankConfig
+from src.main.models import EnrichedQuery, ScoredChunk
+from src.main.config import RerankConfig
 from src.main.ollama_client import OllamaClient
 from src.main.logger  import get_logger
 
