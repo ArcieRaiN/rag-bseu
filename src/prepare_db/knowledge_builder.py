@@ -67,8 +67,7 @@ class KnowledgeBaseBuilder:
         )
         self._llm_enricher = LLMEnricher(
             llm_client=self._llm,
-            batch_size=5,
-            batch_concurrency=1,
+            max_parallel_requests=1,
             context_buffer_size=10,
             reset_interval=50,
         )
@@ -112,6 +111,7 @@ class KnowledgeBaseBuilder:
                 pdf_path.name,
                 raw_chunks,
                 skip_first_pages=3,
+                show_progress=True,
             )
             all_chunks.extend(enriched_chunks)
             
