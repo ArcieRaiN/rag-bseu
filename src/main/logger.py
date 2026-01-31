@@ -211,7 +211,7 @@ class RAGLogger:
 
 # Глобальный экземпляр логгера
 # Путь к логам относительно корня src/
-_logs_dir = Path(__file__).resolve().parent
+_logs_dir = Path(__file__).resolve().parent.parent.parent / "usage" / "logs"
 
 # Создаем singleton логгер
 _global_logger: Optional[RAGLogger] = None
