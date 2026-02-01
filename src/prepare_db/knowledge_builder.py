@@ -7,7 +7,6 @@ PIPELINE 1: подготовка базы знаний (prepare_db).
 - PDFChunker: чанкинг PDF
 - LLMEnricher: LLM enrichment с rolling context buffer
 - FAISSIndexer: построение FAISS индекса
-- ChunkValidator: валидация данных
 
 Высокоуровневый фасад KnowledgeBaseBuilder координирует работу всех модулей.
 """
@@ -39,7 +38,7 @@ class BuildConfig:
 class KnowledgeBaseBuilder:
     """
     Высокоуровневый фасад для подготовки базы знаний.
-    
+
     Координирует работу модулей:
     - PDFChunker для чанкинга PDF
     - LLMEnricher для обогащения чанков
@@ -49,22 +48,14 @@ class KnowledgeBaseBuilder:
     def __init__(self, config: BuildConfig, llm_client: OllamaClient | None = None):
         """
         Инициализация билдера.
-        
-        Args:
-            config: Конфигурация построения базы знаний
-            llm_client: Клиент Ollama (опционально)
         """
         self._config = config
         self._llm = llm_client or OllamaClient()
         self._vectorizer = SentenceVectorizer(dimension=config.vector_dim)
         self._logger = get_logger()
-        
+
         # Инициализируем модули
-        self._pdf_chunker = PDFChunker(
-            chunk_size=1500,
-            chunk_overlap=200,
-            paragraph_separator="\n\n",
-        )
+        self._pdf_chunker = PDFChunker()
         self._llm_enricher = LLMEnricher(
             llm_client=self._llm,
             max_parallel_requests=1,
@@ -76,16 +67,9 @@ class KnowledgeBaseBuilder:
     def build(self) -> None:
         """
         Основной entrypoint для подготовки базы знаний.
-        
-        Процесс:
-        1. Чанкинг всех PDF через PDFChunker
-        2. Обогащение чанков через LLMEnricher (с rolling context buffer)
-        3. Сохранение data.json
-        4. Построение FAISS индекса через FAISSIndexer
         """
         self._config.output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Логируем начало процесса
+
         total_pdfs = len(list(self._config.documents_dir.glob("*.pdf")))
         self._logger.log_prepare_db("start", total_pdfs=total_pdfs)
         build_start_time = time.time()
@@ -93,20 +77,19 @@ class KnowledgeBaseBuilder:
         all_chunks: List[Chunk] = []
         chunk_id_counter = 0
 
-        # Обрабатываем каждый PDF
         for pdf_path in sorted(self._config.documents_dir.glob("*.pdf")):
             pdf_start_time = time.time()
             self._logger.log_prepare_db("pdf_start", pdf_name=pdf_path.name)
-            
-            # 1. Чанкинг PDF через PDFChunker
+
+            # 1. Чанкинг PDF (чанк = страница)
             raw_chunks = self._pdf_chunker.chunk_pdf(pdf_path)
 
-            # Присваиваем id на уровне всего корпуса
+            # Глобальные id
             for ch in raw_chunks:
                 ch.id = f"{pdf_path.name}::page{ch.page}::chunk{chunk_id_counter}"
                 chunk_id_counter += 1
 
-            # 2. LLM-enrichment через LLMEnricher (использует rolling context buffer)
+            # 2. LLM enrichment
             enriched_chunks = self._llm_enricher.enrich_chunks(
                 pdf_path.name,
                 raw_chunks,
@@ -114,33 +97,30 @@ class KnowledgeBaseBuilder:
                 show_progress=True,
             )
             all_chunks.extend(enriched_chunks)
-            
-            pdf_elapsed = time.time() - pdf_start_time
+
             self._logger.log_prepare_db(
                 "pdf_end",
                 pdf_name=pdf_path.name,
                 chunks_count=len(enriched_chunks),
-                elapsed_time=pdf_elapsed,
+                elapsed_time=time.time() - pdf_start_time,
             )
 
-        # 3. Сохранение data.json
+        # 3. Сохранение данных
         self._save_data_json(all_chunks)
 
-        # 4. Построение FAISS индекса через FAISSIndexer
+        # 4. FAISS индекс
         self._faiss_indexer.build_index(
             all_chunks,
             self._config.output_dir / "index.faiss",
         )
 
-        # 5. Сохранение метаданных
+        # 5. Метаданные
         self._save_metadata(all_chunks)
-        
-        # Логируем завершение процесса
-        build_elapsed = time.time() - build_start_time
+
         self._logger.log_prepare_db(
             "end",
             total_chunks=len(all_chunks),
-            elapsed_time=build_elapsed,
+            elapsed_time=time.time() - build_start_time,
         )
 
     def _save_data_json(self, chunks: List[Chunk]) -> None:

@@ -235,7 +235,7 @@ class LLMEnricher:
         prompt = self._build_prompt_single(pdf_name, chunk, previous_context)
 
         keep_alive = os.getenv("RAG_OLLAMA_KEEP_ALIVE", "5m")
-        req_options = {"temperature": 0, "top_p": 1, "num_predict": 300}
+        req_options = {"temperature": 0, "top_p": 1, "num_predict": 512}
 
         ollama_config = {
             "model": getattr(getattr(self._llm, "config", None), "model", None),

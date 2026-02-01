@@ -6,3 +6,5 @@
 {"event": "pdf_start", "pdf_name": "Беларусь и Россия, 2024.pdf", "ts": 1769887973.4289336}
 {"event": "pdf_end", "pdf_name": "Беларусь и Россия, 2024.pdf", "chunks_count": 475, "elapsed_time": 1753.158160686493, "ts": 1769889726.5870943}
 {"event": "end", "total_chunks": 475, "elapsed_time": 1756.7121782302856, "ts": 1769889730.139609}
+{"event": "start", "total_pdfs": 1, "ts": 1769951143.8357878}
+{"event": "pdf_start", "pdf_name": "Беларусь и Россия, 2024.pdf", "ts": 1769951143.8365953}
