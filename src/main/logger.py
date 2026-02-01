@@ -54,66 +54,6 @@ class RAGLogger:
         with lock:
             with open(log_path, "a", encoding="utf-8") as f:
                 f.write(line + "\n")
-
-    
-    def log_llm_enrichment(
-        self,
-        event: str,
-        pdf_name: Optional[str] = None,
-        chunks_count: Optional[int] = None,
-        chunk_ids: Optional[list] = None,
-        pages: Optional[list] = None,
-        system_prompt: Optional[str] = None,
-        prompt: Optional[str] = None,
-        raw_response: Optional[str] = None,
-        parsed_items: Optional[int] = None,
-        parsed_with_chunk_id: Optional[int] = None,
-        ollama_config: Optional[Dict[str, Any]] = None,
-        **kwargs: Any
-    ) -> None:
-        """
-        Логирование для LLM enrichment в prepare_db.
-        
-        Args:
-            event: 'request' или 'response'
-            pdf_name: Имя PDF файла
-            chunks_count: Количество чанков в батче
-            chunk_ids: Список ID чанков
-            pages: Список номеров страниц
-            system_prompt: Системный промпт
-            prompt: Пользовательский промпт
-            raw_response: Сырой ответ от LLM
-            parsed_items: Количество успешно распарсенных элементов
-            parsed_with_chunk_id: Количество элементов с chunk_id
-            ollama_config: Конфигурация Ollama
-            **kwargs: Дополнительные поля
-        """
-        record: Dict[str, Any] = {
-            "event": event,
-            **kwargs
-        }
-        if pdf_name:
-            record["pdf_name"] = pdf_name
-        if chunks_count is not None:
-            record["chunks_count"] = chunks_count
-        if chunk_ids:
-            record["chunk_ids"] = chunk_ids
-        if pages:
-            record["pages"] = pages
-        if system_prompt:
-            record["system_prompt"] = system_prompt
-        if prompt:
-            record["prompt"] = prompt
-        if raw_response:
-            record["raw_response"] = raw_response
-        if parsed_items is not None:
-            record["parsed_items"] = parsed_items
-        if parsed_with_chunk_id is not None:
-            record["parsed_with_chunk_id"] = parsed_with_chunk_id
-        if ollama_config:
-            record["ollama"] = ollama_config
-        
-        self.log("LLM-enrichment-input-out-log", record)
     
     def log_llm_reranking(
         self,
@@ -176,7 +116,7 @@ class RAGLogger:
         if ollama_config:
             record["ollama"] = ollama_config
         
-        self.log("LLM-reranking-input-out-log", record)
+        self.log("reranking-log", record)
 
 
 # Глобальный экземпляр логгера
