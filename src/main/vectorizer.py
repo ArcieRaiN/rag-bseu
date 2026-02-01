@@ -6,8 +6,6 @@ from typing import Iterable, Optional
 
 import numpy as np
 
-from src.main.logger import get_logger
-
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 try:
@@ -57,7 +55,6 @@ class SentenceVectorizer:
             "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         )
         self.device = device or os.getenv("RAG_ST_DEVICE")  # e.g. "cpu", "cuda"
-        get_logger().log("vectorizer", {"info": f"Vectorizer device: {self.device}"})
 
         # Lazy-ish init is possible, but we keep it simple and explicit.
         self._model = SentenceTransformer(self.model_name, device=self.device)

@@ -54,37 +54,7 @@ class RAGLogger:
         with lock:
             with open(log_path, "a", encoding="utf-8") as f:
                 f.write(line + "\n")
-    
-    def log_prepare_db(
-        self,
-        event: str,
-        pdf_name: Optional[str] = None,
-        chunks_count: Optional[int] = None,
-        elapsed_time: Optional[float] = None,
-        **kwargs: Any
-    ) -> None:
-        """
-        Логирование для prepare_db пайплайна.
-        
-        Args:
-            event: Тип события ('start', 'pdf_start', 'pdf_end', 'batch', 'end', 'error')
-            pdf_name: Имя PDF файла
-            chunks_count: Количество чанков
-            elapsed_time: Затраченное время в секундах
-            **kwargs: Дополнительные поля
-        """
-        record: Dict[str, Any] = {
-            "event": event,
-            **kwargs
-        }
-        if pdf_name:
-            record["pdf_name"] = pdf_name
-        if chunks_count is not None:
-            record["chunks_count"] = chunks_count
-        if elapsed_time is not None:
-            record["elapsed_time"] = elapsed_time
-        
-        self.log("prepare_db-log", record)
+
     
     def log_llm_enrichment(
         self,
