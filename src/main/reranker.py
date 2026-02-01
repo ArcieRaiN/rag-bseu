@@ -116,7 +116,6 @@ class LLMReranker:
         top_10_before_rerank = [
             {
                 "id": sc.chunk.id,
-                "text": getattr(sc.chunk, "text", None),
                 "context": getattr(sc.chunk, "context", None),
                 "geo": getattr(sc.chunk, "geo", None),
                 "metrics": getattr(sc.chunk, "metrics", None),
@@ -598,7 +597,6 @@ class CrossEncoderReranker:
         top_10_before_rerank = [
             {
                 "id": sc.chunk.id,
-                "text": getattr(sc.chunk, "text", None),
                 "context": getattr(sc.chunk, "context", None),
                 "geo": getattr(sc.chunk, "geo", None),
                 "metrics": getattr(sc.chunk, "metrics", None),
