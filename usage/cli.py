@@ -1,127 +1,37 @@
 """
-CLI для нового пайплайна запросов (PIPELINE 2–4).
+CLI для rag-bseu: единый вход для query и подготовки векторного хранилища.
 
-Требования:
-- два режима через флаги запуска:
-  * --predefined-queries  (запуск набора предопределённых запросов)
-  * --user-queries       (интерактивный режим)
-- НЕТ генерации ответа LLM — только Top-3 чанка.
+Использует подпакеты:
+- prepare_vector_store.py
+- query.py
 """
 
-from __future__ import annotations
-
-import os
 import argparse
 from pathlib import Path
-from typing import List
+import subprocess
 
-from src.main.models import ScoredChunk
-
-
-def _build_argparser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(
-        description="RAG-BSEU CLI v2 (hybrid retrieval + reranking)."
-    )
-
-    group = p.add_mutually_exclusive_group()
-    group.add_argument(
-        "--predefined-queries",
+def main():
+    parser = argparse.ArgumentParser(description="RAG-BSEU CLI")
+    parser.add_argument(
+        "--prepare-vector-store",
         action="store_true",
-        help="Запустить набор предопределённых запросов (по умолчанию).",
+        help="Запустить подготовку базы знаний и FAISS индекса",
     )
-    group.add_argument(
-        "--user-queries",
+    parser.add_argument(
+        "--query",
         action="store_true",
-        help="Интерактивный режим ввода запросов пользователя.",
+        help="Интерактивный режим запросов",
     )
 
-    return p
+    args = parser.parse_args()
+    root_dir = Path(__file__).resolve().parent
 
-
-def _format_top_chunks(chunks: List[ScoredChunk]) -> str:
-    if not chunks:
-        return "Ничего не найдено."
-
-    lines: List[str] = []
-    for i, sc in enumerate(chunks, start=1):
-        ch = sc.chunk
-        lines.append(f"{i}. [source={ch.source}, page={ch.page}, id={ch.id}]")
-
-        meta_parts = []
-        if ch.geo:
-            meta_parts.append(f"geo={ch.geo}")
-        if ch.years:
-            meta_parts.append(f"years={ch.years}")
-        if ch.metrics:
-            meta_parts.append(f"metrics={ch.metrics}")
-        if ch.time_granularity:
-            meta_parts.append(f"time={ch.time_granularity}")
-        if ch.oked:
-            meta_parts.append(f"oked={ch.oked}")
-
-        if meta_parts:
-            lines.append("   " + "; ".join(meta_parts))
-
-        lines.append(f"   context: {ch.context}")
-        lines.append("")
-
-    return "\n".join(lines)
-
-
-def main() -> None:
-    # Настройки окружения до импорта тяжёлых библиотек (FAISS, Torch и т.п.)
-    # KMP_DUPLICATE_LIB_OK позволяет продолжить работу при дублирующихся OpenMP-рантаймах.
-    os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-    # Ограничиваем число потоков OpenMP, чтобы снизить вероятность конфликтов и нагрузку на CPU.
-    os.environ.setdefault("OMP_NUM_THREADS", "1")
-
-    # Импортируем пайплайн только после установки переменных окружения
-    from src.main.query_pipeline import QueryPipelineV2
-
-    args = _build_argparser().parse_args()
-
-    # по умолчанию — predefined
-    run_predefined = not args.user_queries
-
-    base_dir = Path(__file__).resolve().parents[1]
-    pipeline = QueryPipelineV2(base_dir=base_dir)
-
-    predefined_queries = [
-        "производство резиновых и пластмассовых изделий",
-        "численности студентов в Беларуси и России",
-        "число студентов в Беларуси и России",
-        "сколько студентов в Беларуси и России",
-        "сколько студентов в Беларуси",
-        "сколько студентов в РБ",
-        "студенты число",
-        "струденты число"
-        # "Численность населения по областям Беларуси",
-        # "Производство молока",
-        # "Число учреждений здравоохранения",
-        # "Добыча нефти в Беларуси",
-    ]
-
-    if run_predefined:
-        for q in predefined_queries:
-            print(f'Запрос: "{q}"')
-            result = pipeline.run(q)
-            print(_format_top_chunks(result.top_chunks))
-
-    if args.user_queries:
-        print("Интерактивный режим. Введите запрос (Ctrl+C для выхода).")
-
-        try:
-            while True:
-                query = input("> ").strip()
-                if not query:
-                    continue
-
-                result = pipeline.run(query)
-                print(f'Запрос: "{query}"')
-                print(_format_top_chunks(result.top_chunks))
-        except KeyboardInterrupt:
-            print("Выход из программы.")
-
+    if args.prepare_vector_store:
+        subprocess.run(["python", root_dir / "prepare_vector_store.py"])
+    elif args.query:
+        subprocess.run(["python", root_dir / "query.py"])
+    else:
+        print("❌ Нужно указать флаг: --prepare-vector-store или --query")
 
 if __name__ == "__main__":
     main()
