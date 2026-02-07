@@ -1,4 +1,0 @@
-{"event": "start", "total_pdfs": 1, "ts": 1769625577.5970702}
-{"event": "pdf_start", "pdf_name": "Беларусь и Россия, 2024.pdf", "ts": 1769625577.5980709}
-{"event": "pdf_end", "pdf_name": "Беларусь и Россия, 2024.pdf", "chunks_count": 243, "elapsed_time": 1176.450941324234, "ts": 1769626754.0490122}
-{"event": "end", "total_chunks": 243, "elapsed_time": 1182.1757898330688, "ts": 1769626759.7738607}

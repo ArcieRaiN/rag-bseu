@@ -10,11 +10,8 @@ import time
 
 from src.main.context_enrichment import QueryContextEnricher
 from src.main.hybrid_search import HybridSearcher
-from src.main.models import (
-    PipelineResult,
-    RetrievalConfig,
-    RerankConfig,
-)
+from src.main.models import PipelineResult
+from src.main.config import RetrievalConfig, RerankConfig
 from src.main.ollama_client import OllamaClient
 from src.main.vectorizer import SentenceVectorizer
 from src.main.semantic_search import FaissSemanticSearcher
@@ -38,7 +35,7 @@ class QueryPipelineV2:
         self._ollama = ollama_client or OllamaClient()
         self._vectorizer = SentenceVectorizer(dimension=vector_dim)
 
-        vector_store_dir = self._base_dir / "src" / "prepare_db" / "vector_store"
+        vector_store_dir = self._base_dir / "usage" / "vector_store"
         index_path = vector_store_dir / "index.faiss"
         data_path = vector_store_dir / "data.json"
 

@@ -125,4 +125,3 @@ class SentenceVectorizer:
             # keep shape consistent: (0, dimension)
             return np.zeros((0, self.dimension), dtype=np.float32)
         return self._encode_many(items)
-

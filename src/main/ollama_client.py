@@ -132,19 +132,21 @@ class OllamaClient:
                 if attempt < max_retries - 1:
                     wait_time = (2 ** attempt) * 5
                     print(
-                        f"⚠️  Таймаут при запросе к LLM "
-                        f"(попытка {attempt + 1}/{max_retries}). "
+                        f"⚠️  Таймаут при запросе к Ollama (попытка {attempt + 1}/{max_retries}). "
                         f"Повтор через {wait_time} сек..."
                     )
                     time.sleep(wait_time)
                 else:
                     print(
-                        f"❌ Превышено максимальное количество попыток. "
-                        f"Таймаут: {self.config.timeout} сек"
+                        f"❌ Ollama недоступен: превышено кол-во попыток. "
+                        f"Таймаут: {self.config.timeout} сек\n"
+                        "→ Проверьте, что Ollama запущен (ollama serve)\n"
+                        f"→ Если нужно, скачайте модель: ollama pull {self.config.model}"
                     )
                     raise
             except requests.exceptions.RequestException as e:
-                print(f"❌ Ошибка при запросе к Ollama: {e}")
+                print(f"❌ Ollama недоступен: {e}\n"
+                      "→ Проверьте, что Ollama запущен (ollama serve)\n"
+                      f"→ Если нужно, скачайте модель: ollama pull {self.config.model}")
                 raise
-
 

@@ -3,18 +3,22 @@ from __future__ import annotations
 """
 Модуль для чанкинга PDF-документов с использованием LlamaIndex.
 
+Стратегия:
+- ЧАНК = СТРАНИЦА PDF
+
 Отвечает за:
 - Чтение PDF через LlamaIndex PDFReader
-- Разбиение на чанки с настраиваемыми параметрами
-- Извлечение метаданных страниц
+- Группировку текста по страницам
+- Извлечение и нормализацию номера страницы
 """
 
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 import shutil
+from collections import defaultdict
 
 from llama_index.readers.file import PDFReader
-from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core.schema import BaseNode
 
 from src.main.models import Chunk
 
@@ -22,115 +26,107 @@ from src.main.models import Chunk
 class PDFChunker:
     """
     Класс для разбиения PDF-документов на чанки.
-    
-    Использует LlamaIndex для чтения PDF и парсинга на ноды.
-    """
 
-    def __init__(
-        self,
-        chunk_size: int = 1500,
-        chunk_overlap: int = 200,
-        paragraph_separator: str = "\n\n",
-    ):
-        """
-        Инициализация чанкера.
-        
-        Args:
-            chunk_size: Максимальный размер чанка в символах
-            chunk_overlap: Перекрытие между чанками
-            paragraph_separator: Разделитель параграфов
-        """
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
-        self.paragraph_separator = paragraph_separator
-        
-        self._node_parser = SentenceSplitter(
-            chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap,
-            paragraph_separator=paragraph_separator,
-        )
+    Стратегия:
+    - один Chunk соответствует одной странице PDF
+    - идеально подходит для статистических таблиц и отчётов
+    """
 
     def chunk_pdf(self, pdf_path: Path) -> List[Chunk]:
         """
-        Разбивает PDF на чанки.
-        
+        Разбивает PDF на чанки по страницам.
+
         Args:
             pdf_path: Путь к PDF-файлу
-            
+
         Returns:
-            Список Chunk с заполненными:
-            - text (текст чанка)
-            - source (имя PDF)
-            - page (номер страницы)
-            - context и метаданные пустые (заполнятся в LLMEnricher)
+            Список Chunk, где:
+            - text = полный текст страницы
+            - page = номер страницы
+            - source = имя PDF
+            - остальные поля заполняются позже
         """
-        # Создаём временную директорию с одним PDF для LlamaIndex
-        # (PDFReader работает с директориями)
+        # LlamaIndex PDFReader работает с директориями,
+        # поэтому создаём временную папку с одним PDF
         temp_dir = pdf_path.parent / f"_temp_{pdf_path.stem}"
         temp_dir.mkdir(exist_ok=True)
         temp_pdf = temp_dir / pdf_path.name
 
         try:
-            # Копируем PDF во временную директорию
             shutil.copy2(pdf_path, temp_pdf)
 
-            # Читаем PDF через LlamaIndex
             pdf_reader = PDFReader()
             documents = pdf_reader.load_data(file=str(temp_pdf))
 
-            # Парсим документы на ноды (чанки)
-            chunks: List[Chunk] = []
+            # page_number -> list[text fragments]
+            pages: Dict[int, List[str]] = defaultdict(list)
+
             for doc in documents:
-                nodes = self._node_parser.get_nodes_from_documents([doc])
+                # PDFReader уже разбивает документ на page-level ноды
+                nodes: List[BaseNode] = getattr(doc, "nodes", None)
+
+                # fallback: если nodes нет, работаем через text + metadata
+                if not nodes:
+                    page = self._extract_page_number(doc)
+                    pages[page].append(doc.text or "")
+                    continue
 
                 for node in nodes:
-                    # Извлекаем номер страницы из метаданных
-                    page_num = self._extract_page_number(node)
+                    page = self._extract_page_number(node)
+                    if node.text:
+                        pages[page].append(node.text)
 
-                    # Создаём Chunk с пустыми полями для enrichment
-                    chunk = Chunk(
-                        id="",  # будет присвоен в KnowledgeBaseBuilder
-                        context="",  # заполнится в LLMEnricher
-                        text=node.text or "",
-                        source=pdf_path.name,
-                        page=page_num,
-                        geo=None,
-                        metrics=None,
-                        years=None,
-                        time_granularity=None,
-                        oked=None,
-                    )
-                    chunks.append(chunk)
+            # Собираем чанки: один чанк = одна страница
+            chunks: List[Chunk] = []
+
+            for page_num in sorted(pages.keys()):
+                page_text = "\n".join(pages[page_num]).strip()
+
+                if not page_text:
+                    continue
+
+                chunk = Chunk(
+                    id="",              # будет назначен позже
+                    context="",         # заполнится в LLMEnricher
+                    text=page_text,
+                    source=pdf_path.name,
+                    page=page_num,
+                    geo=None,
+                    metrics=None,
+                    years=None,
+                    time_granularity=None,
+                    oked=None,
+                )
+                chunks.append(chunk)
+
+            return chunks
 
         finally:
-            # Удаляем временную директорию
             if temp_dir.exists():
                 shutil.rmtree(temp_dir, ignore_errors=True)
 
-        return chunks
-
     @staticmethod
-    def _extract_page_number(node) -> int:
+    def _extract_page_number(node: BaseNode) -> int:
         """
-        Извлекает номер страницы из метаданных ноды.
-        
+        Извлекает номер страницы из метаданных ноды или документа.
+
         Args:
-            node: Нода от LlamaIndex
-            
+            node: BaseNode или Document от LlamaIndex
+
         Returns:
             Номер страницы (0 если не найден)
         """
-        if not hasattr(node, "metadata"):
+        metadata = getattr(node, "metadata", None)
+        if not isinstance(metadata, dict):
             return 0
-            
-        metadata = node.metadata
+
         page_num = (
-            metadata.get("page_label") or
-            metadata.get("page_number") or
-            metadata.get("page") or
-            0
+            metadata.get("page_label")
+            or metadata.get("page_number")
+            or metadata.get("page")
+            or 0
         )
-        
+
         try:
             return int(page_num) if page_num else 0
         except (ValueError, TypeError):

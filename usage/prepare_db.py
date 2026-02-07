@@ -29,7 +29,7 @@ def main() -> None:
     print(f"📄 Найдено PDF-файлов: {len(pdf_files)}")
 
     # Папка для индекса
-    vector_store_dir = src_dir / "src" / "prepare_db" / "vector_store"
+    vector_store_dir = src_dir / "usage" / "vector_store"
     vector_store_dir.mkdir(parents=True, exist_ok=True)
 
     print("🔧 Строим базу знаний через LlamaIndex + Ollama enrichment...")
@@ -51,17 +51,7 @@ def main() -> None:
     builder.build()
 
     print("✅ База знаний построена!")
-    print(f"📁 vector_store: {vector_store_dir}")
-
-    # Диагностика
-    import json
-    data_path = vector_store_dir / "data.json"
-    if data_path.exists():
-        with open(data_path, "r", encoding="utf-8") as f:
-            chunks = json.load(f)
-
-        print(f"📊 Всего чанков проиндексировано: {len(chunks)}")
-
+    print(f"📁 Индекс сохранён в: {vector_store_dir}")
 
 if __name__ == "__main__":
     main()

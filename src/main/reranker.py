@@ -17,7 +17,8 @@ import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from src.main.models import EnrichedQuery, ScoredChunk, RerankConfig
+from src.main.models import EnrichedQuery, ScoredChunk
+from src.main.config import RerankConfig
 from src.main.ollama_client import OllamaClient
 from src.main.logger  import get_logger
 
@@ -111,15 +112,45 @@ class LLMReranker:
 
         # Логируем финальный результат
         elapsed_time = time.time() - rerank_start_time
+        # Логируем топ-10 до rerank
+        top_10_before_rerank = [
+            {
+                "id": sc.chunk.id,
+                "context": getattr(sc.chunk, "context", None),
+                "geo": getattr(sc.chunk, "geo", None),
+                "metrics": getattr(sc.chunk, "metrics", None),
+                "years": getattr(sc.chunk, "years", None),
+                "time_granularity": getattr(sc.chunk, "time_granularity", None),
+                "oked": getattr(sc.chunk, "oked", None),
+                "hybrid_score": getattr(sc, "hybrid_score", None),
+            }
+            for sc in candidates
+        ]
+
+        # Логируем топ-3 после rerank
+        top_3_after_rerank = [
+            {
+                "id": sc.chunk.id,
+                "text": getattr(sc.chunk, "text", None),
+                "context": getattr(sc.chunk, "context", None),
+                "geo": getattr(sc.chunk, "geo", None),
+                "metrics": getattr(sc.chunk, "metrics", None),
+                "years": getattr(sc.chunk, "years", None),
+                "time_granularity": getattr(sc.chunk, "time_granularity", None),
+                "oked": getattr(sc.chunk, "oked", None),
+                "rerank_score": getattr(sc, "rerank_score", None),
+            }
+            for sc in top_chunks
+        ]
+
         self._logger.log_llm_reranking(
             event="final",
             query=enriched_query.query,
             enriched_query=enriched_query_dict,
             candidates_count=len(candidates),
-            candidate_ids=[sc.chunk.id for sc in candidates_sorted],
-            rerank_scores={sc.chunk.id: sc.rerank_score for sc in candidates_sorted},
+            top_10_candidates=top_10_before_rerank,
+            top_3_candidates=top_3_after_rerank,
             buckets=metadata_buckets,
-            top_k=len(top_chunks),
             elapsed_time=elapsed_time,
         )
 
@@ -562,13 +593,44 @@ class CrossEncoderReranker:
         elapsed_time = time.time() - rerank_start_time
         # Логируем через существующий logger (без prompt/system_prompt)
         # Важно: rerank_scores тут — raw logits (после мета-штрафов), чтобы видеть реальный разброс.
+        # Логируем топ-10 до rerank
+        top_10_before_rerank = [
+            {
+                "id": sc.chunk.id,
+                "context": getattr(sc.chunk, "context", None),
+                "geo": getattr(sc.chunk, "geo", None),
+                "metrics": getattr(sc.chunk, "metrics", None),
+                "years": getattr(sc.chunk, "years", None),
+                "time_granularity": getattr(sc.chunk, "time_granularity", None),
+                "oked": getattr(sc.chunk, "oked", None),
+                "hybrid_score": getattr(sc, "hybrid_score", None),
+            }
+            for sc in candidates
+        ]
+
+        # Логируем топ-3 после rerank
+        top_3_after_rerank = [
+            {
+                "id": sc.chunk.id,
+                "text": getattr(sc.chunk, "text", None),
+                "context": getattr(sc.chunk, "context", None),
+                "geo": getattr(sc.chunk, "geo", None),
+                "metrics": getattr(sc.chunk, "metrics", None),
+                "years": getattr(sc.chunk, "years", None),
+                "time_granularity": getattr(sc.chunk, "time_granularity", None),
+                "oked": getattr(sc.chunk, "oked", None),
+                "rerank_score": getattr(sc, "rerank_score", None),
+            }
+            for sc in top_chunks
+        ]
+
         self._logger.log_llm_reranking(
             event="final_cross_encoder",
             query=enriched_query.query,
             enriched_query=enriched_query_dict,
             candidates_count=len(candidates),
-            candidate_ids=[sc.chunk.id for sc in candidates_sorted],
-            rerank_scores={sc.chunk.id: sc.rerank_score for sc in candidates_sorted},
+            top_10_candidates=top_10_before_rerank,
+            top_3_candidates=top_3_after_rerank,
             buckets=metadata_buckets,
             top_k=len(top_chunks),
             elapsed_time=elapsed_time,

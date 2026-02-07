@@ -20,3 +20,6 @@ venv.bak/
 .cursorignore
 .cursorindexingignore
 
+# Pycharm Continue plugin
+.continue/
+/.continue/

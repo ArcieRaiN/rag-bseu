@@ -17,9 +17,8 @@ import numpy as np
 
 from src.main.models import (
     EnrichedQuery,
-    ScoredChunk,
-    RetrievalConfig,
-)
+    ScoredChunk)
+from src.main.config import RetrievalConfig
 from src.main.semantic_search import FaissSemanticSearcher
 from src.main.lexical_search import InMemoryBM25
 from src.main.metadata_scorer import MetadataScorer
