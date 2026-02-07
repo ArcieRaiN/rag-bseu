@@ -29,7 +29,7 @@ def main() -> None:
     print(f"📄 Найдено PDF-файлов: {len(pdf_files)}")
 
     # Папка для индекса
-    vector_store_dir = src_dir / "src" / "prepare_db" / "vector_store"
+    vector_store_dir = src_dir / "usage" / "vector_store"
     vector_store_dir.mkdir(parents=True, exist_ok=True)
 
     print("🔧 Строим базу знаний через LlamaIndex + Ollama enrichment...")

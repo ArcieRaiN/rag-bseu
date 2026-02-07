@@ -1,0 +1,786 @@
+{"event": "start", "total_chunks": 190, "ts": 1770479533.8853538}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "ts": 1770479533.8853538}
+{"event": "generate_error", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "attempt": 0, "error": "HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/generate (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [WinError 10061] Подключение не установлено, т.к. конечный компьютер отверг запрос на подключение\"))", "ts": 1770479537.9197922}
+{"event": "generate_error", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "attempt": 1, "error": "HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/generate (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [WinError 10061] Подключение не установлено, т.к. конечный компьютер отверг запрос на подключение\"))", "ts": 1770479542.4568903}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "parsed": false, "ts": 1770479542.4568903}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479542.4568903}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "ts": 1770479542.4579458}
+{"event": "generate_error", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "attempt": 0, "error": "HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/generate (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [WinError 10061] Подключение не установлено, т.к. конечный компьютер отверг запрос на подключение\"))", "ts": 1770479546.5154426}
+{"event": "generate_error", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "attempt": 1, "error": "HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/generate (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [WinError 10061] Подключение не установлено, т.к. конечный компьютер отверг запрос на подключение\"))", "ts": 1770479551.0498781}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "parsed": false, "ts": 1770479551.0498781}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479551.0498781}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page13::chunk11", "ts": 1770479551.0508788}
+{"event": "start", "total_chunks": 190, "ts": 1770479585.8492467}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "ts": 1770479585.850669}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "parsed": true, "ts": 1770479595.0581353}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479595.0592797}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "ts": 1770479595.0597818}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "parsed": true, "ts": 1770479600.820797}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479600.8213015}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page13::chunk11", "ts": 1770479600.8213015}
+{"event": "start", "total_chunks": 190, "ts": 1770479868.7304707}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "ts": 1770479868.731472}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "parsed": true, "ts": 1770479875.8127875}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page6::chunk4", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479875.813512}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "ts": 1770479875.8145158}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "parsed": true, "ts": 1770479880.9869506}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page7::chunk5", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479880.9874604}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page13::chunk11", "ts": 1770479880.9874604}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page13::chunk11", "parsed": true, "ts": 1770479887.6793103}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page13::chunk11", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479887.6798131}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page14::chunk12", "ts": 1770479887.6798131}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page14::chunk12", "parsed": true, "ts": 1770479893.9269328}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page14::chunk12", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479893.9269328}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page15::chunk13", "ts": 1770479893.9279377}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page15::chunk13", "parsed": true, "ts": 1770479898.9217486}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page15::chunk13", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479898.9222538}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page16::chunk14", "ts": 1770479898.922966}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page16::chunk14", "parsed": true, "ts": 1770479904.2916813}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page16::chunk14", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479904.2926807}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page17::chunk15", "ts": 1770479904.2926807}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page17::chunk15", "parsed": true, "ts": 1770479910.1312175}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page17::chunk15", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479910.1318724}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page18::chunk16", "ts": 1770479910.132434}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page18::chunk16", "parsed": true, "ts": 1770479917.335816}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page18::chunk16", "warning": "metrics[0] похож на определение, а не метрику: 'численность населения'", "ts": 1770479917.3363194}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page18::chunk16", "warning": "metrics[1] похож на определение, а не метрику: 'среднегодовая численность занятых в экономике'", "ts": 1770479917.3363194}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page18::chunk16", "warning": "metrics[2] похож на определение, а не метрику: 'численность безработных'", "ts": 1770479917.3373234}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page18::chunk16", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479917.3373234}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page19::chunk17", "ts": 1770479917.3373234}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page19::chunk17", "parsed": true, "ts": 1770479924.0645275}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page19::chunk17", "warning": "metrics[0] похож на определение, а не метрику: 'объем промышленного производства'", "ts": 1770479924.0645275}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page19::chunk17", "warning": "metrics[1] похож на определение, а не метрику: 'продукция сельского хозяйства'", "ts": 1770479924.0645275}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page19::chunk17", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479924.0655327}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page20::chunk18", "ts": 1770479924.0655327}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page20::chunk18", "parsed": true, "ts": 1770479932.0610259}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page20::chunk18", "warning": "metrics[0] похож на определение, а не метрику: 'Индекс цен производителей промышленной продукции'", "ts": 1770479932.0610259}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page20::chunk18", "warning": "metrics[1] слишком длинный (возможно, это определение, а не метрика): 'Индекс цен производителей сельскохозяйственной про...'", "ts": 1770479932.0610259}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page20::chunk18", "warning": "metrics[1] похож на определение, а не метрику: 'Индекс цен производителей сельскохозяйственной продукции'", "ts": 1770479932.0610259}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page20::chunk18", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479932.0620291}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page21::chunk19", "ts": 1770479932.0620291}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page21::chunk19", "parsed": true, "ts": 1770479939.899844}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page21::chunk19", "warning": "metrics[0] похож на определение, а не метрику: 'численность населения'", "ts": 1770479939.900346}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page21::chunk19", "warning": "metrics[1] похож на определение, а не метрику: 'естественный прирост населения'", "ts": 1770479939.900346}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page21::chunk19", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479939.900346}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page22::chunk20", "ts": 1770479939.9013488}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page22::chunk20", "parsed": true, "ts": 1770479947.9568243}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page22::chunk20", "warning": "metrics[0] похож на определение, а не метрику: 'продукция сельского хозяйства'", "ts": 1770479947.9573283}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page22::chunk20", "warning": "metrics[1] похож на определение, а не метрику: 'продукция растениеводства'", "ts": 1770479947.9573283}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page22::chunk20", "warning": "metrics[2] похож на определение, а не метрику: 'продукция животноводства'", "ts": 1770479947.9573283}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page22::chunk20", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479947.9583318}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page23::chunk21", "ts": 1770479947.9583318}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page23::chunk21", "parsed": true, "ts": 1770479955.8547368}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page23::chunk21", "warning": "metrics[0] похож на определение, а не метрику: 'Индекс тарифов на грузовые перевозки'", "ts": 1770479955.8552678}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page23::chunk21", "warning": "metrics[1] слишком длинный (возможно, это определение, а не метрика): 'Сводный индекс цен на продукцию инвестиционного на...'", "ts": 1770479955.8552678}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page23::chunk21", "warning": "metrics[1] похож на определение, а не метрику: 'Сводный индекс цен на продукцию инвестиционного назначения'", "ts": 1770479955.8552678}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page23::chunk21", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479955.8552678}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page24::chunk22", "ts": 1770479955.8552678}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page24::chunk22", "parsed": true, "ts": 1770479964.6350658}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page24::chunk22", "warning": "metrics[0] похож на определение, а не метрику: 'численность населения'", "ts": 1770479964.6350658}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page24::chunk22", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479964.635801}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page25::chunk23", "ts": 1770479964.635801}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page25::chunk23", "parsed": true, "ts": 1770479973.1236968}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page25::chunk23", "warning": "metrics[0] похож на определение, а не метрику: 'ввод в действие жилых домов'", "ts": 1770479973.1242063}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page25::chunk23", "warning": "metrics[1] похож на определение, а не метрику: 'коммерческий грузооборот транспорта'", "ts": 1770479973.1242063}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page25::chunk23", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479973.1242063}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page26::chunk24", "ts": 1770479973.1252103}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page26::chunk24", "parsed": true, "ts": 1770479979.3936186}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page26::chunk24", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479979.3936186}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page27::chunk25", "ts": 1770479979.3946238}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page27::chunk25", "parsed": true, "ts": 1770479986.751873}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page27::chunk25", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479986.7523773}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page28::chunk26", "ts": 1770479986.7523773}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page28::chunk26", "parsed": true, "ts": 1770479994.768647}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page28::chunk26", "warning": "metrics[0] похож на определение, а не метрику: 'запас воды из природных водных объектов'", "ts": 1770479994.768647}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page28::chunk26", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770479994.7691648}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page29::chunk27", "ts": 1770479994.7691648}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page29::chunk27", "parsed": true, "ts": 1770480003.3451247}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page29::chunk27", "warning": "metrics[0] похож на определение, а не метрику: 'от передвижных источников'", "ts": 1770480003.3451247}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page29::chunk27", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480003.3458483}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page30::chunk28", "ts": 1770480003.3458483}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page30::chunk28", "parsed": true, "ts": 1770480014.2501385}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page30::chunk28", "warning": "metrics[0] похож на определение, а не метрику: 'лесистость территории'", "ts": 1770480014.2506862}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page30::chunk28", "warning": "metrics[1] похож на определение, а не метрику: 'объем лесовосстановления'", "ts": 1770480014.2506862}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page30::chunk28", "warning": "metrics[2] похож на определение, а не метрику: 'искусственное лесовосстановление'", "ts": 1770480014.2506862}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page30::chunk28", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480014.2516901}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page31::chunk29", "ts": 1770480014.2516901}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page31::chunk29", "parsed": true, "ts": 1770480023.1793387}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page31::chunk29", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480023.1797345}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page32::chunk30", "ts": 1770480023.1802385}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page32::chunk30", "parsed": true, "ts": 1770480030.5328577}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page32::chunk30", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480030.5333595}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page33::chunk31", "ts": 1770480030.5333595}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page33::chunk31", "parsed": true, "ts": 1770480038.0190613}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page33::chunk31", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480038.0197663}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page34::chunk32", "ts": 1770480038.0197663}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page34::chunk32", "parsed": true, "ts": 1770480044.043492}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page34::chunk32", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480044.0444963}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page35::chunk33", "ts": 1770480044.0444963}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page35::chunk33", "parsed": true, "ts": 1770480051.133254}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page35::chunk33", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480051.133994}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page36::chunk34", "ts": 1770480051.133994}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page36::chunk34", "parsed": true, "ts": 1770480057.1930702}
+{"event": "model_context_reset", "after_chunks": 51, "ts": 1770480057.1938572}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page36::chunk34", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480059.2448168}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page37::chunk35", "ts": 1770480059.2454064}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page37::chunk35", "parsed": true, "ts": 1770480068.2129505}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page37::chunk35", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480068.2129505}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page38::chunk36", "ts": 1770480068.2129505}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page38::chunk36", "parsed": true, "ts": 1770480074.1791446}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page38::chunk36", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480074.179815}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page39::chunk37", "ts": 1770480074.179815}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page39::chunk37", "parsed": true, "ts": 1770480081.343932}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page39::chunk37", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480081.3444395}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page40::chunk38", "ts": 1770480081.3444395}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page40::chunk38", "parsed": true, "ts": 1770480087.8880022}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page40::chunk38", "warning": "metrics[0] похож на определение, а не метрику: 'б уровень участия в составе рабочей силы'", "ts": 1770480087.8886244}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page40::chunk38", "warning": "metrics[3] похож на определение, а не метрику: 'травматизм на производстве'", "ts": 1770480087.8886244}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page40::chunk38", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480087.8886244}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page41::chunk39", "ts": 1770480087.889628}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page41::chunk39", "parsed": true, "ts": 1770480094.0973477}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page41::chunk39", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480094.098211}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page42::chunk40", "ts": 1770480094.098211}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page42::chunk40", "parsed": true, "ts": 1770480101.1761367}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page42::chunk40", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480101.176903}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page43::chunk41", "ts": 1770480101.176903}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page43::chunk41", "parsed": true, "ts": 1770480108.5077527}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page43::chunk41", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480108.5085032}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page44::chunk42", "ts": 1770480108.5085032}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page44::chunk42", "parsed": true, "ts": 1770480114.042762}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page44::chunk42", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480114.042762}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page45::chunk43", "ts": 1770480114.0432947}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page45::chunk43", "parsed": true, "ts": 1770480121.225934}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page45::chunk43", "warning": "metrics[0] похож на определение, а не метрику: 'административная деятельность'", "ts": 1770480121.2265873}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page45::chunk43", "warning": "metrics[1] похож на определение, а не метрику: 'государственное управление'", "ts": 1770480121.2265873}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page45::chunk43", "warning": "metrics[2] похож на определение, а не метрику: 'обеспечение военной безопасности'", "ts": 1770480121.2265873}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page45::chunk43", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480121.2265873}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page46::chunk44", "ts": 1770480121.2265873}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page46::chunk44", "parsed": true, "ts": 1770480129.5448716}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page46::chunk44", "warning": "metrics[0] похож на определение, а не метрику: 'количество пострадавших'", "ts": 1770480129.5448716}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page46::chunk44", "warning": "metrics[1] похож на определение, а не метрику: 'утрата трудоспособности'", "ts": 1770480129.5453966}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page46::chunk44", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480129.5453966}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page47::chunk45", "ts": 1770480129.5453966}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page47::chunk45", "parsed": true, "ts": 1770480137.4428566}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page47::chunk45", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480137.4433591}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page48::chunk46", "ts": 1770480137.4433591}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page48::chunk46", "parsed": true, "ts": 1770480144.0340831}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page48::chunk46", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480144.034592}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page49::chunk47", "ts": 1770480144.034592}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page49::chunk47", "parsed": true, "ts": 1770480150.2838206}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page49::chunk47", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480150.2843287}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page50::chunk48", "ts": 1770480150.2843287}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page50::chunk48", "parsed": true, "ts": 1770480156.162047}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page50::chunk48", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480156.1627462}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page51::chunk49", "ts": 1770480156.1627462}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page51::chunk49", "parsed": true, "ts": 1770480163.6469316}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page51::chunk49", "warning": "metrics[1] похож на определение, а не метрику: 'доходы от предпринимательской деятельности'", "ts": 1770480163.6469316}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page51::chunk49", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480163.6475132}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page52::chunk50", "ts": 1770480163.6475132}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page52::chunk50", "parsed": true, "ts": 1770480171.1724045}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page52::chunk50", "warning": "metrics[0] похож на определение, а не метрику: 'Численность населения'", "ts": 1770480171.1724045}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page52::chunk50", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480171.172961}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page53::chunk51", "ts": 1770480171.172961}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page53::chunk51", "parsed": true, "ts": 1770480178.7015505}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page53::chunk51", "warning": "metrics[1] похож на определение, а не метрику: 'численность населения'", "ts": 1770480178.7025611}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page53::chunk51", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480178.7031024}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page54::chunk52", "ts": 1770480178.7031024}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page54::chunk52", "parsed": true, "ts": 1770480186.0329409}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page54::chunk52", "warning": "metrics[1] похож на определение, а не метрику: 'номинальная заработная плата'", "ts": 1770480186.0329409}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page54::chunk52", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480186.0335653}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page55::chunk53", "ts": 1770480186.0335653}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page55::chunk53", "parsed": true, "ts": 1770480193.3714135}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page55::chunk53", "warning": "metrics[1] похож на определение, а не метрику: 'покупка алкогольных напитков, табачных изделий'", "ts": 1770480193.3720937}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page55::chunk53", "warning": "metrics[2] похож на определение, а не метрику: 'покупка непродовольственных товаров'", "ts": 1770480193.3720937}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page55::chunk53", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480193.3720937}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page56::chunk54", "ts": 1770480193.3720937}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page56::chunk54", "parsed": true, "ts": 1770480200.3376935}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page56::chunk54", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480200.3382208}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page57::chunk55", "ts": 1770480200.3382208}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page57::chunk55", "parsed": true, "ts": 1770480207.1955361}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page57::chunk55", "warning": "metrics[2] похож на определение, а не метрику: 'покупка алкогольных напитков'", "ts": 1770480207.1962998}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page57::chunk55", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480207.1962998}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page58::chunk56", "ts": 1770480207.1962998}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page58::chunk56", "parsed": true, "ts": 1770480214.3327353}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page58::chunk56", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480214.3332384}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page59::chunk57", "ts": 1770480214.3332384}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page59::chunk57", "parsed": true, "ts": 1770480219.9860985}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page59::chunk57", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480219.986727}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page60::chunk58", "ts": 1770480219.986727}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page60::chunk58", "parsed": true, "ts": 1770480226.226621}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page60::chunk58", "warning": "metrics[0] похож на определение, а не метрику: 'Хлеб и хлебные продукты'", "ts": 1770480226.2271245}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page60::chunk58", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480226.2271245}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page61::chunk59", "ts": 1770480226.2271245}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page61::chunk59", "parsed": true, "ts": 1770480232.9481928}
+{"event": "model_context_reset", "after_chunks": 101, "ts": 1770480232.9489212}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page61::chunk59", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480234.9894092}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page62::chunk60", "ts": 1770480234.9894092}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page62::chunk60", "parsed": true, "ts": 1770480245.9943945}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page62::chunk60", "warning": "metrics[0] похож на определение, а не метрику: 'наличие предметов длительного пользования'", "ts": 1770480245.9950278}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page62::chunk60", "warning": "metrics[2] похож на определение, а не метрику: 'персональные компьютеры'", "ts": 1770480245.9950278}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page62::chunk60", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480245.9950278}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page63::chunk61", "ts": 1770480245.9965382}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page63::chunk61", "parsed": true, "ts": 1770480252.813434}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page63::chunk61", "warning": "metrics[1] похож на определение, а не метрику: 'наличие персональных компьютеров'", "ts": 1770480252.8139358}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page63::chunk61", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480252.8139358}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page64::chunk62", "ts": 1770480252.8146005}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page64::chunk62", "parsed": true, "ts": 1770480261.8167849}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page64::chunk62", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480261.8173952}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page65::chunk63", "ts": 1770480261.8173952}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page65::chunk63", "parsed": true, "ts": 1770480269.1274579}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page65::chunk63", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480269.1274579}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page66::chunk64", "ts": 1770480269.1274579}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page66::chunk64", "parsed": true, "ts": 1770480274.6515555}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page66::chunk64", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480274.652514}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page67::chunk65", "ts": 1770480274.652514}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page67::chunk65", "parsed": true, "ts": 1770480281.184451}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page67::chunk65", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480281.184911}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page68::chunk66", "ts": 1770480281.1854143}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page68::chunk66", "parsed": true, "ts": 1770480289.1731398}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page68::chunk66", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480289.174149}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page69::chunk67", "ts": 1770480289.174149}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page69::chunk67", "parsed": true, "ts": 1770480296.459583}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page69::chunk67", "warning": "metrics[0] похож на определение, а не метрику: 'численность студентов'", "ts": 1770480296.4600983}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page69::chunk67", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480296.4600983}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page70::chunk68", "ts": 1770480296.4600983}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page70::chunk68", "parsed": true, "ts": 1770480304.087694}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page70::chunk68", "warning": "metrics[0] похож на определение, а не метрику: 'число персональных компьютеров'", "ts": 1770480304.088198}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page70::chunk68", "warning": "metrics[1] похож на определение, а не метрику: 'используемых в учебных целях'", "ts": 1770480304.088198}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page70::chunk68", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480304.088198}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page71::chunk69", "ts": 1770480304.0892043}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page71::chunk69", "parsed": true, "ts": 1770480311.2334344}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page71::chunk69", "warning": "metrics[0] похож на определение, а не метрику: 'численность аспирантов'", "ts": 1770480311.2345517}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page71::chunk69", "warning": "metrics[2] похож на определение, а не метрику: 'выпуск из аспирантуры'", "ts": 1770480311.2345517}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page71::chunk69", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480311.235555}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page72::chunk70", "ts": 1770480311.235555}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page72::chunk70", "parsed": true, "ts": 1770480317.528817}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page72::chunk70", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480317.5293193}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page73::chunk71", "ts": 1770480317.5293193}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page73::chunk71", "parsed": true, "ts": 1770480323.5877063}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page73::chunk71", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480323.588452}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page74::chunk72", "ts": 1770480323.588452}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page74::chunk72", "parsed": true, "ts": 1770480332.6533105}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page74::chunk72", "warning": "metrics[0] похож на определение, а не метрику: 'число больничных организаций'", "ts": 1770480332.6540763}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page74::chunk72", "warning": "metrics[1] похож на определение, а не метрику: 'количество коек в больничных организациях'", "ts": 1770480332.6540763}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page74::chunk72", "warning": "metrics[2] похож на определение, а не метрику: 'заболеваемость населения'", "ts": 1770480332.6540763}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page74::chunk72", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480332.654588}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page75::chunk73", "ts": 1770480332.654588}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page75::chunk73", "parsed": true, "ts": 1770480342.4449916}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page75::chunk73", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480342.4455059}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page76::chunk74", "ts": 1770480342.4455059}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page76::chunk74", "parsed": true, "ts": 1770480348.6238668}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page76::chunk74", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480348.6243753}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page77::chunk75", "ts": 1770480348.6243753}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page77::chunk75", "parsed": true, "ts": 1770480355.9516425}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page77::chunk75", "warning": "metrics[1] похож на определение, а не метрику: 'Количество заболеваний'", "ts": 1770480355.9516425}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page77::chunk75", "warning": "metrics[2] похож на определение, а не метрику: 'Эндокринные заболевания'", "ts": 1770480355.9516425}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page77::chunk75", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480355.9516425}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page78::chunk76", "ts": 1770480355.9526477}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page78::chunk76", "parsed": true, "ts": 1770480363.085632}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page78::chunk76", "warning": "metrics[0] похож на определение, а не метрику: 'Численность пациентов'", "ts": 1770480363.0861475}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page78::chunk76", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480363.0866644}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page79::chunk77", "ts": 1770480363.0866644}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page79::chunk77", "parsed": true, "ts": 1770480368.7435675}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page79::chunk77", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480368.7435675}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page80::chunk78", "ts": 1770480368.7450752}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page80::chunk78", "parsed": true, "ts": 1770480375.8569262}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page80::chunk78", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480375.8575537}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page81::chunk79", "ts": 1770480375.8575537}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page81::chunk79", "parsed": true, "ts": 1770480383.283078}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page81::chunk79", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480383.2835803}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page82::chunk80", "ts": 1770480383.2835803}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page82::chunk80", "parsed": true, "ts": 1770480390.1357543}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page82::chunk80", "warning": "metrics[0] похож на определение, а не метрику: 'Число коллективных средств размещения – всего'", "ts": 1770480390.1357543}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page82::chunk80", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480390.1366074}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page83::chunk81", "ts": 1770480390.1366074}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page83::chunk81", "parsed": true, "ts": 1770480397.0517483}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page83::chunk81", "warning": "metrics[0] слишком длинный (возможно, это определение, а не метрика): 'Численность лиц, размешенных в коллективных средст...'", "ts": 1770480397.0517483}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page83::chunk81", "warning": "metrics[1] похож на определение, а не метрику: 'Число коллективных средств размещения'", "ts": 1770480397.0522501}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page83::chunk81", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480397.0522501}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page84::chunk82", "ts": 1770480397.0522501}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page84::chunk82", "parsed": true, "ts": 1770480404.6320717}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page84::chunk82", "warning": "metrics[0] похож на определение, а не метрику: 'перевезено пассажиров'", "ts": 1770480404.632811}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page84::chunk82", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480404.632811}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page85::chunk83", "ts": 1770480404.632811}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page85::chunk83", "parsed": true, "ts": 1770480412.9914718}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page85::chunk83", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480412.9921796}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page86::chunk84", "ts": 1770480412.9921796}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page86::chunk84", "parsed": true, "ts": 1770480421.5391722}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page86::chunk84", "warning": "metrics[2] похож на определение, а не метрику: 'объекты культурного и археологического наследия'", "ts": 1770480421.5405293}
+{"event": "model_context_reset", "after_chunks": 151, "ts": 1770480421.5410328}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page86::chunk84", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480423.6179082}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page87::chunk85", "ts": 1770480423.6179082}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page87::chunk85", "parsed": true, "ts": 1770480433.2815225}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page87::chunk85", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480433.282025}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page88::chunk86", "ts": 1770480433.282025}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page88::chunk86", "parsed": true, "ts": 1770480440.0773144}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page88::chunk86", "warning": "metrics[0] похож на определение, а не метрику: 'валовая добавленная стоимость'", "ts": 1770480440.0779054}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page88::chunk86", "warning": "metrics[1] слишком длинный (возможно, это определение, а не метрика): 'сельское хозяйство, лесное хозяйство, охота, рыбол...'", "ts": 1770480440.0779054}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page88::chunk86", "warning": "metrics[2] похож на определение, а не метрику: 'добыча полезных ископаемых'", "ts": 1770480440.0779054}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page88::chunk86", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480440.0779054}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page89::chunk87", "ts": 1770480440.07891}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page89::chunk87", "parsed": true, "ts": 1770480448.336082}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page89::chunk87", "warning": "metrics[1] похож на определение, а не метрику: 'деятельность финансовая и страховая'", "ts": 1770480448.3365898}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page89::chunk87", "warning": "metrics[2] похож на определение, а не метрику: 'деятельность по операциям с недвижимым имуществом'", "ts": 1770480448.3365898}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page89::chunk87", "warning": "metrics[3] слишком длинный (возможно, это определение, а не метрика): 'деятельность профессиональная, научная и техническ...'", "ts": 1770480448.3365898}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page89::chunk87", "warning": "metrics[3] похож на определение, а не метрику: 'деятельность профессиональная, научная и техническая'", "ts": 1770480448.3365898}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page89::chunk87", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480448.337595}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page90::chunk88", "ts": 1770480448.337595}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page90::chunk88", "parsed": true, "ts": 1770480456.160761}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page90::chunk88", "warning": "metrics[0] похож на определение, а не метрику: 'валовой внутренний продукт'", "ts": 1770480456.1617644}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page90::chunk88", "warning": "metrics[1] похож на определение, а не метрику: 'расходы на конечное потребление'", "ts": 1770480456.162283}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page90::chunk88", "warning": "metrics[2] похож на определение, а не метрику: 'государственное управление'", "ts": 1770480456.1627882}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page90::chunk88", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480456.1627882}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page91::chunk89", "ts": 1770480456.1642983}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page91::chunk89", "parsed": true, "ts": 1770480463.3163652}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page91::chunk89", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480463.316869}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page92::chunk90", "ts": 1770480463.316869}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page92::chunk90", "parsed": true, "ts": 1770480469.5062838}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page92::chunk90", "warning": "metrics[2] похож на определение, а не метрику: 'вида экономической деятельности'", "ts": 1770480469.506935}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page92::chunk90", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480469.506935}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page93::chunk91", "ts": 1770480469.506935}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page93::chunk91", "parsed": true, "ts": 1770480477.961247}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page93::chunk91", "warning": "metrics[0] похож на определение, а не метрику: 'гостиничная и общественное питание'", "ts": 1770480477.961247}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page93::chunk91", "warning": "metrics[2] похож на определение, а не метрику: 'финансовая и страховая деятельность'", "ts": 1770480477.96175}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page93::chunk91", "warning": "metrics[3] похож на определение, а не метрику: 'операции с недвижимым имуществом'", "ts": 1770480477.96175}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page93::chunk91", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480477.96175}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page94::chunk92", "ts": 1770480477.9627573}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page94::chunk92", "parsed": true, "ts": 1770480484.7824514}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page94::chunk92", "warning": "metrics[0] похож на определение, а не метрику: 'Коэффициент обновления'", "ts": 1770480484.7830918}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page94::chunk92", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480484.7830918}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page95::chunk93", "ts": 1770480484.7830918}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page95::chunk93", "parsed": true, "ts": 1770480491.224896}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page95::chunk93", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480491.2255757}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page96::chunk94", "ts": 1770480491.2255757}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page96::chunk94", "parsed": true, "ts": 1770480497.5582113}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page96::chunk94", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480497.5587885}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page97::chunk95", "ts": 1770480497.5587885}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page97::chunk95", "parsed": true, "ts": 1770480505.9928968}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page97::chunk95", "warning": "metrics[1] похож на определение, а не метрику: 'газ природный и попутный'", "ts": 1770480505.9936116}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page97::chunk95", "warning": "metrics[2] слишком длинный (возможно, это определение, а не метрика): 'мясо крупного рогатого скота, свинина, баранина, к...'", "ts": 1770480505.9936116}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page97::chunk95", "warning": "metrics[2] похож на определение, а не метрику: 'мясо крупного рогатого скота, свинина, баранина, козлятина, конина и мясо прочих животных семейства лошадиных, оленина и мясо прочих животных семейства оленевых'", "ts": 1770480505.9936116}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page97::chunk95", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480505.9941185}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page98::chunk96", "ts": 1770480505.9941185}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page98::chunk96", "parsed": true, "ts": 1770480513.2173743}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page98::chunk96", "warning": "metrics[0] похож на определение, а не метрику: 'ткани хлопчатобумажные'", "ts": 1770480513.2181423}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page98::chunk96", "warning": "metrics[2] слишком длинный (возможно, это определение, а не метрика): 'ткани из синтетических и искусственных волокон и н...'", "ts": 1770480513.2181423}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page98::chunk96", "warning": "metrics[2] похож на определение, а не метрику: 'ткани из синтетических и искусственных волокон и нитей'", "ts": 1770480513.2181423}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page98::chunk96", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480513.2181423}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page99::chunk97", "ts": 1770480513.2181423}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page99::chunk97", "parsed": true, "ts": 1770480519.7453406}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page99::chunk97", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480519.74587}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page100::chunk98", "ts": 1770480519.74587}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page100::chunk98", "parsed": true, "ts": 1770480527.9770837}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page100::chunk98", "warning": "metrics[1] похож на определение, а не метрику: 'текстильная промышленность'", "ts": 1770480527.9770837}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page100::chunk98", "warning": "metrics[2] похож на определение, а не метрику: 'стекольная промышленность'", "ts": 1770480527.9790874}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page100::chunk98", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480527.9790874}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page101::chunk99", "ts": 1770480527.9800878}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page101::chunk99", "parsed": true, "ts": 1770480539.1356716}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page101::chunk99", "warning": "metrics[1] похож на определение, а не метрику: 'мясо крупного рогатого скота'", "ts": 1770480539.1366758}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page101::chunk99", "warning": "metrics[6] похож на определение, а не метрику: 'мясо прочих животных семейства лошадиных'", "ts": 1770480539.1376762}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page101::chunk99", "warning": "metrics[8] слишком длинный (возможно, это определение, а не метрика): 'мясо прочих животных семейства оленьих парные, ост...'", "ts": 1770480539.1376762}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page101::chunk99", "warning": "metrics[8] похож на определение, а не метрику: 'мясо прочих животных семейства оленьих парные, остывшие или охлажденные'", "ts": 1770480539.1376762}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page101::chunk99", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480539.1376762}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page102::chunk100", "ts": 1770480539.1386755}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page102::chunk100", "parsed": true, "ts": 1770480545.2813735}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page102::chunk100", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480545.2819843}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page103::chunk101", "ts": 1770480545.2819843}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page103::chunk101", "parsed": true, "ts": 1770480552.5194354}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page103::chunk101", "warning": "metrics[0] похож на определение, а не метрику: 'Индекс промышленного производства'", "ts": 1770480552.5201516}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page103::chunk101", "warning": "metrics[1] похож на определение, а не метрику: 'Индекс добычи полезных ископаемых'", "ts": 1770480552.5201516}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page103::chunk101", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480552.5201516}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page104::chunk102", "ts": 1770480552.5201516}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page104::chunk102", "parsed": true, "ts": 1770480562.12165}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page104::chunk102", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480562.1224308}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page105::chunk103", "ts": 1770480562.1224308}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page105::chunk103", "parsed": true, "ts": 1770480568.2945912}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page105::chunk103", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480568.2951531}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page106::chunk104", "ts": 1770480568.2951531}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page106::chunk104", "parsed": true, "ts": 1770480575.1315184}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page106::chunk104", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480575.1322882}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page107::chunk105", "ts": 1770480575.1322882}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page107::chunk105", "parsed": true, "ts": 1770480582.8985078}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page107::chunk105", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480582.8995168}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page108::chunk106", "ts": 1770480582.8995168}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page108::chunk106", "parsed": true, "ts": 1770480590.7393367}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page108::chunk106", "warning": "metrics[0] похож на определение, а не метрику: 'Индексы производства продукции'", "ts": 1770480590.7398388}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page108::chunk106", "warning": "metrics[1] похож на определение, а не метрику: 'Продукция сельского хозяйства'", "ts": 1770480590.7398388}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page108::chunk106", "warning": "metrics[2] похож на определение, а не метрику: 'Продукция растениеводства'", "ts": 1770480590.7398388}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page108::chunk106", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480590.7398388}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page109::chunk107", "ts": 1770480590.7408412}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page109::chunk107", "parsed": true, "ts": 1770480597.9755974}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page109::chunk107", "warning": "metrics[0] похож на определение, а не метрику: 'Зерновые и зернобобовые культуры'", "ts": 1770480597.9763932}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page109::chunk107", "warning": "metrics[1] похож на определение, а не метрику: 'Технические культуры'", "ts": 1770480597.9763932}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page109::chunk107", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480597.9763932}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page110::chunk108", "ts": 1770480597.9763932}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page110::chunk108", "parsed": true, "ts": 1770480605.7864592}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page110::chunk108", "warning": "metrics[0] похож на определение, а не метрику: 'сельскохозяйственные угодья'", "ts": 1770480605.7869623}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page110::chunk108", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480605.7869623}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page111::chunk109", "ts": 1770480605.7869623}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page111::chunk109", "parsed": true, "ts": 1770480613.6694198}
+{"event": "model_context_reset", "after_chunks": 201, "ts": 1770480613.6700835}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page111::chunk109", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480615.7365348}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page112::chunk110", "ts": 1770480615.7377224}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page112::chunk110", "parsed": true, "ts": 1770480625.3419788}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page112::chunk110", "warning": "metrics[0] похож на определение, а не метрику: 'поголовье крупного рогатого скота'", "ts": 1770480625.3424819}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page112::chunk110", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480625.3424819}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page113::chunk111", "ts": 1770480625.3424819}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page113::chunk111", "parsed": true, "ts": 1770480633.2711565}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page113::chunk111", "warning": "metrics[3] похож на определение, а не метрику: 'сельскохозяйственная'", "ts": 1770480633.2717113}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page113::chunk111", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480633.2717113}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page114::chunk112", "ts": 1770480633.2717113}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page114::chunk112", "parsed": true, "ts": 1770480639.0743926}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page114::chunk112", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480639.0749302}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page115::chunk113", "ts": 1770480639.0749302}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page115::chunk113", "parsed": true, "ts": 1770480645.1750386}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page115::chunk113", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480645.1755407}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page116::chunk114", "ts": 1770480645.17605}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page116::chunk114", "parsed": true, "ts": 1770480652.4623137}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page116::chunk114", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480652.4628444}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page117::chunk115", "ts": 1770480652.4628444}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page117::chunk115", "parsed": true, "ts": 1770480659.4681573}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page117::chunk115", "warning": "metrics[0] слишком длинный (возможно, это определение, а не метрика): 'сельское, лесное хозяйство, охота, рыболовство и р...'", "ts": 1770480659.4686835}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page117::chunk115", "warning": "metrics[1] похож на определение, а не метрику: 'добыча полезных ископаемых'", "ts": 1770480659.4686835}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page117::chunk115", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480659.4686835}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page118::chunk116", "ts": 1770480659.469687}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page118::chunk116", "parsed": true, "ts": 1770480666.7353854}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page118::chunk116", "warning": "metrics[0] похож на определение, а не метрику: 'деятельность в области информации и связи'", "ts": 1770480666.7358875}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page118::chunk116", "warning": "metrics[1] похож на определение, а не метрику: 'деятельность финансовая и страховая'", "ts": 1770480666.7358875}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page118::chunk116", "warning": "metrics[2] похож на определение, а не метрику: 'деятельность по операциям с недвижимым имуществом'", "ts": 1770480666.7358875}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page118::chunk116", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480666.7358875}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page119::chunk117", "ts": 1770480666.736891}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page119::chunk117", "parsed": true, "ts": 1770480672.547402}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page119::chunk117", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480672.547402}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page120::chunk118", "ts": 1770480672.547402}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page120::chunk118", "parsed": true, "ts": 1770480680.667718}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page120::chunk118", "warning": "metrics[2] похож на определение, а не метрику: 'мощность организаций социальной сферы'", "ts": 1770480680.668228}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page120::chunk118", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480680.668228}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page121::chunk119", "ts": 1770480680.6692312}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page121::chunk119", "parsed": true, "ts": 1770480688.149218}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page121::chunk119", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480688.1499872}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page122::chunk120", "ts": 1770480688.1499872}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page122::chunk120", "parsed": true, "ts": 1770480694.0188272}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page122::chunk120", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480694.0193446}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page123::chunk121", "ts": 1770480694.0193446}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page123::chunk121", "parsed": true, "ts": 1770480702.0558496}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page123::chunk121", "warning": "metrics[1] похож на определение, а не метрику: 'Грузооборот транспорта'", "ts": 1770480702.0563517}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page123::chunk121", "warning": "metrics[2] похож на определение, а не метрику: 'Перевезено пассажиров'", "ts": 1770480702.0563517}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page123::chunk121", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480702.0563517}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page124::chunk122", "ts": 1770480702.0573545}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page124::chunk122", "parsed": true, "ts": 1770480709.810024}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page124::chunk122", "warning": "metrics[2] похож на определение, а не метрику: 'автомобильные дороги'", "ts": 1770480709.8107545}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page124::chunk122", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480709.8107545}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page125::chunk123", "ts": 1770480709.8107545}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page125::chunk123", "parsed": true, "ts": 1770480717.2835033}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page125::chunk123", "warning": "metrics[0] похож на определение, а не метрику: 'Количество происшествий'", "ts": 1770480717.2847676}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page125::chunk123", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480717.2847676}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page126::chunk124", "ts": 1770480717.2847676}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page126::chunk124", "parsed": true, "ts": 1770480724.5149398}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page126::chunk124", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480724.5149398}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page127::chunk125", "ts": 1770480724.5164464}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page127::chunk125", "parsed": true, "ts": 1770480731.1910143}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page127::chunk125", "warning": "metrics[2] похож на определение, а не метрику: 'организации'", "ts": 1770480731.1915913}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page127::chunk125", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480731.1925952}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page128::chunk126", "ts": 1770480731.1925952}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page128::chunk126", "parsed": true, "ts": 1770480737.517073}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page128::chunk126", "warning": "metrics[0] похож на определение, а не метрику: 'доступность информации'", "ts": 1770480737.5175755}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page128::chunk126", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480737.5175755}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page129::chunk127", "ts": 1770480737.5175755}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page129::chunk127", "parsed": true, "ts": 1770480742.6271813}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page129::chunk127", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480742.627693}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page130::chunk128", "ts": 1770480742.627693}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page130::chunk128", "parsed": true, "ts": 1770480749.6583443}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page130::chunk128", "warning": "metrics[1] похож на определение, а не метрику: 'списочная численность работников'", "ts": 1770480749.6589932}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page130::chunk128", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480749.6589932}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page131::chunk129", "ts": 1770480749.6589932}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page131::chunk129", "parsed": true, "ts": 1770480756.6110718}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page131::chunk129", "warning": "metrics[0] похож на определение, а не метрику: 'удельный вес населения'", "ts": 1770480756.6120627}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page131::chunk129", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480756.6125655}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page132::chunk130", "ts": 1770480756.6125655}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page132::chunk130", "parsed": true, "ts": 1770480764.5849237}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page132::chunk130", "warning": "metrics[0] похож на определение, а не метрику: 'удельный вес населения'", "ts": 1770480764.5854955}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page132::chunk130", "warning": "metrics[1] похож на определение, а не метрику: 'пользующегося сетью Интернет'", "ts": 1770480764.5854955}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page132::chunk130", "warning": "metrics[3] похож на определение, а не метрику: 'в том числе проживающего'", "ts": 1770480764.5854955}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page132::chunk130", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480764.5854955}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page133::chunk131", "ts": 1770480764.586499}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page133::chunk131", "parsed": true, "ts": 1770480771.81243}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page133::chunk131", "warning": "metrics[0] слишком длинный (возможно, это определение, а не метрика): 'доля домашних хозяйств, имеющих телевизоры (всех т...'", "ts": 1770480771.813433}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page133::chunk131", "warning": "metrics[0] похож на определение, а не метрику: 'доля домашних хозяйств, имеющих телевизоры (всех типов)'", "ts": 1770480771.813937}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page133::chunk131", "warning": "metrics[1] похож на определение, а не метрику: 'доля домашних хозяйств, имеющих компьютер'", "ts": 1770480771.8144388}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page133::chunk131", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480771.8144388}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page134::chunk132", "ts": 1770480771.8154433}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page134::chunk132", "parsed": true, "ts": 1770480778.9021356}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page134::chunk132", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480778.9021356}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page135::chunk133", "ts": 1770480778.9021356}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page135::chunk133", "parsed": true, "ts": 1770480785.2585611}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page135::chunk133", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480785.2590718}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page136::chunk134", "ts": 1770480785.2590718}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page136::chunk134", "parsed": true, "ts": 1770480791.0837064}
+{"event": "model_context_reset", "after_chunks": 251, "ts": 1770480791.0842125}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page136::chunk134", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480793.1128643}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page137::chunk135", "ts": 1770480793.1128643}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page137::chunk135", "parsed": true, "ts": 1770480801.9413102}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page137::chunk135", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480801.941831}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page138::chunk136", "ts": 1770480801.941831}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page138::chunk136", "parsed": true, "ts": 1770480809.2738807}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page138::chunk136", "warning": "metrics[0] похож на определение, а не метрику: 'Розничный товарооборот'", "ts": 1770480809.2743917}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page138::chunk136", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480809.2743917}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page139::chunk137", "ts": 1770480809.2753956}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page139::chunk137", "parsed": true, "ts": 1770480817.034938}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page139::chunk137", "warning": "metrics[0] похож на определение, а не метрику: 'Платные услуги населению'", "ts": 1770480817.036447}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page139::chunk137", "warning": "metrics[3] похож на определение, а не метрику: 'почтовые и курьерские'", "ts": 1770480817.036447}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page139::chunk137", "warning": "metrics[4] похож на определение, а не метрику: 'по временному проживанию'", "ts": 1770480817.036447}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page139::chunk137", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480817.0374522}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page140::chunk138", "ts": 1770480817.0384507}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page140::chunk138", "parsed": true, "ts": 1770480824.2883675}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page140::chunk138", "warning": "metrics[0] похож на определение, а не метрику: 'Розничный товарооборот'", "ts": 1770480824.2883675}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page140::chunk138", "warning": "metrics[2] похож на определение, а не метрику: 'Индексы физического объема платных услуг'", "ts": 1770480824.2883675}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page140::chunk138", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480824.2893722}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page141::chunk139", "ts": 1770480824.2893722}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page141::chunk139", "parsed": true, "ts": 1770480832.2157106}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page141::chunk139", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480832.21636}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page142::chunk140", "ts": 1770480832.21636}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page142::chunk140", "parsed": true, "ts": 1770480839.3817825}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page142::chunk140", "warning": "metrics[0] похож на определение, а не метрику: 'Объем внешней торговли товарами'", "ts": 1770480839.3825843}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page142::chunk140", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480839.3825843}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page143::chunk141", "ts": 1770480839.3825843}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page143::chunk141", "parsed": true, "ts": 1770480845.0423682}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page143::chunk141", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480845.0431483}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page144::chunk142", "ts": 1770480845.0431483}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page144::chunk142", "parsed": true, "ts": 1770480851.476633}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page144::chunk142", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480851.476633}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page145::chunk143", "ts": 1770480851.477633}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page145::chunk143", "parsed": true, "ts": 1770480858.121158}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page145::chunk143", "warning": "metrics[0] похож на определение, а не метрику: 'численность персонала'", "ts": 1770480858.121158}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page145::chunk143", "warning": "metrics[1] похож на определение, а не метрику: 'научные исследования'", "ts": 1770480858.1228049}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page145::chunk143", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480858.123309}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page146::chunk144", "ts": 1770480858.1243124}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page146::chunk144", "parsed": true, "ts": 1770480864.7126913}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page146::chunk144", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480864.7134814}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page147::chunk145", "ts": 1770480864.7134814}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page147::chunk145", "parsed": true, "ts": 1770480872.2615836}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page147::chunk145", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480872.2623208}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page148::chunk146", "ts": 1770480872.2623208}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page148::chunk146", "parsed": true, "ts": 1770480877.418496}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page148::chunk146", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480877.4191222}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page149::chunk147", "ts": 1770480877.4196248}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page149::chunk147", "parsed": true, "ts": 1770480882.8507817}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page149::chunk147", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480882.8507817}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page150::chunk148", "ts": 1770480882.8507817}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page150::chunk148", "parsed": true, "ts": 1770480891.7529805}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page150::chunk148", "warning": "metrics[1] похож на определение, а не метрику: 'налог на прибыль организаций'", "ts": 1770480891.7535334}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page150::chunk148", "warning": "metrics[2] похож на определение, а не метрику: 'налог на доходы физических лиц'", "ts": 1770480891.7535334}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page150::chunk148", "warning": "metrics[3] похож на определение, а не метрику: 'налог на добавленную стоимость'", "ts": 1770480891.7535334}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page150::chunk148", "warning": "metrics[5] похож на определение, а не метрику: 'доходы от внешнеэкономической деятельности'", "ts": 1770480891.7535334}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page150::chunk148", "warning": "metrics[6] слишком длинный (возможно, это определение, а не метрика): 'страховые взносы на обязательное социальное страхо...'", "ts": 1770480891.7535334}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page150::chunk148", "warning": "metrics[6] похож на определение, а не метрику: 'страховые взносы на обязательное социальное страхование'", "ts": 1770480891.7545362}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page150::chunk148", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480891.7545362}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page151::chunk149", "ts": 1770480891.7545362}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page151::chunk149", "parsed": true, "ts": 1770480900.0192368}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page151::chunk149", "warning": "metrics[0] похож на определение, а не метрику: 'количество страховых организаций'", "ts": 1770480900.0192368}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page151::chunk149", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480900.0202398}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page152::chunk150", "ts": 1770480900.021512}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page152::chunk150", "parsed": true, "ts": 1770480911.61494}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page152::chunk150", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480911.61494}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page153::chunk151", "ts": 1770480911.61494}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page153::chunk151", "parsed": true, "ts": 1770480917.5479538}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page153::chunk151", "warning": "metrics[1] похож на определение, а не метрику: 'выплаты по договорам страхования'", "ts": 1770480917.5487154}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page153::chunk151", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480917.5487154}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page154::chunk152", "ts": 1770480917.5487154}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page154::chunk152", "parsed": true, "ts": 1770480924.525252}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page154::chunk152", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480924.52594}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page155::chunk153", "ts": 1770480924.52594}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page155::chunk153", "parsed": true, "ts": 1770480931.031159}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page155::chunk153", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480931.0316622}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page156::chunk154", "ts": 1770480931.0316622}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page156::chunk154", "parsed": true, "ts": 1770480936.7989447}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page156::chunk154", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480936.7994473}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page157::chunk155", "ts": 1770480936.7994473}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page157::chunk155", "parsed": true, "ts": 1770480945.3186314}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page157::chunk155", "warning": "metrics[0] похож на определение, а не метрику: 'цены производителей промышленных товаров'", "ts": 1770480945.3196342}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page157::chunk155", "warning": "metrics[1] похож на определение, а не метрику: 'индекс цен производителей промышленных товаров'", "ts": 1770480945.3206348}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page157::chunk155", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480945.3206348}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page158::chunk156", "ts": 1770480945.3216345}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page158::chunk156", "parsed": true, "ts": 1770480951.7018974}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page158::chunk156", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480951.7029}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page159::chunk157", "ts": 1770480951.704404}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page159::chunk157", "parsed": true, "ts": 1770480958.840664}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page159::chunk157", "warning": "metrics[0] похож на определение, а не метрику: 'Индекс потребительских цен'", "ts": 1770480958.841272}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page159::chunk157", "warning": "metrics[1] похож на определение, а не метрику: 'Индекс цен производителей промышленных товаров'", "ts": 1770480958.841272}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page159::chunk157", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480958.841272}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page160::chunk158", "ts": 1770480958.8422775}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page160::chunk158", "parsed": true, "ts": 1770480966.6703534}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page160::chunk158", "warning": "metrics[0] похож на определение, а не метрику: 'индекс цены на все товары и услуги'", "ts": 1770480966.6713564}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page160::chunk158", "warning": "metrics[1] похож на определение, а не метрику: 'индекс потребительских цен'", "ts": 1770480966.6713564}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page160::chunk158", "warning": "metrics[2] похож на определение, а не метрику: 'индекс цен на продовольственные товары'", "ts": 1770480966.6723561}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page160::chunk158", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480966.6723561}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page161::chunk159", "ts": 1770480966.6733568}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page161::chunk159", "parsed": true, "ts": 1770480975.4322934}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page161::chunk159", "warning": "metrics[3] похож на определение, а не метрику: 'индексы потребительских цен'", "ts": 1770480975.4330554}
+{"event": "model_context_reset", "after_chunks": 301, "ts": 1770480975.4335587}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page161::chunk159", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480977.4957335}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page162::chunk160", "ts": 1770480977.4971507}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page162::chunk160", "parsed": true, "ts": 1770480988.179075}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page162::chunk160", "warning": "metrics[2] похож на определение, а не метрику: 'Капуста свежая белокочанная'", "ts": 1770480988.179075}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page162::chunk160", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480988.179075}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page163::chunk161", "ts": 1770480988.179075}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page163::chunk161", "parsed": true, "ts": 1770480995.3416483}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page163::chunk161", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770480995.342195}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page164::chunk162", "ts": 1770480995.342195}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page164::chunk162", "parsed": true, "ts": 1770481003.2335117}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page164::chunk162", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481003.2350235}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page165::chunk163", "ts": 1770481003.2350235}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page165::chunk163", "parsed": true, "ts": 1770481011.748304}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page165::chunk163", "warning": "metrics[5] похож на определение, а не метрику: 'капуста белокочанная свежая'", "ts": 1770481011.7489102}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page165::chunk163", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481011.7489102}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page166::chunk164", "ts": 1770481011.7489102}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page166::chunk164", "parsed": true, "ts": 1770481020.5470083}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page166::chunk164", "warning": "metrics[2] похож на определение, а не метрику: 'велосипед дорожный для взрослых'", "ts": 1770481020.5477426}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page166::chunk164", "warning": "metrics[4] похож на определение, а не метрику: 'бензин автомобильный'", "ts": 1770481020.5477426}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page166::chunk164", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481020.5477426}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page167::chunk165", "ts": 1770481020.548747}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page167::chunk165", "parsed": true, "ts": 1770481027.6593568}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page167::chunk165", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481027.6593568}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page168::chunk166", "ts": 1770481027.6603613}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page168::chunk166", "parsed": true, "ts": 1770481034.5046113}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page168::chunk166", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481034.5052419}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page169::chunk167", "ts": 1770481034.5052419}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page169::chunk167", "parsed": true, "ts": 1770481041.521538}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page169::chunk167", "warning": "metrics[1] похож на определение, а не метрику: 'непродовольственные товары'", "ts": 1770481041.521538}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page169::chunk167", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481041.5221777}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page170::chunk168", "ts": 1770481041.5221777}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page170::chunk168", "parsed": true, "ts": 1770481047.384949}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page170::chunk168", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481047.3855505}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page171::chunk169", "ts": 1770481047.3855505}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page171::chunk169", "parsed": true, "ts": 1770481054.2040577}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page171::chunk169", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481054.2047217}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page172::chunk170", "ts": 1770481054.2047217}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page172::chunk170", "parsed": true, "ts": 1770481061.3063705}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page172::chunk170", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481061.306873}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page173::chunk171", "ts": 1770481061.306873}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page173::chunk171", "parsed": true, "ts": 1770481068.5593045}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page173::chunk171", "warning": "metrics[3] похож на определение, а не метрику: 'Химическая чистка верхней одежды'", "ts": 1770481068.5603101}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page173::chunk171", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481068.561073}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page174::chunk172", "ts": 1770481068.5615761}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page174::chunk172", "parsed": true, "ts": 1770481075.4393246}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page174::chunk172", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481075.439882}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page175::chunk173", "ts": 1770481075.439882}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page175::chunk173", "parsed": true, "ts": 1770481082.4189591}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page175::chunk173", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481082.4194634}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page176::chunk174", "ts": 1770481082.4194634}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page176::chunk174", "parsed": true, "ts": 1770481089.7800136}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page176::chunk174", "warning": "metrics[0] похож на определение, а не метрику: 'Производство промышленных товаров'", "ts": 1770481089.780516}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page176::chunk174", "warning": "metrics[1] похож на определение, а не метрику: 'Добыча полезных ископаемых'", "ts": 1770481089.780516}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page176::chunk174", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481089.780516}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page177::chunk175", "ts": 1770481089.780516}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page177::chunk175", "parsed": true, "ts": 1770481098.4171333}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page177::chunk175", "warning": "metrics[0] похож на определение, а не метрику: 'производство резиновых и пластмассовых изделий'", "ts": 1770481098.4177034}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page177::chunk175", "warning": "metrics[1] похож на определение, а не метрику: 'производство металлургическое'", "ts": 1770481098.4177034}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page177::chunk175", "warning": "metrics[2] слишком длинный (возможно, это определение, а не метрика): 'производство прочей неметаллической минеральной пр...'", "ts": 1770481098.4177034}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page177::chunk175", "warning": "metrics[2] похож на определение, а не метрику: 'производство прочей неметаллической минеральной продукции'", "ts": 1770481098.4177034}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page177::chunk175", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481098.4187086}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page178::chunk176", "ts": 1770481098.4187086}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page178::chunk176", "parsed": true, "ts": 1770481105.505218}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page178::chunk176", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481105.5067208}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page179::chunk177", "ts": 1770481105.5067208}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page179::chunk177", "parsed": true, "ts": 1770481113.6110291}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page179::chunk177", "warning": "metrics[1] похож на определение, а не метрику: 'живущего за международной'", "ts": 1770481113.6115332}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page179::chunk177", "warning": "metrics[4] похож на определение, а не метрику: 'живущего за национальной'", "ts": 1770481113.6115332}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page179::chunk177", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481113.6125386}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page180::chunk178", "ts": 1770481113.6125386}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page180::chunk178", "parsed": true, "ts": 1770481120.5763695}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page180::chunk178", "warning": "metrics[0] похож на определение, а не метрику: 'распространенность анемии среди женщин'", "ts": 1770481120.5763695}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page180::chunk178", "warning": "metrics[1] слишком длинный (возможно, это определение, а не метрика): 'уровень самообеспечения основной сельскохозяйствен...'", "ts": 1770481120.5773733}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page180::chunk178", "warning": "metrics[1] похож на определение, а не метрику: 'уровень самообеспечения основной сельскохозяйственной продукцией'", "ts": 1770481120.5773733}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page180::chunk178", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481120.5783732}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page181::chunk179", "ts": 1770481120.5783732}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page181::chunk179", "parsed": true, "ts": 1770481127.016986}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page181::chunk179", "warning": "metrics[1] похож на определение, а не метрику: 'число новых заражений ВИЧ'", "ts": 1770481127.0175314}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page181::chunk179", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481127.0175314}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page182::chunk180", "ts": 1770481127.0175314}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page182::chunk180", "parsed": true, "ts": 1770481133.1933992}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page182::chunk180", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481133.1939013}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page183::chunk181", "ts": 1770481133.1939013}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page183::chunk181", "parsed": true, "ts": 1770481139.9512904}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page183::chunk181", "warning": "metrics[0] слишком длинный (возможно, это определение, а не метрика): 'доля женщин в возрасте от 20 до 24 лет, вступивших...'", "ts": 1770481139.9520328}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page183::chunk181", "warning": "metrics[0] похож на определение, а не метрику: 'доля женщин в возрасте от 20 до 24 лет, вступивших в брак или союз до 15 лет'", "ts": 1770481139.9530365}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page183::chunk181", "warning": "metrics[1] слишком длинный (возможно, это определение, а не метрика): 'доля времени, потраченного на неоплачиваемый труд ...'", "ts": 1770481139.9530365}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page183::chunk181", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481139.9530365}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page184::chunk182", "ts": 1770481139.954539}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page184::chunk182", "parsed": true, "ts": 1770481146.545171}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page184::chunk182", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481146.5456738}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page185::chunk183", "ts": 1770481146.5456738}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page185::chunk183", "parsed": true, "ts": 1770481154.2821143}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page185::chunk183", "warning": "metrics[0] слишком длинный (возможно, это определение, а не метрика): 'Ежегодный темп роста реального ВВП на душу населен...'", "ts": 1770481154.2826185}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page185::chunk183", "warning": "metrics[0] похож на определение, а не метрику: 'Ежегодный темп роста реального ВВП на душу населения'", "ts": 1770481154.2826185}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page185::chunk183", "warning": "metrics[1] слишком длинный (возможно, это определение, а не метрика): 'Ежегодный темп роста реального ВВП на каждого заня...'", "ts": 1770481154.2826185}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page185::chunk183", "warning": "metrics[1] похож на определение, а не метрику: 'Ежегодный темп роста реального ВВП на каждого занятого'", "ts": 1770481154.2826185}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page185::chunk183", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481154.2826185}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page186::chunk184", "ts": 1770481154.2826185}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page186::chunk184", "parsed": true, "ts": 1770481162.08128}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page186::chunk184", "warning": "metrics[4] похож на определение, а не метрику: 'Не приобретает профессиональные навыки'", "ts": 1770481162.0822794}
+{"event": "model_context_reset", "after_chunks": 351, "ts": 1770481162.0822794}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page186::chunk184", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481164.1336021}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page187::chunk185", "ts": 1770481164.1336021}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page187::chunk185", "parsed": true, "ts": 1770481174.1996963}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page187::chunk185", "warning": "metrics[0] похож на определение, а не метрику: 'объем пассажирских и грузовых перевозок'", "ts": 1770481174.1996963}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page187::chunk185", "warning": "metrics[1] похож на определение, а не метрику: 'темп роста грузооборота'", "ts": 1770481174.2001991}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page187::chunk185", "warning": "metrics[2] похож на определение, а не метрику: 'темп роста пассажирооборота'", "ts": 1770481174.2001991}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page187::chunk185", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481174.2001991}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page188::chunk186", "ts": 1770481174.2001991}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page188::chunk186", "parsed": true, "ts": 1770481181.2345715}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page188::chunk186", "warning": "metrics[0] слишком длинный (возможно, это определение, а не метрика): 'доля населения с доходом ниже 50 процентов медианн...'", "ts": 1770481181.2345715}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page188::chunk186", "warning": "metrics[0] похож на определение, а не метрику: 'доля населения с доходом ниже 50 процентов медианного дохода'", "ts": 1770481181.235076}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page188::chunk186", "warning": "metrics[1] похож на определение, а не метрику: 'доля доходов трудящихся в ВВП'", "ts": 1770481181.235076}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page188::chunk186", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481181.235076}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page189::chunk187", "ts": 1770481181.235076}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page189::chunk187", "parsed": true, "ts": 1770481188.6414921}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page189::chunk187", "warning": "metrics[0] похож на определение, а не метрику: 'Природные чрезвычайные ситуации'", "ts": 1770481188.6420622}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page189::chunk187", "warning": "metrics[1] слишком длинный (возможно, это определение, а не метрика): 'Погибшие в результате природных чрезвычайных ситуа...'", "ts": 1770481188.6420622}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page189::chunk187", "warning": "metrics[1] похож на определение, а не метрику: 'Погибшие в результате природных чрезвычайных ситуаций'", "ts": 1770481188.6430662}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page189::chunk187", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481188.6430662}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page190::chunk188", "ts": 1770481188.6445708}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page190::chunk188", "parsed": true, "ts": 1770481196.2828414}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page190::chunk188", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481196.2828414}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page191::chunk189", "ts": 1770481196.2828414}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page191::chunk189", "parsed": true, "ts": 1770481203.947359}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page191::chunk189", "warning": "metrics[1] похож на определение, а не метрику: 'экспорт товаров и услуг'", "ts": 1770481203.9480138}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page191::chunk189", "warning": "metrics[2] похож на определение, а не метрику: 'импорт товаров и услуг'", "ts": 1770481203.9480138}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page191::chunk189", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481203.9480138}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page192::chunk190", "ts": 1770481203.9490187}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page192::chunk190", "parsed": true, "ts": 1770481209.3592193}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page192::chunk190", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481209.359914}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page193::chunk191", "ts": 1770481209.359914}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page193::chunk191", "parsed": true, "ts": 1770481217.2722654}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page193::chunk191", "warning": "metrics[0] похож на определение, а не метрику: 'среднедушевые денежные доходы'", "ts": 1770481217.2722654}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page193::chunk191", "warning": "metrics[1] похож на определение, а не метрику: 'величина прожиточного минимума'", "ts": 1770481217.2722654}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page193::chunk191", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481217.2722654}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page194::chunk192", "ts": 1770481217.2732697}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page194::chunk192", "parsed": true, "ts": 1770481224.314465}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page194::chunk192", "warning": "metrics[0] похож на определение, а не метрику: 'хлеб и хлебные продукты'", "ts": 1770481224.314465}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page194::chunk192", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481224.3154671}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page195::chunk193", "ts": 1770481224.3154671}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page195::chunk193", "parsed": true, "ts": 1770481230.2725508}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page195::chunk193", "warning": "metrics[0] похож на определение, а не метрику: 'потребление продуктов питания'", "ts": 1770481230.2725508}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page195::chunk193", "warning": "metrics[1] похож на определение, а не метрику: 'размер общей площади жилья'", "ts": 1770481230.2730558}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page195::chunk193", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481230.2730558}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page196::chunk194", "ts": 1770481230.2730558}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page196::chunk194", "parsed": true, "ts": 1770481237.1609156}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page196::chunk194", "warning": "metrics[0] похож на определение, а не метрику: 'Зерновые и зернобобовые культуры'", "ts": 1770481237.1615963}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page196::chunk194", "warning": "metrics[1] похож на определение, а не метрику: 'Технические культуры'", "ts": 1770481237.1615963}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page196::chunk194", "warning": "metrics[2] похож на определение, а не метрику: 'Картофель и овощебахчевые культуры'", "ts": 1770481237.1615963}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page196::chunk194", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481237.1615963}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page197::chunk195", "ts": 1770481237.1615963}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page197::chunk195", "parsed": true, "ts": 1770481243.6809459}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page197::chunk195", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481243.681541}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page198::chunk196", "ts": 1770481243.681541}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page198::chunk196", "parsed": true, "ts": 1770481250.428082}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page198::chunk196", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481250.4288487}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page199::chunk197", "ts": 1770481250.4288487}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page199::chunk197", "parsed": true, "ts": 1770481256.7447114}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page199::chunk197", "warning": "metrics[0] похож на определение, а не метрику: 'Продовольственные товары'", "ts": 1770481256.7452781}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page199::chunk197", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481256.7452781}
+{"event": "request", "chunk_id": "Беларусь и Россия, 2024.pdf::page200::chunk198", "ts": 1770481256.7452781}
+{"event": "response", "chunk_id": "Беларусь и Россия, 2024.pdf::page200::chunk198", "parsed": true, "ts": 1770481263.1498709}
+{"event": "metrics_warning", "chunk_id": "Беларусь и Россия, 2024.pdf::page200::chunk198", "warning": "metrics[0] похож на определение, а не метрику: 'Индекс потребительских цен'", "ts": 1770481263.1502674}
+{"event": "error", "chunk_id": "Беларусь и Россия, 2024.pdf::page200::chunk198", "error": "cannot access local variable 'rate' where it is not associated with a value", "ts": 1770481263.1507714}
+{"event": "done", "total_returned": 390, "ts": 1770481263.1507714}
