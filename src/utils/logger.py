@@ -106,55 +106,8 @@ class RAGLogger:
         if ollama_config:
             record["ollama"] = ollama_config
 
-        self.log("reranking-log", record)
+        self.log("reranking", record)
 
-    # =========================
-    # LLM Enrichment Logging
-    # =========================
-    def log_llm_enrichment(
-        self,
-        event: str,
-        pdf_name: Optional[str] = None,
-        chunk_ids: Optional[list] = None,
-        system_prompt: Optional[str] = None,
-        prompt: Optional[str] = None,
-        raw_response: Optional[str] = None,
-        parsed_items: Optional[int] = None,
-        ollama_config: Optional[Dict[str, Any]] = None,
-        include_raw_response: bool = True,
-        **kwargs: Any
-    ) -> None:
-        """
-        Логирование шагов обогащения LLM.
-
-        Args:
-            event: 'request' или 'response'
-            pdf_name: название документа
-            chunk_ids: список id обрабатываемых чанков
-            system_prompt: системный промпт
-            prompt: пользовательский промпт
-            raw_response: ответ от LLM
-            parsed_items: количество успешно распарсенных полей
-            ollama_config: конфиг Ollama
-            include_raw_response: если False, raw_response не логируется
-        """
-        record: Dict[str, Any] = {"event": event, **kwargs}
-        if pdf_name:
-            record["pdf_name"] = pdf_name
-        if chunk_ids:
-            record["chunk_ids"] = chunk_ids
-        if system_prompt:
-            record["system_prompt"] = system_prompt
-        if prompt:
-            record["prompt"] = prompt
-        if raw_response and include_raw_response:
-            record["raw_response"] = raw_response
-        if parsed_items is not None:
-            record["parsed_items"] = parsed_items
-        if ollama_config:
-            record["ollama"] = ollama_config
-
-        self.log("llm-enrichment-log", record)
 
     # =========================
     # LLM Enrichment Failures
