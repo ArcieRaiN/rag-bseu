@@ -47,7 +47,7 @@ class QueryPipeline:
         print("[INIT] QueryPipeline: инициализация...")
 
         self._base_dir = Path(base_dir)
-        self._ollama = OllamaClient(model=llm_model)
+        self._ollama = OllamaClient()
         self._vectorizer = SentenceVectorizer(dimension=vector_dim)
 
         vector_store_dir = self._base_dir / "usage" / "vector_store"
@@ -59,16 +59,18 @@ class QueryPipeline:
         self._retrieval_config = retrieval_config or RetrievalConfig()
         self._hybrid = HybridSearcher(
             semantic_searcher=self._semantic,
-            retrieval_config=self._retrieval_config,
+            config=self._retrieval_config
         )
-
         self._enricher = QueryContextEnricher(
             vectorizer=self._vectorizer,
             llm_client=self._ollama,
         )
 
         self._rerank_config = rerank_config or RerankConfig()
-        self._reranker = LLMReranker(config=self._rerank_config)
+        self._reranker = LLMReranker(
+            config=self._rerank_config,
+            llm_client=self._ollama
+        )
 
         print(f"[INIT] QueryPipeline готов за {time.perf_counter() - t0:.2f}s")
 
@@ -80,7 +82,7 @@ class QueryPipeline:
             query: Строка запроса пользователя
 
         Returns:
-            PipelineResult с кандидатом и rerank
+            PipelineResult с кандидатами и rerank
         """
         print(f"\n[PIPELINE] Start query: {query!r}")
         t_pipeline = time.perf_counter()

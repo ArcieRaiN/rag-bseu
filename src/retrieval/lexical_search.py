@@ -83,30 +83,44 @@ class InMemoryBM25:
             combined = f"{ch.context}\n{ch.text}"
 
             # Добавляем псевдо‑запросы (query hints), построенные из метаданных.
-            # Это не полноценные вопросы, а нормализованные фразы вида:
-            # "розничный товарооборот по областям беларуси 2015-2023".
             hints_parts: list[str] = []
+
+            # Метрики
             if ch.metrics:
-                # Берём первые 2‑3 метрики, чтобы не раздувать документ.
-                hints_parts.append(" ".join(ch.metrics[:3]))
-            if ch.geo:
-                hints_parts.append(ch.geo)
-            if ch.years:
-                years_sorted = sorted(ch.years)
-                if len(years_sorted) > 1:
-                    years_repr = f"{years_sorted[0]}-{years_sorted[-1]}"
+                if isinstance(ch.metrics, list):
+                    hints_parts.append(" ".join(str(m) for m in ch.metrics[:3]))
                 else:
-                    years_repr = str(years_sorted[0])
-                hints_parts.append(years_repr)
+                    hints_parts.append(str(ch.metrics))
+
+            # Гео
+            if ch.geo:
+                if isinstance(ch.geo, list):
+                    hints_parts.append(" ".join(str(g) for g in ch.geo))
+                else:
+                    hints_parts.append(str(ch.geo))
+
+            # Годы
+            if ch.years:
+                if isinstance(ch.years, list):
+                    years_sorted = sorted(ch.years)
+                    if len(years_sorted) > 1:
+                        years_repr = f"{years_sorted[0]}-{years_sorted[-1]}"
+                    else:
+                        years_repr = str(years_sorted[0])
+                    hints_parts.append(years_repr)
+                else:
+                    hints_parts.append(str(ch.years))
 
             if hints_parts:
                 combined += "\n" + " ".join(hints_parts)
 
+            # Нормализация текста и токенизация
             norm = normalize_text_lemmatized(combined)
             tokens = [t for t in norm.split() if t]
             self._doc_len.append(len(tokens))
             total_len += len(tokens)
 
+            # Построение tf_map
             tf_map = {}
             for t in tokens:
                 tf_map[t] = tf_map.get(t, 0) + 1

@@ -11,19 +11,24 @@ Context enrichment (PIPELINE 2) для пользовательских запр
 """
 
 from typing import Any, Dict, List, Optional
+import json
 
 from src.core.models import EnrichedQuery
 from src.enrichers.client import OllamaClient
 from src.vectorstore.vectorizer import SentenceVectorizer
-from src.core.utils import normalize_geo, normalize_list, normalize_years
 
 DEFAULT_ENRICHMENT: Dict[str, Any] = {
-    "geo": "Республика Беларусь",
-    "years": [2020, 2021, 2022, 2023, 2024],
-    "metrics": None,
-    "time_granularity": "year",
+    "geo": [],
+    "metrics": [],
+    "years": [],
+    "time_granularity": None,
     "oked": None,
 }
+
+
+def _fallback(value, default):
+    """Возвращает default только если value is None, иначе оставляет value."""
+    return default if value is None else value
 
 
 class QueryContextEnricher:
@@ -50,21 +55,22 @@ class QueryContextEnricher:
         """
         # embedding запроса
         embedded = self._vectorizer.embed(query)
+
         # LLM enrichment
         llm_raw = self._call_llm_for_enrichment(query)
         parsed = self._safe_parse_llm_response(llm_raw)
 
-        # Применяем значения по умолчанию
-        geo = normalize_geo(parsed.get("geo")) or DEFAULT_ENRICHMENT["geo"]
-        years = normalize_years(parsed.get("years")) or DEFAULT_ENRICHMENT["years"]
-        metrics = normalize_list(parsed.get("metrics")) or DEFAULT_ENRICHMENT["metrics"]
-        time_granularity = parsed.get("time_granularity") or DEFAULT_ENRICHMENT["time_granularity"]
-        oked = parsed.get("oked") or DEFAULT_ENRICHMENT["oked"]
+        # Применяем значения по умолчанию только если None
+        geo = _fallback(parsed.get("geo"), DEFAULT_ENRICHMENT["geo"])
+        metrics = _fallback(parsed.get("metrics"), DEFAULT_ENRICHMENT["metrics"])
+        years = _fallback(parsed.get("years"), DEFAULT_ENRICHMENT["years"])
+        time_granularity = _fallback(parsed.get("time_granularity"), DEFAULT_ENRICHMENT["time_granularity"])
+        oked = _fallback(parsed.get("oked"), DEFAULT_ENRICHMENT["oked"])
 
         # Возвращаем EnrichedQuery с list вместо np.ndarray
         return EnrichedQuery(
             query=query,
-            embedded_query=embedded.astype("float32").tolist(),
+            embedded_query=embedded.astype("float32"),
             geo=geo,
             years=years,
             metrics=metrics,
@@ -81,7 +87,7 @@ class QueryContextEnricher:
 
         Ожидаемый формат ответа — JSON с ключами:
         {
-          "geo": "...",
+          "geo": ["..."],
           "metrics": ["...", "..."],
           "years": [2020, 2021],
           "time_granularity": "year",
@@ -89,14 +95,23 @@ class QueryContextEnricher:
         }
         """
         prompt = (
-            "Ты аналитик по официальной статистике Республики Беларусь.\n"
-            "По пользовательскому запросу нужно аккуратно извлечь следующие поля:\n"
-            "- geo: строка с географическим объектом\n"
-            "- metrics: список показателей (например, 'добыча нефти')\n"
-            "- years: список целых годов (если диапазон — развернуть)\n"
-            "- time_granularity: 'year' | 'quarter' | 'month' | 'day'\n"
-            "- oked: код или описание из ОКЭД\n\n"
-            "Верни ТОЛЬКО один JSON‑объект без пояснений.\n\n"
+            "Ты — аналитик официальной статистики Республики Беларусь.\n"
+            "По пользовательскому запросу нужно извлечь СТРУКТУРУ запроса "
+            "для последующего семантического поиска.\n\n"
+
+            "Верни ТОЛЬКО один валидный JSON с полями:\n"
+            "- geo: список территорий (если не указаны — [])\n"
+            "- metrics: список названий показателей, без чисел, лет и единиц измерения\n"
+            "- years: список целых лет (если указан диапазон — разверни)\n"
+            "- time_granularity: 'year', 'quarter', 'month' или null\n"
+            "- oked: строка (код или описание ОКЭД) или null\n\n"
+
+            "Правила:\n"
+            "1. Используй только информацию из запроса.\n"
+            "2. Ничего не додумывай.\n"
+            "3. Если поле невозможно определить — верни [] или null.\n"
+            "4. Ответ строго JSON, без комментариев.\n\n"
+
             f"Запрос: \"{query}\""
         )
         return self._llm_client.generate(prompt, format="json")
@@ -121,24 +136,3 @@ class QueryContextEnricher:
             return data if isinstance(data, dict) else {}
         except json.JSONDecodeError:
             return {}
-
-    @staticmethod
-    def _merge_metrics(
-        primary: Optional[List[str]],
-        secondary: Optional[List[str]],
-        limit: int = 5,
-    ) -> Optional[List[str]]:
-        """
-        Объединяет списки метрик, убирает дубликаты, лимитирует результат.
-        """
-        out: List[str] = []
-        for src in (primary or []), (secondary or []):
-            for m in src:
-                mm = str(m).strip().lower()
-                if mm and mm not in out:
-                    out.append(mm)
-                if len(out) >= limit:
-                    break
-            if len(out) >= limit:
-                break
-        return out or None
