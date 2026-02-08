@@ -1,21 +1,30 @@
 """
-CLI для rag-bseu: единый вход для query и подготовки векторного хранилища.
+CLI для rag-bseu: единый вход для всех pipeline-кнопок.
 
-Использует подпакеты:
-- prepare_vector_store.py
-- query.py
+Доступные команды:
+- parse_documents.py        → загрузка / парсинг источников
+- prepare_vector_store.py   → построение базы знаний и FAISS
+- query.py                  → интерактивный RAG-запрос
 """
 
 import argparse
-from pathlib import Path
 import subprocess
+import sys
+from pathlib import Path
 
-def main():
+
+def main() -> None:
     parser = argparse.ArgumentParser(description="RAG-BSEU CLI")
+
+    parser.add_argument(
+        "--parse-documents",
+        action="store_true",
+        help="Скачать и распарсить документы (PDF / сайты)",
+    )
     parser.add_argument(
         "--prepare-vector-store",
         action="store_true",
-        help="Запустить подготовку базы знаний и FAISS индекса",
+        help="Построить базу знаний и FAISS индекс",
     )
     parser.add_argument(
         "--query",
@@ -24,14 +33,23 @@ def main():
     )
 
     args = parser.parse_args()
-    root_dir = Path(__file__).resolve().parent
+    usage_dir = Path(__file__).resolve().parent
 
-    if args.prepare_vector_store:
-        subprocess.run(["python", root_dir / "prepare_vector_store.py"])
+    if args.parse_documents:
+        subprocess.run([sys.executable, usage_dir / "parse_documents.py"])
+
+    elif args.prepare_vector_store:
+        subprocess.run([sys.executable, usage_dir / "prepare_vector_store.py"])
+
     elif args.query:
-        subprocess.run(["python", root_dir / "query.py"])
+        subprocess.run([sys.executable, usage_dir / "query.py"])
+
     else:
-        print("❌ Нужно указать флаг: --prepare-vector-store или --query")
+        print("❌ Укажите режим запуска:")
+        print("   --parse-documents")
+        print("   --prepare-vector-store")
+        print("   --query")
+
 
 if __name__ == "__main__":
     main()
