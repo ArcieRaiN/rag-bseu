@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import List, Optional, Dict, Any
 import time
 import logging
+from tqdm import tqdm
+from sys import stdout
 
 from src.core.models import Chunk
 from src.enrichers.client import OllamaClient
@@ -66,7 +68,17 @@ class LLMEnricher:
         start_time = time.time()
         processed = 0
 
-        for chunk in to_process:
+        progress_iter = tqdm(
+            to_process,
+            total=len(to_process),
+            desc=f"LLM enrich: {pdf_name}",
+            mininterval=0.5,
+            disable=not show_progress,
+            file=stdout,
+            colour="green",
+        )
+
+        for chunk in progress_iter:
             try:
                 enriched_chunk = self._enrich_single_chunk(pdf_name, chunk)
                 resulting.append(enriched_chunk or chunk)
@@ -74,17 +86,24 @@ class LLMEnricher:
                 processed += 1
                 self._chunks_since_reset += 1
 
-                # Periodically reset LLM context
                 if self._chunks_since_reset >= self._cfg.reset_interval:
                     try:
                         ok = self._llm.reset_context()
-                        logger.info("LLM context reset (ok=%s) after %d chunks", ok, self._chunks_since_reset)
+                        logger.info(
+                            "LLM context reset (ok=%s) after %d chunks",
+                            ok,
+                            self._chunks_since_reset,
+                        )
                     except Exception as e:
                         logger.warning("Error during LLM reset: %s", e)
                     self._chunks_since_reset = 0
 
             except Exception as e:
-                logger.exception("Error enriching chunk %s: %s", getattr(chunk, "id", None), e)
+                logger.exception(
+                    "Error enriching chunk %s: %s",
+                    getattr(chunk, "id", None),
+                    e,
+                )
                 if not chunk.context:
                     chunk.context = chunk.text[:256] if chunk.text else "нет текста"
                 resulting.append(chunk)
