@@ -156,6 +156,43 @@ class RAGLogger:
 
         self.log("llm-enrichment-log", record)
 
+    # =========================
+    # LLM Enrichment Failures
+    # =========================
+    def log_llm_enrichment_fail(
+        self,
+        *,
+        pdf_name: str,
+        chunk_id: str,
+        page: int | None,
+        chunk_text: str | None,
+        system_prompt: str,
+        prompt: str,
+        raw_response: str,
+        attempts: int,
+        error_type: str = "parse_failed",
+        **kwargs: Any,
+    ) -> None:
+        """
+        Логирование неудачных enrichment-попыток (parse / validation / etc).
+        """
+        record: Dict[str, Any] = {
+            "event": "enrichment_fail",
+            "error_type": error_type,
+            "pdf_name": pdf_name,
+            "chunk_id": chunk_id,
+            "page": page,
+            "attempts": attempts,
+            "chunk_text": chunk_text,
+            "system_prompt": system_prompt,
+            "prompt": prompt,
+            "raw_response": raw_response,
+            **kwargs,
+        }
+
+        self.log("llm-enrichment-fails", record)
+
+
 
 # =========================
 # Singleton Instance

@@ -13,6 +13,7 @@ from src.enrichers.parsers import parse_single_enrichment
 
 # Optional project-specific helpers
 try:
+    from src.utils.logger import get_logger
     from src.utils.json_validator import ChunkValidator
     from src.ingestion.chunk_filter import ChunkFilter
     from src.utils.post_processor import EnrichmentPostProcessor
@@ -38,8 +39,9 @@ class LLMEnricher:
         self._llm = llm_client
         self._cfg = config or EnricherConfig()
         self._validator = ChunkValidator() if ChunkValidator else None
-        self._chunk_filter = ChunkFilter(skip_first_pages=3) if ChunkFilter else None
+        self._chunk_filter = ChunkFilter(skip_first_pages=5) if ChunkFilter else None
         self._post = EnrichmentPostProcessor() if EnrichmentPostProcessor else None
+        self._rag_logger = get_logger()
         self._chunks_since_reset = 0
 
     def enrich_chunks(
@@ -157,9 +159,15 @@ class LLMEnricher:
                 time.sleep(0.5)
 
         if not parsed:
-            logger.warning(
-                "Failed to parse enrichment for chunk %s after %d attempts",
-                chunk.id, self._cfg.max_retries
+            self._rag_logger.log_llm_enrichment_fail(
+                pdf_name=pdf_name,
+                chunk_id=chunk.id,
+                page=getattr(chunk, "page", None),
+                chunk_text=(chunk.text or "")[:2000],
+                system_prompt=system_prompt,
+                prompt=prompt,
+                raw_response=raw_response,
+                attempts=self._cfg.max_retries,
             )
             return None
 
