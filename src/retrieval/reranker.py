@@ -130,15 +130,36 @@ class LLMReranker:
         )
         return f"{instruction}\n\nЗапрос:\n{json.dumps(query_block, ensure_ascii=False, indent=2)}\n\nФрагмент:\n{json.dumps(chunk_block, ensure_ascii=False, indent=2)}"
 
-    def _score_single_chunk(self, enriched_query: EnrichedQuery, scored_chunk: ScoredChunk,
-                            system_prompt: str, enriched_query_dict: dict) -> float:
+    def _score_single_chunk(
+            self,
+            enriched_query: EnrichedQuery,
+            scored_chunk: ScoredChunk,
+            system_prompt: str,
+            enriched_query_dict: dict
+    ) -> float:
         """
         Оценка одного чанка через LLM. Возвращает score в диапазоне [0,1].
+        Логирует raw ответы LLM для дебага.
         """
         ch_id = scored_chunk.chunk.id
         last_raw = ""
+
         for attempt in range(1, self._config.max_retries + 1):
             prompt = self._build_prompt_for_chunk(enriched_query, scored_chunk)
+
+            # 🔹 Логируем вызов LLM
+            self._logger.log_llm_reranking(
+                event="llm_call",
+                query=enriched_query.query,
+                candidate_ids=[ch_id],
+                system_prompt=system_prompt,
+                prompt=prompt,
+                ollama_config={
+                    "model": self._config.model_name,
+                    "temperature": self._config.temperature,
+                },
+            )
+
             last_raw = self._llm.generate(
                 prompt,
                 system_prompt=system_prompt,
@@ -147,9 +168,28 @@ class LLMReranker:
                 format="json"
             )
 
+            # 🔹 Логируем сырой ответ LLM
+            self._logger.log_llm_reranking(
+                event="llm_raw_response",
+                query=enriched_query.query,
+                candidate_ids=[ch_id],
+                raw_response=last_raw,
+            )
+
             score = self._parse_single_score(last_raw, ch_id)
+
             if score is not None:
                 return score
+
+            # 🔹 Логируем ошибку парсинга
+            self._logger.log_llm_reranking(
+                event="llm_parse_failed",
+                query=enriched_query.query,
+                candidate_ids=[ch_id],
+                raw_response=last_raw,
+                attempt=attempt,
+            )
+
         return 0.0
 
     @staticmethod
