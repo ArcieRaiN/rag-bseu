@@ -19,20 +19,14 @@ from src.vectorstore.vectorizer import SentenceVectorizer
 from src.core.models import PipelineResult, ScoredChunk
 from src.core.config import RetrievalConfig
 from src.enrichers.client import OllamaClient
-
+from src.utils.spellchecker import QuerySpellChecker
 
 class QueryPipeline:
-    def __init__(
-        self,
-        base_dir: Path,
-        *,
-        llm_model: str = "llama3-chatqa:latest",
-        vector_dim: int = 256,
-        retrieval_config: RetrievalConfig | None = None,
-    ):
+    def __init__(self, base_dir: Path, *, llm_model: str = "llama3-chatqa:latest",
+                 vector_dim: int = 256, retrieval_config: RetrievalConfig | None = None,
+                 custom_words: set[str] | None = None):
         """
         Инициализация пайплайна.
-
         Args:
             base_dir: Корень проекта (rag-bseu)
             llm_model: Модель LLM для enrichment
@@ -45,6 +39,7 @@ class QueryPipeline:
         self._base_dir = Path(base_dir)
         self._ollama = OllamaClient()
         self._vectorizer = SentenceVectorizer(dimension=vector_dim)
+        self._spellchecker = QuerySpellChecker()
 
         vector_store_dir = self._base_dir / "usage" / "vector_store"
         self._semantic = FaissSemanticSearcher(
@@ -71,16 +66,20 @@ class QueryPipeline:
 
         Args:
             query: Строка запроса пользователя
-
         Returns:
             PipelineResult с кандидатами (без rerank)
         """
         print(f"\n[PIPELINE] Start query: {query!r}")
         t_pipeline = time.perf_counter()
 
+        # Исправление опечаток
+        t0 = time.perf_counter()
+        corrected_query = self._spellchecker.correct_query(query)
+        print(f"[STEP 0] Spellcheck done in {time.perf_counter() - t0:.2f}s -> {corrected_query!r}")
+
         # 1. Enrichment
         t0 = time.perf_counter()
-        enriched_query = self._enricher.enrich(query)
+        enriched_query = self._enricher.enrich(corrected_query)
         print(f"[STEP 1] Enrichment done in {time.perf_counter() - t0:.2f}s")
 
         # 2. Hybrid search
