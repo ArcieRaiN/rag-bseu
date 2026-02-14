@@ -60,54 +60,6 @@ class RAGLogger:
             with open(log_path, "a", encoding="utf-8") as f:
                 f.write(line + "\n")
 
-    # =========================
-    # LLM Reranking Logging
-    # =========================
-    def log_llm_reranking(
-        self,
-        event: str,
-        query: Optional[str] = None,
-        enriched_query: Optional[Dict[str, Any]] = None,
-        candidates_count: Optional[int] = None,
-        candidate_ids: Optional[list] = None,
-        system_prompt: Optional[str] = None,
-        prompt: Optional[str] = None,
-        raw_response: Optional[str] = None,
-        rerank_scores: Optional[Dict[str, float]] = None,
-        top_k: Optional[int] = None,
-        elapsed_time: Optional[float] = None,
-        ollama_config: Optional[Dict[str, Any]] = None,
-        **kwargs: Any
-    ) -> None:
-        """
-        Логирование для LLM reranking.
-        """
-        record: Dict[str, Any] = {"event": event, **kwargs}
-        if query:
-            record["query"] = query
-        if enriched_query:
-            record["enriched_query"] = enriched_query
-        if candidates_count is not None:
-            record["candidates_count"] = candidates_count
-        if candidate_ids:
-            record["candidate_ids"] = candidate_ids
-        if system_prompt:
-            record["system_prompt"] = system_prompt
-        if prompt:
-            record["prompt"] = prompt
-        if raw_response:
-            record["raw_response"] = raw_response
-        if rerank_scores:
-            record["rerank_scores"] = rerank_scores
-        if top_k is not None:
-            record["top_k"] = top_k
-        if elapsed_time is not None:
-            record["elapsed_time"] = elapsed_time
-        if ollama_config:
-            record["ollama"] = ollama_config
-
-        self.log("reranking", record)
-
 
     # =========================
     # LLM Enrichment Failures

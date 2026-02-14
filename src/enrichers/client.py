@@ -3,9 +3,6 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional, Protocol
 import time
 import requests
-from src.utils.logger import get_logger
-
-logger = get_logger()
 
 
 # --- HTTP client interface для тестов / DI ---
@@ -34,7 +31,7 @@ class OllamaConfig:
 
 class OllamaClient:
     """
-    Клиент для Ollama HTTP API с логированием и retry.
+    Клиент для Ollama HTTP API с retry.
 
     Поддержка Dependency Injection через http_client (для юнит-тестов).
     """
@@ -59,19 +56,17 @@ class OllamaClient:
         try:
             resp = self._http_client.post(url, json=payload, timeout=5.0)
             resp.raise_for_status()
-            logger.log("llm_client", {"event": "reset_context_success"})
             return True
-        except Exception as e:
-            logger.log("llm_client", {"event": "reset_context_failed", "error": str(e)})
+        except Exception:
             return False
 
     def generate(
-            self,
-            prompt: str,
-            *,
-            system_prompt: Optional[str] = None,
-            max_retries: int = 3,
-            **params: Any,
+        self,
+        prompt: str,
+        *,
+        system_prompt: Optional[str] = None,
+        max_retries: int = 3,
+        **params: Any,
     ) -> str:
         """
         Сгенерировать текст от Ollama.
@@ -93,41 +88,27 @@ class OllamaClient:
             "num_predict": self.config.num_predict,
             "keep_alive": self.config.keep_alive,
         }
+
         if self.config.format:
             payload["format"] = self.config.format
         if system_prompt:
             payload["system"] = system_prompt
+
         payload.update(params)
 
         for attempt in range(1, max_retries + 1):
             try:
-                logger.log("llm_client", {
-                    "event": "request",
-                    "attempt": attempt,
-                    "payload": payload,
-                })
                 resp = self._http_client.post(url, json=payload, timeout=self.config.timeout)
                 resp.raise_for_status()
                 data = resp.json()
-                result = data.get("response", "") or ""
-                logger.log("llm_client", {
-                    "event": "response",
-                    "attempt": attempt,
-                    "response_length": len(result),
-                    "raw_response": result[:500],  # первые 500 символов
-                })
-                return result
+                return data.get("response", "") or ""
+
             except requests.exceptions.ReadTimeout:
                 backoff = (2 ** (attempt - 1)) * 2
-                logger.log("llm_client", {
-                    "event": "timeout",
-                    "attempt": attempt,
-                    "backoff": backoff,
-                })
                 if attempt < max_retries:
                     time.sleep(backoff)
                     continue
                 raise
-            except requests.exceptions.RequestException as e:
-                logger.log("llm_client", {"event": "request_error", "error": str(e)})
+
+            except requests.exceptions.RequestException:
                 raise
