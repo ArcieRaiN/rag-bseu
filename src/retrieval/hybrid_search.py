@@ -18,7 +18,7 @@ import numpy as np
 from src.core.models import EnrichedQuery, ScoredChunk
 from src.core.config import RetrievalConfig
 from src.retrieval.semantic_search import FaissSemanticSearcher
-from src.retrieval.lexical_search import InMemoryBM25
+from src.retrieval.lexical_search import RankBM25Search
 from src.retrieval.metadata_scorer import MetadataScorer
 
 
@@ -41,7 +41,7 @@ class HybridSearcher:
         self._semantic = semantic_searcher
         self._config = config
         self._metadata_scorer = MetadataScorer()
-        self._lexical = InMemoryBM25(self._semantic.get_all_chunks())  # через геттер
+        self._lexical = RankBM25Search(self._semantic.get_all_chunks())  # через геттер
 
     # -------------------- Публичный интерфейс -------------------- #
 

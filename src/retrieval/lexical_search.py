@@ -1,75 +1,48 @@
 from __future__ import annotations
 
 """
-Lexical Search (BM25‑подобный) по полям text + context (PIPELINE 3.2).
-
-Задачи:
-- проиндексировать чанки в памяти
-- по запросу вернуть Top‑K кандидатов с заполненным lexical_score
-
-Реализация BM25 упрощена и ориентирована на отладку. При необходимости
-её можно заменить на rank_bm25 или другой готовый backend, не меняя интерфейс.
+Lexical Search через rank_bm25 с поддержкой весов полей (text/context/hints).
+Интерфейс search(query, top_k)
 """
 
-from dataclasses import dataclass
-from typing import Iterable, List
-import math
+from typing import List
+from rank_bm25 import BM25Okapi
 
 from src.core.models import Chunk, ScoredChunk, EnrichedQuery
 from src.core.input_normalizer import normalize_text_lemmatized
 from src.core.config import LexicalSearchConfig
 
 
-@dataclass
-class _Posting:
-    doc_id: int
-    tf: int
-
-
-class InMemoryBM25:
+class RankBM25Search:
     """
-    Простейший BM25‑подобный индекс для text+context с поддержкой весов полей.
+    Lexical search с использованием rank_bm25 + Cython для ускорения.
+    Поддерживает веса полей:
+        w_text, w_context, w_hints
     """
 
     def __init__(self, chunks: List[Chunk], config: LexicalSearchConfig | None = None):
         self._chunks = chunks
         self._config = config or LexicalSearchConfig()
-        self._index = {}  # term -> List[_Posting]
-        self._doc_len = []
-        self._avg_doc_len = 0.0
+
+        # токенизация по документам и полям
+        self._text_tokens: List[List[str]] = []
+        self._context_tokens: List[List[str]] = []
+        self._hints_tokens: List[List[str]] = []
+
         self._build()
 
-    # -------------------- Публичный интерфейс -------------------- #
-
-    def search(self, enriched_query: EnrichedQuery, top_k: int) -> List[ScoredChunk]:
-        terms = self._make_query_terms(enriched_query)
-        if not terms:
-            return []
-
-        scores = self._score_documents(terms)
-        ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:top_k]
-
-        results: List[ScoredChunk] = []
-        for doc_id, score in ranked:
-            if doc_id < 0 or doc_id >= len(self._chunks):
-                continue
-            results.append(
-                ScoredChunk(
-                    chunk=self._chunks[doc_id],
-                    lexical_score=float(score),
-                )
-            )
-        return results
-
     # -------------------- Индексация -------------------- #
-
     def _build(self) -> None:
-        total_len = 0
-        for doc_id, ch in enumerate(self._chunks):
-            # Разделяем токены по полям
+        for ch in self._chunks:
+            # text
             text_tokens = [t for t in normalize_text_lemmatized(ch.text).split() if t]
-            context_tokens = [t for t in normalize_text_lemmatized(ch.context).split() if t]
+            self._text_tokens.append(text_tokens)
 
+            # context
+            context_tokens = [t for t in normalize_text_lemmatized(ch.context).split() if t]
+            self._context_tokens.append(context_tokens)
+
+            # hints: metrics / geo / years
             hints_parts: list[str] = []
             if ch.metrics:
                 hints_parts.append(" ".join(str(m) for m in ch.metrics[:3]) if isinstance(ch.metrics, list) else str(ch.metrics))
@@ -83,26 +56,14 @@ class InMemoryBM25:
                 else:
                     hints_parts.append(str(ch.years))
             hints_tokens = [t for t in normalize_text_lemmatized(" ".join(hints_parts)).split() if t]
+            self._hints_tokens.append(hints_tokens)
 
-            # длина документа для BM25
-            dl = len(text_tokens) + len(context_tokens) + len(hints_tokens)
-            self._doc_len.append(dl)
-            total_len += dl
-
-            # строим tf_map для каждого токена
-            for term, tf in self._make_tf_map(text_tokens + context_tokens + hints_tokens).items():
-                self._index.setdefault(term, []).append(_Posting(doc_id=doc_id, tf=tf))
-
-        self._avg_doc_len = total_len / max(len(self._chunks), 1)
-
-    def _make_tf_map(self, tokens: list[str]) -> dict[str, int]:
-        tf_map: dict[str, int] = {}
-        for t in tokens:
-            tf_map[t] = tf_map.get(t, 0) + 1
-        return tf_map
+        # Создаём BM25 объекты для каждого поля
+        self._bm25_text = BM25Okapi(self._text_tokens)
+        self._bm25_context = BM25Okapi(self._context_tokens)
+        self._bm25_hints = BM25Okapi(self._hints_tokens)
 
     # -------------------- Подготовка запроса -------------------- #
-
     def _make_query_terms(self, enriched_query: EnrichedQuery) -> List[str]:
         terms = [t for t in normalize_text_lemmatized(enriched_query.query).split() if t]
         if enriched_query.geo:
@@ -112,26 +73,36 @@ class InMemoryBM25:
                 terms.extend([t for t in normalize_text_lemmatized(str(m)).split() if t])
         return terms
 
-    # -------------------- BM25‑подобный скоринг с весами -------------------- #
+    # -------------------- Поиск -------------------- #
+    def search(self, enriched_query: EnrichedQuery, top_k: int) -> List[ScoredChunk]:
+        query_terms = self._make_query_terms(enriched_query)
+        if not query_terms:
+            return []
 
-    def _score_documents(self, query_terms: Iterable[str]) -> dict[int, float]:
-        scores: dict[int, float] = {}
-        N = len(self._chunks)
+        # ранжирование по каждому полю
+        scores_text = self._bm25_text.get_scores(query_terms)
+        scores_context = self._bm25_context.get_scores(query_terms)
+        scores_hints = self._bm25_hints.get_scores(query_terms)
 
-        for term in query_terms:
-            postings = self._index.get(term)
-            if not postings:
-                continue
+        # суммируем с весами
+        combined_scores = []
+        for i, _ in enumerate(self._chunks):
+            score = (
+                self._config.w_text * scores_text[i] +
+                self._config.w_context * scores_context[i] +
+                self._config.w_hints * scores_hints[i]
+            )
+            combined_scores.append(score)
 
-            df = len(postings)
-            idf = math.log((N - df + 0.5) / (df + 0.5) + 1.0)
-            for p in postings:
-                dl = self._doc_len[p.doc_id]
-                denom = p.tf + self._config.k1 * (1.0 - self._config.b + self._config.b * dl / max(self._avg_doc_len, 1e-6))
-                score = idf * (p.tf * (self._config.k1 + 1.0)) / denom
-                # применяем веса полей
-                scores[p.doc_id] = scores.get(p.doc_id, 0.0) + (
-                    score * (self._config.w_text + self._config.w_context + self._config.w_hints)
+        # берём top_k
+        top_indices = sorted(range(len(combined_scores)), key=lambda i: combined_scores[i], reverse=True)[:top_k]
+
+        results = []
+        for idx in top_indices:
+            results.append(
+                ScoredChunk(
+                    chunk=self._chunks[idx],
+                    lexical_score=float(combined_scores[idx])
                 )
-
-        return scores
+            )
+        return results
