@@ -1,11 +1,11 @@
 """
 USAGE: кнопка "Prepare Vector Store".
 
-Просто парсит папку с PDF и вызывает pipeline из pipelines/knowledge_base_builder.py.
+Просто парсит папку с PDF и вызывает pipeline из pipelines/knowledge_base_builder_pipeline.py.
 """
 
 from pathlib import Path
-from src.pipelines.knowledge_base_builder import KnowledgeBaseBuilder
+from src.pipelines.knowledge_base_builder_pipeline import KnowledgeBaseBuilder
 
 def main() -> None:
     root_dir = Path(__file__).resolve().parent.parent  # rag-bseu

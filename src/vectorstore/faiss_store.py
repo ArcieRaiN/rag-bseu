@@ -9,6 +9,7 @@ Responsibilities:
 - Сохранение индекса на диск
 """
 
+import hashlib
 from pathlib import Path
 from typing import List
 
@@ -30,45 +31,42 @@ class FAISSStore:
     def __init__(self, vectorizer: SentenceVectorizer):
         self._vectorizer = vectorizer
 
-    def build_and_save(
-        self,
-        chunks: List[Chunk],
-        index_path: Path,
-    ) -> None:
-        """
-        Строит FAISS индекс из списка чанков и сохраняет на диск.
-
-        Args:
-            chunks: список объектов Chunk
-            index_path: путь для сохранения FAISS индекса
-        """
-        dim = self._vectorizer.dimension
-
-        if not chunks:
-            # пустой индекс для отладки
-            index = faiss.IndexFlatIP(dim)
-            faiss.write_index(index, str(index_path))
-            return
-
-        # берем контексты чанков для векторизации
-        texts = [ch.context or "" for ch in chunks]
-        embeddings = self._vectorizer.embed_many(texts).astype(np.float32)
-
-        if embeddings.shape[1] != dim:
-            raise RuntimeError(
-                f"Embeddings dimension {embeddings.shape[1]} != expected {dim}"
-            )
-
-        # создаём FAISS индекс
-        index = faiss.IndexFlatIP(dim)
-        index.add(embeddings)
-
-        # сохраняем
-        faiss.write_index(index, str(index_path))
-
     def load_index(self, index_path: Path) -> faiss.Index:
         """
         Загружает FAISS индекс с диска.
         """
         return faiss.read_index(str(index_path))
+
+    def _hash_id(self, chunk_id: str) -> int:
+        """Стабильный int64 ID для FAISS"""
+        digest = hashlib.md5(chunk_id.encode("utf-8")).digest()
+        return int.from_bytes(digest[:8], byteorder="big", signed=True)
+
+    def add_chunks(self, chunks: List[Chunk]):
+        """Добавление новых чанков в индекс"""
+        if not chunks:
+            return
+        texts = [ch.context or "" for ch in chunks]
+        embeddings = self._vectorizer.embed_many(texts).astype(np.float32)
+        ids = np.array([self._hash_id(ch.id) for ch in chunks], dtype=np.int64)
+
+        if not hasattr(self, "index") or self.index is None:
+            dim = self._vectorizer.dimension
+            self.index = faiss.IndexIDMap(faiss.IndexFlatIP(dim))
+        self.index.add_with_ids(embeddings, ids)
+
+    def delete_chunks_by_pdf(self, pdf_name: str, chunks: List[Chunk]):
+        """Удаление всех chunk из указанного PDF"""
+        if not hasattr(self, "index") or self.index is None:
+            return
+        ids_to_delete = [self._hash_id(ch.id) for ch in chunks if ch.source == pdf_name]
+        if ids_to_delete:
+            self.index.remove_ids(np.array(ids_to_delete, dtype=np.int64))
+
+    def save(self, index_path: Path):
+        if hasattr(self, "index") and self.index is not None:
+            faiss.write_index(self.index, str(index_path))
+
+    def load(self, index_path: Path):
+        self.index = faiss.read_index(str(index_path))
 

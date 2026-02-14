@@ -2,7 +2,7 @@
 CLI для rag-bseu: единый вход для всех pipeline-кнопок.
 
 Доступные команды:
-- parse_documents.py        → загрузка / парсинг источников
+- parse_documents_pipeline.py        → загрузка / парсинг источников
 - prepare_vector_store.py   → построение базы знаний и FAISS
 - query.py                  → интерактивный RAG-запрос
 """
@@ -36,7 +36,7 @@ def main() -> None:
     usage_dir = Path(__file__).resolve().parent
 
     if args.parse_documents:
-        subprocess.run([sys.executable, usage_dir / "parse_documents.py"])
+        subprocess.run([sys.executable, usage_dir / "parse_documents_pipeline.py"])
 
     elif args.prepare_vector_store:
         subprocess.run([sys.executable, usage_dir / "prepare_vector_store.py"])

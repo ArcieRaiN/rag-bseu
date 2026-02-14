@@ -7,7 +7,7 @@ USAGE: кнопка "Parse Documents".
 
 from pathlib import Path
 
-from src.pipelines.parse_documents import ParseDocumentsPipeline
+from src.pipelines.parse_documents_pipeline import ParseDocumentsPipeline
 
 
 def main() -> None:
