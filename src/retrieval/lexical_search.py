@@ -17,6 +17,7 @@ import math
 
 from src.core.models import Chunk, ScoredChunk, EnrichedQuery
 from src.core.input_normalizer import normalize_text_lemmatized
+from src.core.config import LexicalSearchConfig
 
 
 @dataclass
@@ -27,35 +28,25 @@ class _Posting:
 
 class InMemoryBM25:
     """
-    Простейший BM25‑подобный индекс для text+context.
-
-    Не оптимизирован под миллион документов, но прекрасно подходит:
-    - для локальных экспериментов
-    - для чтения и отладки алгоритма
+    Простейший BM25‑подобный индекс для text+context с поддержкой весов полей.
     """
 
-    def __init__(self, chunks: List[Chunk]):
+    def __init__(self, chunks: List[Chunk], config: LexicalSearchConfig | None = None):
         self._chunks = chunks
+        self._config = config or LexicalSearchConfig()
         self._index = {}  # term -> List[_Posting]
-        self._doc_len = []  # количество токенов в документе
+        self._doc_len = []
         self._avg_doc_len = 0.0
-
         self._build()
 
     # -------------------- Публичный интерфейс -------------------- #
 
     def search(self, enriched_query: EnrichedQuery, top_k: int) -> List[ScoredChunk]:
-        """
-        Поиск по ключевым словам:
-        - из исходного текста запроса
-        - плюс geo / metrics как дополнительные ключевые слова
-        """
         terms = self._make_query_terms(enriched_query)
         if not terms:
             return []
 
         scores = self._score_documents(terms)
-        # Берём top_k по score
         ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:top_k]
 
         results: List[ScoredChunk] = []
@@ -73,98 +64,57 @@ class InMemoryBM25:
     # -------------------- Индексация -------------------- #
 
     def _build(self) -> None:
-        """
-        Строим обратный индекс по объединённому тексту:
-        `context + " " + text + query_hints(geo/metrics/years)`.
-        """
         total_len = 0
         for doc_id, ch in enumerate(self._chunks):
-            # Базовый текст: обогащённый context + сырой text
-            combined = f"{ch.context}\n{ch.text}"
+            # Разделяем токены по полям
+            text_tokens = [t for t in normalize_text_lemmatized(ch.text).split() if t]
+            context_tokens = [t for t in normalize_text_lemmatized(ch.context).split() if t]
 
-            # Добавляем псевдо‑запросы (query hints), построенные из метаданных.
             hints_parts: list[str] = []
-
-            # Метрики
             if ch.metrics:
-                if isinstance(ch.metrics, list):
-                    hints_parts.append(" ".join(str(m) for m in ch.metrics[:3]))
-                else:
-                    hints_parts.append(str(ch.metrics))
-
-            # Гео
+                hints_parts.append(" ".join(str(m) for m in ch.metrics[:3]) if isinstance(ch.metrics, list) else str(ch.metrics))
             if ch.geo:
-                if isinstance(ch.geo, list):
-                    hints_parts.append(" ".join(str(g) for g in ch.geo))
-                else:
-                    hints_parts.append(str(ch.geo))
-
-            # Годы
+                hints_parts.append(" ".join(str(g) for g in ch.geo) if isinstance(ch.geo, list) else str(ch.geo))
             if ch.years:
                 if isinstance(ch.years, list):
-                    years_sorted = sorted(ch.years)
-                    if len(years_sorted) > 1:
-                        years_repr = f"{years_sorted[0]}-{years_sorted[-1]}"
-                    else:
-                        years_repr = str(years_sorted[0])
+                    y_sorted = sorted(ch.years)
+                    years_repr = f"{y_sorted[0]}-{y_sorted[-1]}" if len(y_sorted) > 1 else str(y_sorted[0])
                     hints_parts.append(years_repr)
                 else:
                     hints_parts.append(str(ch.years))
+            hints_tokens = [t for t in normalize_text_lemmatized(" ".join(hints_parts)).split() if t]
 
-            if hints_parts:
-                combined += "\n" + " ".join(hints_parts)
+            # длина документа для BM25
+            dl = len(text_tokens) + len(context_tokens) + len(hints_tokens)
+            self._doc_len.append(dl)
+            total_len += dl
 
-            # Нормализация текста и токенизация
-            norm = normalize_text_lemmatized(combined)
-            tokens = [t for t in norm.split() if t]
-            self._doc_len.append(len(tokens))
-            total_len += len(tokens)
-
-            # Построение tf_map
-            tf_map = {}
-            for t in tokens:
-                tf_map[t] = tf_map.get(t, 0) + 1
-
-            for term, tf in tf_map.items():
+            # строим tf_map для каждого токена
+            for term, tf in self._make_tf_map(text_tokens + context_tokens + hints_tokens).items():
                 self._index.setdefault(term, []).append(_Posting(doc_id=doc_id, tf=tf))
 
         self._avg_doc_len = total_len / max(len(self._chunks), 1)
 
+    def _make_tf_map(self, tokens: list[str]) -> dict[str, int]:
+        tf_map: dict[str, int] = {}
+        for t in tokens:
+            tf_map[t] = tf_map.get(t, 0) + 1
+        return tf_map
+
     # -------------------- Подготовка запроса -------------------- #
 
     def _make_query_terms(self, enriched_query: EnrichedQuery) -> List[str]:
-        """
-        Формируем набор терминов для lexical‑поиска:
-        - лемматизированный текст запроса
-        - geo и metrics (если заданы) как дополнительные токены
-        """
-        base = normalize_text_lemmatized(enriched_query.query)
-        terms = [t for t in base.split() if t]
-
+        terms = [t for t in normalize_text_lemmatized(enriched_query.query).split() if t]
         if enriched_query.geo:
-            terms.extend(
-                t for t in normalize_text_lemmatized(enriched_query.geo).split() if t
-            )
+            terms.extend([t for t in normalize_text_lemmatized(enriched_query.geo).split() if t])
         if enriched_query.metrics:
             for m in enriched_query.metrics:
-                terms.extend(
-                    t
-                    for t in normalize_text_lemmatized(str(m)).split()
-                    if t
-                )
-        # Можно добавить эвристику по годам / окэду при необходимости
+                terms.extend([t for t in normalize_text_lemmatized(str(m)).split() if t])
         return terms
 
-    # -------------------- BM25‑подобный скоринг -------------------- #
+    # -------------------- BM25‑подобный скоринг с весами -------------------- #
 
     def _score_documents(self, query_terms: Iterable[str]) -> dict[int, float]:
-        """
-        Упрощённая реализация BM25:
-        - k1, b заданы константами, достаточными для отладки.
-        """
-        k1 = 1.5
-        b = 0.75
-
         scores: dict[int, float] = {}
         N = len(self._chunks)
 
@@ -174,14 +124,14 @@ class InMemoryBM25:
                 continue
 
             df = len(postings)
-            # классический idf BM25
             idf = math.log((N - df + 0.5) / (df + 0.5) + 1.0)
-
             for p in postings:
                 dl = self._doc_len[p.doc_id]
-                denom = p.tf + k1 * (1.0 - b + b * dl / max(self._avg_doc_len, 1e-6))
-                score = idf * (p.tf * (k1 + 1.0)) / denom
-                scores[p.doc_id] = scores.get(p.doc_id, 0.0) + score
+                denom = p.tf + self._config.k1 * (1.0 - self._config.b + self._config.b * dl / max(self._avg_doc_len, 1e-6))
+                score = idf * (p.tf * (self._config.k1 + 1.0)) / denom
+                # применяем веса полей
+                scores[p.doc_id] = scores.get(p.doc_id, 0.0) + (
+                    score * (self._config.w_text + self._config.w_context + self._config.w_hints)
+                )
 
         return scores
-
