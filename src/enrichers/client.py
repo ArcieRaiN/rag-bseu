@@ -22,7 +22,7 @@ class OllamaConfig:
     temperature: float = 0.0
     top_p: float = 0.9
     repeat_penalty: float = 1.1
-    num_predict: int = 800
+    num_predict: int = 650
 
     # Формат ответа (например, json)
     format: Optional[str] = None

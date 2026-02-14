@@ -28,7 +28,7 @@ def _extract_first_json_object(text: str) -> Optional[str]:
     return None
 
 
-def parse_single_enrichment(raw: str, expected_chunk_id: str) -> Optional[Dict[str, Any]]:
+def parse_single_enrichment(raw: str) -> Optional[Dict[str, Any]]:
     """
     Parse an enrichment LLM response. Returns dict or None.
 
@@ -39,24 +39,22 @@ def parse_single_enrichment(raw: str, expected_chunk_id: str) -> Optional[Dict[s
     """
     if not raw:
         return None
+
     txt = raw.strip()
 
     # Drop markdown code fences if present
     if txt.startswith("```"):
-        # drop triple fence header
         first_nl = txt.find("\n")
         if first_nl != -1:
             txt = txt[first_nl + 1 :]
         if txt.endswith("```"):
-            txt = txt[: -3]
+            txt = txt[:-3]
         txt = txt.strip()
 
     # Try direct parse
     try:
         obj = json.loads(txt)
         if isinstance(obj, dict):
-            if "chunk_id" not in obj:
-                obj["chunk_id"] = expected_chunk_id
             return obj
     except Exception:
         pass
@@ -67,10 +65,9 @@ def parse_single_enrichment(raw: str, expected_chunk_id: str) -> Optional[Dict[s
         try:
             obj = json.loads(snippet)
             if isinstance(obj, dict):
-                if "chunk_id" not in obj:
-                    obj["chunk_id"] = expected_chunk_id
                 return obj
         except Exception:
             pass
 
     return None
+

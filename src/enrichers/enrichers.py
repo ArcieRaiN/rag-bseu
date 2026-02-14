@@ -148,7 +148,7 @@ class LLMEnricher:
                     time.sleep(0.5)
                 continue
 
-            parsed = parse_single_enrichment(raw_response, chunk.id)
+            parsed = parse_single_enrichment(raw_response)
             if parsed:
                 break
             logger.debug(
@@ -163,7 +163,7 @@ class LLMEnricher:
                 pdf_name=pdf_name,
                 chunk_id=chunk.id,
                 page=getattr(chunk, "page", None),
-                chunk_text=(chunk.text or "")[:2000],
+                chunk_text=(chunk.text or "")[:1000],
                 system_prompt=system_prompt,
                 prompt=prompt,
                 raw_response=raw_response,
@@ -214,9 +214,8 @@ class LLMEnricher:
             "Ты — аналитик официальной статистики.\n"
             "Входной чанк — фрагмент статистического сборника, чаще всего табличные данные "
             "Твоя задача — извлечь МЕТАДАННЫЕ для семантического поиска.\n"
-            "Верни ТОЛЬКО один валидный с полями:\n"
-            "- chunk_id: скопируй без изменений\n"
-            "- context: 1-2 предложения, которые обобщённо описывают содержание таблиц в чанке, без значений показателей,\n"
+            "Верни ТОЛЬКО один валидный JSON с полями:\n"
+            "- context: строка, 1 предложение, которое обобщённо описывает содержание таблиц в чанке, без значений показателей,\n"
             "- geo: список территорий, упомянутых в чанке (без агрегатов 'в целом по стране', 'итого')\n"
             "- metrics: список названий показателей, без чисел, лет и единиц измерения\n"
             "- years: список лет, явно упомянутых в чанке\n"
@@ -230,7 +229,6 @@ class LLMEnricher:
     
             "Пример корректного ответа:\n"
             "{\n"
-            '  "chunk_id": "123",\n'
             '  "context": "Производство основных видов промышленной продукции на душу населения в Беларуси и России за 2018-2021 годы",\n'
             '  "geo": ["Беларусь", "Россия"],\n'
             '  "metrics": ["Производство нефти", "Производство мяса"],\n'
@@ -244,7 +242,6 @@ class LLMEnricher:
         text_snip = (chunk.text or "")[:800]
         return (
             f"Документ: {pdf_name}\n"
-            f"chunk_id (скопируй без изменений): {chunk.id}\n"
             f"page: {chunk.page}\n\n"
             "Содержимое чанка:\n"
             f"{text_snip}\n\n"

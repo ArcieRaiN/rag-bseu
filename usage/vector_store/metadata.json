@@ -1,5 +1,5 @@
 {
   "vectorizer": "SentenceVectorizer",
   "dimension": 256,
-  "chunks": 200
+  "chunks": 262
 }
