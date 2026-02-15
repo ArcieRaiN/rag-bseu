@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import List, Union
 
 import warnings
 warnings.filterwarnings(
@@ -21,7 +21,7 @@ _vocab = MorphVocab()
 TOKEN_RE = re.compile(r"[а-яёіў]+(?:[-%][а-яёіў]+)*|\d+", re.IGNORECASE)
 
 
-def normalize_text_lemmatized(text: str) -> str:
+def normalize_text_lemmatized(text: Union[str, List[str]]) -> str:
     """
     Нормализация текста для RAG:
     - лемматизация RU/BY
@@ -30,8 +30,11 @@ def normalize_text_lemmatized(text: str) -> str:
     """
     if not text:
         return ""
+    if isinstance(text, list):
+        text = " ".join(text)
 
     text = text.lower()
+
     tokens = TOKEN_RE.findall(text)
     if not tokens:
         return ""
@@ -51,7 +54,6 @@ def normalize_text_lemmatized(text: str) -> str:
             if token.lemma:
                 lemmas.append(token.lemma)
 
-    # ВАЖНО: числа добавляем в конец — стабильность для lexical search
     return " ".join(lemmas + numbers)
 
 
