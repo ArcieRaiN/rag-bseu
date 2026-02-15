@@ -163,7 +163,7 @@ class LLMEnricher:
                 pdf_name=pdf_name,
                 chunk_id=chunk.id,
                 page=getattr(chunk, "page", None),
-                chunk_text=(chunk.text or "")[:1000],
+                chunk_text=(chunk.text or "")[:1200],
                 system_prompt=system_prompt,
                 prompt=prompt,
                 raw_response=raw_response,

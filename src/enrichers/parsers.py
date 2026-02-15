@@ -39,11 +39,11 @@ def parse_single_enrichment(raw: str) -> Optional[Dict[str, Any]]:
     """
     if not raw:
         return None
-
     txt = raw.strip()
 
     # Drop markdown code fences if present
     if txt.startswith("```"):
+        # drop triple fence header
         first_nl = txt.find("\n")
         if first_nl != -1:
             txt = txt[first_nl + 1 :]
@@ -70,4 +70,3 @@ def parse_single_enrichment(raw: str) -> Optional[Dict[str, Any]]:
             pass
 
     return None
-
