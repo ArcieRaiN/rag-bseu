@@ -2,43 +2,56 @@ import os
 import sys
 import subprocess
 import venv
+from pathlib import Path
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
-ENV_DIR = os.path.join(PROJECT_DIR, ".venv")
 
-def in_venv():
+PROJECT_DIR = Path(__file__).resolve().parent
+ENV_DIR = PROJECT_DIR / ".venv"
+
+
+def in_venv() -> bool:
     return sys.prefix != sys.base_prefix
 
-# Пути внутри venv
-if os.name == "nt":
-    PYTHON_VENV = os.path.join(ENV_DIR, "Scripts", "python.exe")
-    PIP_VENV = os.path.join(ENV_DIR, "Scripts", "pip.exe")
-else:
-    PYTHON_VENV = os.path.join(ENV_DIR, "bin", "python")
-    PIP_VENV = os.path.join(ENV_DIR, "bin", "pip")
 
-# 1️⃣ Если не в venv — создаём и перезапускаемся
-if not in_venv():
-    if not os.path.exists(ENV_DIR):
-        print("Создаём виртуальное окружение...")
-        venv.create(ENV_DIR, with_pip=True)
+def get_venv_paths():
+    if os.name == "nt":
+        return (
+            ENV_DIR / "Scripts" / "python.exe",
+            ENV_DIR / "Scripts" / "pip.exe",
+        )
     else:
-        print("Виртуальное окружение уже существует.")
+        return (
+            ENV_DIR / "bin" / "python",
+            ENV_DIR / "bin" / "pip",
+        )
 
-    print("Перезапуск скрипта через виртуальное окружение...")
-    subprocess.check_call([PYTHON_VENV, __file__])
-    sys.exit(0)
 
-# 2️⃣ Мы уже внутри venv
-print("Работаем внутри виртуального окружения")
-print("Python:", sys.executable)
+def main():
+    python_venv, _ = get_venv_paths()
 
-# Установка зависимостей
-requirements_file = os.path.join(PROJECT_DIR, "requirements.txt")
-if os.path.exists(requirements_file):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", requirements_file])
-else:
-    print("requirements.txt не найден")
+    if not in_venv():
+        if not ENV_DIR.exists():
+            print("🔧 Создаём виртуальное окружение...")
+            venv.create(ENV_DIR, with_pip=True)
+        else:
+            print("ℹ️ Виртуальное окружение уже существует.")
 
-print("Готово ✅")
+        print("🔁 Перезапуск через venv...")
+        subprocess.check_call([str(python_venv), __file__])
+        sys.exit(0)
+
+    print("✅ Работаем внутри venv")
+    print("Python:", sys.executable)
+
+    req = PROJECT_DIR / "requirements.txt"
+    if req.exists():
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", str(req)])
+    else:
+        print("❌ requirements.txt не найден")
+
+    print("🎉 Готово")
+
+
+if __name__ == "__main__":
+    main()

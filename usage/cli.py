@@ -1,126 +1,54 @@
 """
-CLI для нового пайплайна запросов (PIPELINE 2–4).
+CLI для rag-bseu: единый вход для всех pipeline-кнопок.
 
-Требования:
-- два режима через флаги запуска:
-  * --predefined-queries  (запуск набора предопределённых запросов)
-  * --user-queries       (интерактивный режим)
-- НЕТ генерации ответа LLM — только Top-3 чанка.
+Доступные команды:
+- parse_documents_pipeline.py        → загрузка / парсинг источников
+- prepare_vector_store.py   → построение базы знаний и FAISS
+- query.py                  → интерактивный RAG-запрос
 """
 
-from __future__ import annotations
-
-import os
 import argparse
+import subprocess
+import sys
 from pathlib import Path
-from typing import List
-
-from src.main.models import ScoredChunk
-
-
-def _build_argparser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(
-        description="RAG-BSEU CLI v2 (hybrid retrieval + reranking)."
-    )
-
-    group = p.add_mutually_exclusive_group()
-    group.add_argument(
-        "--predefined-queries",
-        action="store_true",
-        help="Запустить набор предопределённых запросов (по умолчанию).",
-    )
-    group.add_argument(
-        "--user-queries",
-        action="store_true",
-        help="Интерактивный режим ввода запросов пользователя.",
-    )
-
-    return p
-
-
-def _format_top_chunks(chunks: List[ScoredChunk]) -> str:
-    if not chunks:
-        return "Ничего не найдено."
-
-    lines: List[str] = []
-    for i, sc in enumerate(chunks, start=1):
-        ch = sc.chunk
-        lines.append(f"{i}. [source={ch.source}, page={ch.page}, id={ch.id}]")
-
-        meta_parts = []
-        if ch.geo:
-            meta_parts.append(f"geo={ch.geo}")
-        if ch.years:
-            meta_parts.append(f"years={ch.years}")
-        if ch.metrics:
-            meta_parts.append(f"metrics={ch.metrics}")
-        if ch.time_granularity:
-            meta_parts.append(f"time={ch.time_granularity}")
-        if ch.oked:
-            meta_parts.append(f"oked={ch.oked}")
-
-        if meta_parts:
-            lines.append("   " + "; ".join(meta_parts))
-
-        lines.append(f"   context: {ch.context}")
-        lines.append("")
-
-    return "\n".join(lines)
 
 
 def main() -> None:
-    # Настройки окружения до импорта тяжёлых библиотек (FAISS, Torch и т.п.)
-    # KMP_DUPLICATE_LIB_OK позволяет продолжить работу при дублирующихся OpenMP-рантаймах.
-    os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-    # Ограничиваем число потоков OpenMP, чтобы снизить вероятность конфликтов и нагрузку на CPU.
-    os.environ.setdefault("OMP_NUM_THREADS", "1")
+    parser = argparse.ArgumentParser(description="RAG-BSEU CLI")
 
-    # Импортируем пайплайн только после установки переменных окружения
-    from src.main.query_pipeline import QueryPipelineV2
+    parser.add_argument(
+        "--parse-documents",
+        action="store_true",
+        help="Скачать и распарсить документы (PDF / сайты)",
+    )
+    parser.add_argument(
+        "--prepare-vector-store",
+        action="store_true",
+        help="Построить базу знаний и FAISS индекс",
+    )
+    parser.add_argument(
+        "--query",
+        action="store_true",
+        help="Интерактивный режим запросов",
+    )
 
-    args = _build_argparser().parse_args()
+    args = parser.parse_args()
+    usage_dir = Path(__file__).resolve().parent
 
-    # по умолчанию — predefined
-    run_predefined = not args.user_queries
+    if args.parse_documents:
+        subprocess.run([sys.executable, usage_dir / "parse_documents_pipeline.py"])
 
-    base_dir = Path(__file__).resolve().parents[1]
-    pipeline = QueryPipelineV2(base_dir=base_dir)
+    elif args.prepare_vector_store:
+        subprocess.run([sys.executable, usage_dir / "prepare_vector_store.py"])
 
-    predefined_queries = [
-        "производство резиновых и пластмассовых изделий",
-        "численности студентов в Беларуси и России",
-        "число студентов в Беларуси и России",
-        "сколько студентов в Беларуси и России",
-        "сколько студентов в Беларуси",
-        "сколько студентов в РБ",
-        "студенты число",
-        "струденты число"
-        # "Численность населения по областям Беларуси",
-        # "Производство молока",
-        # "Число учреждений здравоохранения",
-        # "Добыча нефти в Беларуси",
-    ]
+    elif args.query:
+        subprocess.run([sys.executable, usage_dir / "query.py"])
 
-    if run_predefined:
-        for q in predefined_queries:
-            print(f'Запрос: "{q}"')
-            result = pipeline.run(q)
-            print(_format_top_chunks(result.top_chunks))
-
-    if args.user_queries:
-        print("Интерактивный режим. Введите запрос (Ctrl+C для выхода).")
-
-        try:
-            while True:
-                query = input("> ").strip()
-                if not query:
-                    continue
-
-                result = pipeline.run(query)
-                print(f'Запрос: "{query}"')
-                print(_format_top_chunks(result.top_chunks))
-        except KeyboardInterrupt:
-            print("Выход из программы.")
+    else:
+        print("❌ Укажите режим запуска:")
+        print("   --parse-documents")
+        print("   --prepare-vector-store")
+        print("   --query")
 
 
 if __name__ == "__main__":

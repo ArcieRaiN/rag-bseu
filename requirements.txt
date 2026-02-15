@@ -13,3 +13,5 @@ llama-index-readers-file==0.1.19
 sentence-transformers==3.4.1
 hf-xet==1.2.0
 tqdm==4.67.2
+rank-bm25==0.2.2
+pyspellchecker==0.8.4
