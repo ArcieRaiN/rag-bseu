@@ -1,20 +1,75 @@
 # rag-bseu
 
+Репозиторий содержит RAG-пайплайн для работы с белорусскими статистическими сборниками:
+1. подготовка векторного хранилища,
+2. интерактивный CLI-запрос,
+3. Streamlit-просмотр таблиц и графиков на основе LLM-ответа.
+
+## Установка зависимостей
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+После этого переходи в корень проекта:
+
+```powershell
+cd C:\Users\alex\Downloads\projects\rag-bseu
+```
+
+Чтобы Python видел пакет `src`, можно установить переменную `PYTHONPATH` (требуется только для ручного запуска):
+
+```powershell
+$env:PYTHONPATH=$PWD
+```
+
 ## CLI (numeric extraction)
 
-Запуск (Windows PowerShell):
+Интерактивный CLI (`usage/query.py`) запускает `QueryPipeline`, отображает топ-чанки и теперь вызывает `OutputPipeline`, который генерирует `usage/outputs/output_df.json`. Пример запуска:
 
 ```powershell
-$env:PYTHONPATH="C:\Users\alex\Downloads\projects\rag-bseu"
-.\.venv\Scripts\python.exe .\src\usage\cli.py --strict --query "Численность населения Минска" --aggregate
+.\.venv\Scripts\python.exe .\usage\query.py --strict --query "Численность населения Минска" --aggregate
 ```
 
-Режимы:
-- `--strict`: строгая фильтрация (по умолчанию) — возвращает только уверенные извлечения.
-- `--relaxed`: показывает больше извлечений (включая низкую уверенность).
+Параметры:
+- `--strict`: строгая фильтрация означает уверенные ответы.
+- `--relaxed`: показывает больше кандидатов, включая менее уверенные.
 
-Логирование raw-фрагментов для ручного ревью:
+Для логирования фрагментов используйте:
 
 ```powershell
-.\.venv\Scripts\python.exe .\src\usage\cli.py --query "Производство молока" --log-raw .\reference\raw_hits.jsonl
+.\.venv\Scripts\python.exe .\usage\query.py --query "Производство молока" --log-raw .\reference\raw_hits.jsonl
 ```
+
+## Подготовка векторного хранилища
+
+Скрипт `usage/prepare_vector_store.py` запускает `KnowledgeBaseBuilder`, который:
+
+- читает PDF из `usage/documents/`,
+- обогащает чанки через LLM,
+- сохраняет `usage/vector_store/data.json`, `index.faiss`, `metadata.json`.
+
+Запуск:
+
+```powershell
+.\.venv\Scripts\python.exe .\usage\prepare_vector_store.py
+```
+
+Можно использовать это перед запросами, чтобы обновить базу.
+
+## Streamlit-интерфейс
+
+Новая Streamlit-страница визуализирует JSON-ответ LLM в виде:
+1. seaborn-barplot,
+2. таблички `st.dataframe`,
+3. кнопки скачивания `.xlsx`.
+
+Запускается командой (из корня проекта):
+
+```powershell
+streamlit run usage/query.py
+```
+
+Интерфейс сам добавляет корень проекта в `sys.path`, поэтому дополнительный `PYTHONPATH` не нужен при таком запуске.
+
+Статусы ошибок сгенерированных ответов пишутся в `usage/logs/output_df_fails.json`, если JSON оказался неверным.
