@@ -24,15 +24,15 @@ from src.utils.spellcheck_validator import SpellcheckValidator
 
 class QueryPipeline:
     def __init__(self, base_dir: Path, *, llm_model: str = "llama3-chatqa:latest",
-                 vector_dim: int = 256, retrieval_config: RetrievalConfig | None = None,
-                 custom_words: set[str] | None = None):
+                 vector_dim: int = 256, retrieval_config: RetrievalConfig | None = None):
         """
         Инициализация пайплайна.
+
         Args:
-            base_dir: Корень проекта (rag-bseu)
-            llm_model: Модель LLM для enrichment
-            vector_dim: Размерность эмбеддингов
-            retrieval_config: Настройки поиска
+            base_dir: Корень проекта (rag-bseu).
+            llm_model: Модель LLM для enrichment.
+            vector_dim: Размерность эмбеддингов.
+            retrieval_config: Настройки гибридного поиска.
         """
         t0 = time.perf_counter()
         print("[INIT] QueryPipeline: инициализация...")

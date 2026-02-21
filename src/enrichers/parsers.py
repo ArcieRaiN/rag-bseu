@@ -1,15 +1,28 @@
+"""
+Парсинг JSON-ответов от LLM.
+
+Обрабатывает типичные проблемы: markdown code fences, мусор вокруг JSON,
+несбалансированные скобки. Используется LLMEnricher для извлечения
+структурированных метаданных из сырых LLM-ответов.
+"""
+
 from __future__ import annotations
 import json
-import regex as re
 from typing import Optional, Dict, Any
 
-_json_obj_re = re.compile(r"\{(?:[^{}]|(?R))*\}", re.DOTALL)  # PCRE-like recursive (but Python re doesn't support (?R))
-# Python re doesn't support recursion; use a safer approach: find first {...} pair by scanning braces.
 
 def _extract_first_json_object(text: str) -> Optional[str]:
     """
-    Find the first top-level JSON object by scanning braces balance.
-    Returns the substring containing {...} or None.
+    Извлекает первый сбалансированный JSON-объект из текста.
+
+    Сканирует скобки ``{`` / ``}`` для определения границ объекта,
+    вместо regex с рекурсией (которую stdlib ``re`` не поддерживает).
+
+    Args:
+        text: Сырой текст, содержащий JSON.
+
+    Returns:
+        Подстрока ``{...}`` или None, если объект не найден.
     """
     if not text:
         return None
@@ -30,12 +43,18 @@ def _extract_first_json_object(text: str) -> Optional[str]:
 
 def parse_single_enrichment(raw: str) -> Optional[Dict[str, Any]]:
     """
-    Parse an enrichment LLM response. Returns dict or None.
+    Парсит ответ LLM с метаданными обогащения.
 
-    Strategy:
-    1) strip common code-block markers
-    2) try json.loads(full cleaned text)
-    3) fallback: extract first balanced {...} and parse it
+    Стратегия:
+    1. Убрать markdown code fences (````` ```json ... ``` `````)
+    2. Попробовать ``json.loads`` на весь очищенный текст
+    3. Fallback: извлечь первый сбалансированный ``{...}`` и распарсить
+
+    Args:
+        raw: Сырая строка ответа LLM.
+
+    Returns:
+        Словарь с метаданными или None при ошибке парсинга.
     """
     if not raw:
         return None

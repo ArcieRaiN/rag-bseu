@@ -1,3 +1,10 @@
+"""
+HTTP-клиент для взаимодействия с Ollama API.
+
+Предоставляет OllamaClient с поддержкой retry, сброса контекста
+и Dependency Injection через Protocol для тестирования.
+"""
+
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Protocol
@@ -5,15 +12,28 @@ import time
 import requests
 
 
-# --- HTTP client interface для тестов / DI ---
 class HTTPClient(Protocol):
+    """Протокол HTTP-клиента для Dependency Injection (используется в тестах)."""
     def post(self, url: str, json: Dict[str, Any], timeout: float) -> Any:
         ...
 
 
-# --- Конфигурация Ollama ---
 @dataclass
 class OllamaConfig:
+    """
+    Параметры подключения и генерации для Ollama API.
+
+    Attributes:
+        base_url: Адрес Ollama-сервера.
+        model: Имя модели для генерации.
+        timeout: Максимальное время ожидания ответа (секунды).
+        temperature: Температура генерации (0.0 = детерминированный вывод).
+        top_p: Порог nucleus sampling.
+        repeat_penalty: Штраф за повторения.
+        num_predict: Максимальное количество токенов в ответе.
+        format: Формат ответа (например, ``"json"``).
+        keep_alive: Время жизни модели в памяти сервера.
+    """
     base_url: str = "http://localhost:11434"
     model: str = "qwen2.5:7b"
     timeout: float = 120.0

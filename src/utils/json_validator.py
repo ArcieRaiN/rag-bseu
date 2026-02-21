@@ -1,10 +1,19 @@
+"""
+Валидация и нормализация данных обогащения чанков.
+
+Проверяет корректность структуры JSON-ответов от LLM (context, metrics,
+years, geo, time_granularity) и нормализует значения полей.
+"""
+
 from __future__ import annotations
 from typing import List, Dict, Any, Optional, Set
 from dataclasses import dataclass
 import re
 
+
 @dataclass
 class ValidationResult:
+    """Результат валидации одного чанка."""
     is_valid: bool
     errors: List[str]
     warnings: List[str]

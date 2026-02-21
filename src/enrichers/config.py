@@ -1,11 +1,23 @@
+"""
+Конфигурация LLM-обогащения чанков.
+"""
+
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Any
 
+
 @dataclass
 class EnricherConfig:
     """
-    Configuration for LLMEnricher.
+    Параметры работы LLMEnricher.
+
+    Attributes:
+        max_parallel_requests: Макс. параллельных запросов (зарезервировано).
+        reset_interval: Через сколько чанков сбрасывать контекст LLM.
+        max_retries: Количество повторных попыток при ошибке парсинга.
+        keep_alive: Время жизни модели в памяти Ollama (например, ``"5m"``).
+        request_options: Низкоуровневые параметры запроса к Ollama.
     """
     # concurrency (currently unused if processing one chunk at a time)
     max_parallel_requests: int = 4

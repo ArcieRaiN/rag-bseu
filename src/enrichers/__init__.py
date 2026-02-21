@@ -1,4 +1,9 @@
-# src/enrichers/__init__.py
+"""
+Пакет enrichers -- обогащение данных через LLM (Ollama).
+
+Предоставляет OllamaClient для HTTP-взаимодействия с Ollama API,
+LLMEnricher для обогащения чанков метаданными и парсеры JSON-ответов.
+"""
 
 from .client import OllamaClient, OllamaConfig
 from .config import EnricherConfig

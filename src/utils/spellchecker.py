@@ -1,17 +1,24 @@
+"""
+Проверка орфографии пользовательских запросов.
+
+Использует pyspellchecker для исправления опечаток в русскоязычных запросах.
+Поддерживает кастомный словарь терминов, которые не должны исправляться.
+"""
+
 from spellchecker import SpellChecker
 from typing import Set
 
-# Сюда прописываем ваши специфичные слова, которые не должны исправляться
-CUSTOM_WORDS = {
-    # "BSEU",
-    # добавляйте сюда всё, что нужно
-}
+CUSTOM_WORDS: Set[str] = set()
+
 
 class QuerySpellChecker:
-    def __init__(self):
-        """
-        Инициализация spellchecker с кастомными словами.
-        """
+    """
+    Исправляет опечатки в пользовательских запросах.
+
+    Слова из ``CUSTOM_WORDS`` не подвергаются исправлению.
+    """
+
+    def __init__(self) -> None:
         self.spell = SpellChecker(language='ru')  # для русского языка
         # Подгружаем кастомные слова
         self.spell.word_frequency.load_words(CUSTOM_WORDS)

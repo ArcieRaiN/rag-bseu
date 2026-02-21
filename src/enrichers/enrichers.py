@@ -1,4 +1,11 @@
-# src/enrichers/enrichers.py
+"""
+LLM-обогащение чанков метаданными.
+
+Модуль содержит LLMEnricher, который последовательно обрабатывает чанки
+через Ollama LLM, извлекая структурированные метаданные (context, geo,
+metrics, years, time_granularity, oked) для последующего поиска.
+"""
+
 from __future__ import annotations
 from typing import List, Optional, Dict, Any
 import time
@@ -27,12 +34,16 @@ logger = logging.getLogger(__name__)
 
 class LLMEnricher:
     """
-    Enriches chunks one by one using OllamaClient.
+    Последовательное обогащение чанков метаданными через Ollama LLM.
 
-    Features:
-    - retries on LLM or parse failure
-    - optional validation and post-processing
-    - logs progress and errors
+    Для каждого чанка:
+    1. Формирует промпт с текстом чанка
+    2. Отправляет запрос в LLM и парсит JSON-ответ
+    3. Валидирует и нормализует полученные метаданные
+    4. Применяет постобработку (фильтрация metrics, обогащение context)
+
+    Поддерживает retry при ошибках LLM/парсинга и периодический сброс
+    контекста модели для предотвращения деградации качества ответов.
     """
 
     def __init__(self, llm_client: OllamaClient, config: Optional[EnricherConfig] = None):
@@ -51,7 +62,17 @@ class LLMEnricher:
         *,
         show_progress: bool = False,
     ) -> List[Chunk]:
-        """Sequentially enrich a list of chunks. Returns enriched chunks in original order."""
+        """
+        Обогащает список чанков, сохраняя исходный порядок.
+
+        Args:
+            pdf_name: Имя PDF-файла (для логирования и промптов).
+            chunks: Список чанков для обогащения.
+            show_progress: Показывать tqdm progress bar.
+
+        Returns:
+            Список обогащённых чанков в исходном порядке.
+        """
         if not chunks:
             return []
 
@@ -121,8 +142,14 @@ class LLMEnricher:
 
     def _enrich_single_chunk(self, pdf_name: str, chunk: Chunk) -> Optional[Chunk]:
         """
-        Enrich a single chunk using LLM.
-        Returns enriched Chunk or None if parsing fails.
+        Обогащает один чанк через LLM с retry.
+
+        Args:
+            pdf_name: Имя PDF-файла.
+            chunk: Чанк для обогащения.
+
+        Returns:
+            Обогащённый Chunk или None при неудаче парсинга после всех попыток.
         """
         system_prompt = self._build_system_prompt()
         prompt = self._build_prompt(pdf_name, chunk)

@@ -36,7 +36,7 @@ def main() -> None:
     usage_dir = Path(__file__).resolve().parent
 
     if args.parse_documents:
-        subprocess.run([sys.executable, usage_dir / "parse_documents_pipeline.py"])
+        subprocess.run([sys.executable, usage_dir / "parse_documents.py"])
 
     elif args.prepare_vector_store:
         subprocess.run([sys.executable, usage_dir / "prepare_vector_store.py"])

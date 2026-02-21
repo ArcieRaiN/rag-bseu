@@ -1,3 +1,10 @@
+"""
+Скрипт первоначальной настройки проекта.
+
+Создаёт виртуальное окружение (.venv), перезапускается внутри него
+и устанавливает зависимости из requirements.txt.
+"""
+
 import os
 import sys
 import subprocess
@@ -6,14 +13,16 @@ from pathlib import Path
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
-ENV_DIR = PROJECT_DIR / "..venv"
+ENV_DIR = PROJECT_DIR / ".venv"
 
 
 def in_venv() -> bool:
+    """Проверяет, запущен ли скрипт внутри виртуального окружения."""
     return sys.prefix != sys.base_prefix
 
 
-def get_venv_paths():
+def get_venv_paths() -> tuple[Path, Path]:
+    """Возвращает пути к python и pip внутри .venv (кроссплатформенно)."""
     if os.name == "nt":
         return (
             ENV_DIR / "Scripts" / "python.exe",
@@ -26,7 +35,8 @@ def get_venv_paths():
         )
 
 
-def main():
+def main() -> None:
+    """Основной сценарий: создание venv и установка зависимостей."""
     python_venv, _ = get_venv_paths()
 
     if not in_venv():

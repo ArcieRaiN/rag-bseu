@@ -1,3 +1,11 @@
+"""
+Генерация векторных представлений текста (эмбеддингов).
+
+Использует sentence-transformers для кодирования текста в вектор фиксированной
+размерности. При несовпадении размерности модели и целевой размерности
+применяется детерминированная случайная проекция (Gaussian random projection).
+"""
+
 from __future__ import annotations
 
 import hashlib
@@ -19,12 +27,13 @@ else:
 
 class SentenceVectorizer:
     """
-    Sentence-transformers based vectorizer.
+    Генератор эмбеддингов на основе sentence-transformers.
 
-    Features:
-    - Lazy initialization
-    - Optional deterministic random projection to target dimension
-    - Normalization to unit vectors
+    Особенности:
+    - Ленивая инициализация модели
+    - Детерминированная случайная проекция для приведения к целевой размерности
+      (seed привязан к имени модели для воспроизводимости)
+    - Нормализация векторов к единичной длине для cosine similarity
     """
 
     def __init__(
@@ -56,7 +65,7 @@ class SentenceVectorizer:
         self._init_model()
 
     def _init_model(self) -> None:
-        """Lazy-ish model initialization."""
+        """Инициализация модели и матрицы проекции (при несовпадении размерностей)."""
         if self._model is not None:
             return
         self._model = SentenceTransformer(self.model_name, device=self.device)
@@ -66,7 +75,12 @@ class SentenceVectorizer:
 
     @staticmethod
     def _make_projection(input_dim: int, output_dim: int, *, seed: str) -> np.ndarray:
-        """Deterministic Gaussian random projection."""
+        """
+        Детерминированная гауссова случайная проекция.
+
+        Seed вычисляется из имени модели (SHA-256), что гарантирует
+        одинаковую матрицу проекции при одинаковой модели.
+        """
         digest = hashlib.sha256(seed.encode("utf-8")).hexdigest()
         rng_seed = int(digest[:16], 16)
         rng = np.random.default_rng(rng_seed)
@@ -74,7 +88,7 @@ class SentenceVectorizer:
         return proj
 
     def _encode_many(self, texts: List[str]) -> np.ndarray:
-        """Generate embeddings for a list of texts."""
+        """Генерирует эмбеддинги для списка текстов с проекцией и нормализацией."""
         if not texts:
             return np.zeros((0, self.dimension), dtype=np.float32)
 
@@ -96,7 +110,7 @@ class SentenceVectorizer:
         return vecs
 
     def embed(self, text: str) -> np.ndarray:
-        """Generate embedding for a single text."""
+        """Генерирует эмбеддинг для одного текста."""
         if text is None:
             raise ValueError("text must not be None")
         text = text.strip()
@@ -105,6 +119,6 @@ class SentenceVectorizer:
         return self._encode_many([text])[0]
 
     def embed_many(self, texts: Iterable[str]) -> np.ndarray:
-        """Generate embeddings for multiple texts."""
+        """Генерирует эмбеддинги для нескольких текстов (пустые строки отфильтровываются)."""
         items = [str(t).strip() for t in texts if t and str(t).strip()]
         return self._encode_many(items)
