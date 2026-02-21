@@ -4,19 +4,17 @@ from __future__ import annotations
 PIPELINE: парсинг и загрузка документов (PDF).
 
 Назначение:
-- Скачать / собрать PDF-документы
-- Сохранить их в usage/documents
+- Скачать статистические сборники (compilation) с Белстата
+- Сохранить PDF в usage/documents
 """
 
 from pathlib import Path
-from typing import Optional
 
 from src.ingestion.site_parser import SiteParser
 
 
 class ParseDocumentsPipeline:
-    """
-    Pipeline для подготовки документов.
+    """Pipeline для подготовки документов.
 
     SRC-уровень:
     - не знает про CLI
@@ -28,28 +26,27 @@ class ParseDocumentsPipeline:
         self,
         output_dir: Path,
         *,
-        source_url: Optional[str] = None,
-    ):
+        max_pages: int = 2,
+    ) -> None:
         """
         Args:
-            output_dir: куда сохранять PDF (usage/documents)
-            source_url: опционально — источник (сайт / каталог)
+            output_dir: куда сохранять PDF (usage/documents).
+            max_pages:  сколько страниц каталога обработать (по умолчанию 2).
         """
-        self.output_dir = output_dir
+        self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         self.site_parser = SiteParser(
             output_dir=self.output_dir,
-            source_url=source_url,
+            max_pages=max_pages,
         )
 
-    def run(self) -> None:
-        """
-        Запуск пайплайна.
-        """
-        print("Запуск ParseDocumentsPipeline...")
+    def run(self) -> list[Path]:
+        """Запуск пайплайна. Возвращает список скачанных PDF."""
+        print("Запуск ParseDocumentsPipeline…")
         print(f"Директория документов: {self.output_dir}")
 
-        self.site_parser.parse()
+        downloaded = self.site_parser.parse()
 
-        print("Парсинг документов завершён")
+        print("Парсинг документов завершён.")
+        return downloaded

@@ -13,12 +13,11 @@ from src.pipelines.parse_documents_pipeline import ParseDocumentsPipeline
 def main() -> None:
     root_dir = Path(__file__).resolve().parent.parent  # rag-bseu
 
-    documents_dir = root_dir / "usage" / "documents"
+    documents_dir = root_dir / "usage" / "archive_documents"
 
     pipeline = ParseDocumentsPipeline(
         output_dir=documents_dir,
-        # source_url можно добавить позже, если нужно
-        # source_url="https://example.com/statistics"
+        max_pages=1,
     )
 
     pipeline.run()
