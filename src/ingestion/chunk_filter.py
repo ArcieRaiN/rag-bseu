@@ -80,7 +80,7 @@ class ChunkFilter:
 
         # Служебные чанки по паттернам
         for pattern in self.SKIP_PATTERNS:
-            if pattern.search(text[:200]):
+            if pattern.search(text[:150]):
                 return ChunkType.METADATA
 
         # Ключевые слова в начале текста
