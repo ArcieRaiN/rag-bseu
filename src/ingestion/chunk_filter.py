@@ -34,9 +34,8 @@ class ChunkFilter:
         "предисловие", "foreword", "preface",
         "содержание", "contents", "table of contents",
         "ответственные", "responsible", "authors",
-        "контакты", "contacts", "contact information",
         "оглавление", "table of contents",
-        "список", "list",
+        "методологические пояснения", "methodological notes"
     }
 
     # Паттерны для определения служебных чанков
@@ -49,7 +48,7 @@ class ChunkFilter:
         re.compile(r"^PREFACE", re.IGNORECASE),
         re.compile(r"ответственные за", re.IGNORECASE),
         re.compile(r"responsible for", re.IGNORECASE),
-        re.compile(r"телефон|phone|email|@", re.IGNORECASE),
+        re.compile(r"Редакционная коллегия:", re.IGNORECASE),
     ]
 
     def __init__(self, skip_first_pages: int = 3):
