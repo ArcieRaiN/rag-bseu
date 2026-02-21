@@ -140,29 +140,3 @@ class ChunkFilter:
 
         return has_cyrillic and has_latin_upper
 
-    @staticmethod
-    def normalize_chunk_id(chunk_id: str) -> str:
-        """
-        Нормализует chunk_id: удаляет NBSP, нормализует пробелы, убирает префиксы.
-
-        Args:
-            chunk_id: Исходный chunk_id
-
-        Returns:
-            Нормализованный chunk_id
-        """
-        if not chunk_id:
-            return ""
-
-        normalized = chunk_id.strip()
-        prefixes = ["ID:", "id:", "ID: ", "id: ", "chunk_id:", "chunk_id: "]
-        for prefix in prefixes:
-            if normalized.startswith(prefix):
-                normalized = normalized[len(prefix):].strip()
-
-        for nbspace in ["\u00A0", "\u2009", "\u2000", "\u2001"]:
-            normalized = normalized.replace(nbspace, " ")
-
-        # Множественные пробелы → один
-        normalized = " ".join(normalized.split())
-        return normalized
