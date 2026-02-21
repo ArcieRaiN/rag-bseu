@@ -52,11 +52,20 @@ class MetadataScorer:
     # -------------------- Частные метрики -------------------- #
 
     @staticmethod
-    def _geo_score(chunk_geo: Optional[str], query_geo: Optional[str]) -> float:
+    def _geo_score(
+        chunk_geo: Optional[str] | List[str],
+        query_geo: Optional[str] | List[str],
+    ) -> float:
         if not chunk_geo or not query_geo:
             return 0.0
-        c = normalize_text_lemmatized(chunk_geo)
-        q = normalize_text_lemmatized(query_geo)
+
+        def _to_str(geo) -> str:
+            if isinstance(geo, list):
+                return " ".join(str(g) for g in geo)
+            return str(geo)
+
+        c = normalize_text_lemmatized(_to_str(chunk_geo))
+        q = normalize_text_lemmatized(_to_str(query_geo))
         if c == q:
             return 1.0
         c_tokens, q_tokens = set(c.split()), set(q.split())

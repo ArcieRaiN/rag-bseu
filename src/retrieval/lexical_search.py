@@ -67,7 +67,12 @@ class RankBM25Search:
     def _make_query_terms(self, enriched_query: EnrichedQuery) -> List[str]:
         terms = [t for t in normalize_text_lemmatized(enriched_query.query).split() if t]
         if enriched_query.geo:
-            terms.extend([t for t in normalize_text_lemmatized(enriched_query.geo).split() if t])
+            geo_str = (
+                " ".join(str(g) for g in enriched_query.geo)
+                if isinstance(enriched_query.geo, list)
+                else str(enriched_query.geo)
+            )
+            terms.extend([t for t in normalize_text_lemmatized(geo_str).split() if t])
         if enriched_query.metrics:
             for m in enriched_query.metrics:
                 terms.extend([t for t in normalize_text_lemmatized(str(m)).split() if t])
