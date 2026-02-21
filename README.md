@@ -21,20 +21,10 @@ cd C:\Users\alex\Downloads\projects\rag-bseu
 
 ## CLI (numeric extraction)
 
-Интерактивный CLI (`usage/query.py`) запускает `QueryPipeline`, отображает топ-чанки и теперь вызывает `OutputPipeline`, который генерирует `usage/outputs/output_df.json`. Пример запуска:
+Интерактивный CLI (`usage/query.py`) запускает `QueryPipeline`, отображает топ-чанки и теперь вызывает `OutputPipeline`, который генерирует `usage/outputs/output_df.json`
 
 ```powershell
-.\.venv\Scripts\python.exe .\usage\query.py --strict --query "Численность населения Минска" --aggregate
-```
-
-Параметры:
-- `--strict`: строгая фильтрация означает уверенные ответы.
-- `--relaxed`: показывает больше кандидатов, включая менее уверенные.
-
-Для логирования фрагментов используйте:
-
-```powershell
-.\.venv\Scripts\python.exe .\usage\query.py --query "Производство молока" --log-raw .\reference\raw_hits.jsonl
+.\.venv\Scripts\python.exe .\usage\query.py
 ```
 
 ## Подготовка векторного хранилища
