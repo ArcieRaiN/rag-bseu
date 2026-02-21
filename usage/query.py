@@ -110,6 +110,16 @@ def main_streamlit() -> None:
         op = OutputPipeline(output_dir=BASE_DIR / "usage" / "outputs")
         return qp, op
 
+    def _reset_state():
+        if "pipeline_output" not in st.session_state:
+            st.session_state["pipeline_output"] = {
+                "df": None,
+                "title": "",
+                "sources": [],
+                "error": "",
+            }
+
+    _reset_state()
     query_pipeline, output_pipeline = load_pipelines()
 
     query = st.text_input("Введите запрос", placeholder="Например: ВВП Беларуси 2018-2022")
@@ -120,39 +130,75 @@ def main_streamlit() -> None:
 
         if not result.top_chunks:
             st.warning("Ничего не найдено по запросу.")
-            return
+            st.session_state["pipeline_output"].update(
+                {"df": None, "title": "", "sources": [], "error": "Ничего не найдено."}
+            )
+        else:
+            with st.spinner("Генерация таблицы через LLM..."):
+                df = output_pipeline.run(result, user_query=query.strip())
 
-        with st.spinner("Генерация таблицы через LLM..."):
-            df = output_pipeline.run(result, user_query=query.strip())
+            if df is None:
+                st.error("Не удалось сформировать таблицу. Подробности в usage/logs/output_df_fails.json")
+                st.session_state["pipeline_output"].update(
+                    {"df": None, "title": "", "sources": [], "error": "LLM не вернула корректный JSON."}
+                )
+            else:
+                title = output_pipeline.title or "Результат"
+                st.session_state["pipeline_output"].update(
+                    {"df": df, "title": title, "sources": output_pipeline.sources, "error": ""}
+                )
 
-        if df is None:
-            st.error("Не удалось сформировать таблицу. Подробности в usage/logs/output_df_fails.json")
-            return
+    ui_state = st.session_state["pipeline_output"]
+    if ui_state["df"] is None:
+        if ui_state["error"]:
+            st.info(ui_state["error"])
+        return
 
-        title = output_pipeline.title or "Результат"
+    df = ui_state["df"]
+    title = ui_state["title"] or "Результат"
 
-        # --- Заголовок ---
-        st.subheader(title)
+    # --- Заголовок ---
+    st.subheader(title)
 
-        # --- Seaborn barplot ---
-        _render_barplot(df, title)
+    # --- Seaborn barplot ---
+    _render_barplot(df, title)
 
-        # --- Таблица данных ---
-        st.markdown("**Таблица данных**")
-        st.dataframe(df, use_container_width=True)
+    # --- Таблица данных ---
+    st.markdown("**Таблица данных**")
+    st.dataframe(df, use_container_width=True)
 
-        # --- Скачивание xlsx ---
-        xlsx_buffer = io.BytesIO()
-        with pd.ExcelWriter(xlsx_buffer, engine="openpyxl") as writer:
-            df.to_excel(writer, index=False, sheet_name="data")
-        xlsx_buffer.seek(0)
-
-        st.download_button(
-            label="Скачать таблицу (.xlsx)",
-            data=xlsx_buffer,
-            file_name="output_data.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    # --- Источники ---
+    sources = ui_state["sources"]
+    if sources:
+        st.markdown(
+            "**Источники:** "
+            + "; ".join(
+                sources
+            )
         )
+
+    # --- Скачивание xlsx ---
+    xlsx_buffer = io.BytesIO()
+    file_name = _sanitize_filename(title)
+    with pd.ExcelWriter(xlsx_buffer, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="data")
+    xlsx_buffer.seek(0)
+
+    st.download_button(
+        label="Скачать таблицу (.xlsx)",
+        data=xlsx_buffer,
+        file_name=file_name,
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+def _sanitize_filename(title: str) -> str:
+    safe = "".join(c if c.isalnum() or c in " _-" else "_" for c in title).strip()
+    if not safe:
+        safe = "output"
+    if not safe.lower().endswith(".xlsx"):
+        safe = f"{safe}.xlsx"
+    return safe
 
 
 def _render_barplot(df: "pd.DataFrame", title: str) -> None:

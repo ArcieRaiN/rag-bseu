@@ -49,6 +49,7 @@ class OutputPipeline:
         )
         self._validator = OutputValidator()
         self._rag_logger = get_logger()
+        self._last_chunk_sources: List[str] = []
 
     def run(
         self,
@@ -94,6 +95,10 @@ class OutputPipeline:
             return None
 
         df = self._validator.to_dataframe(data)
+        self._last_chunk_sources = [
+            f"{sc.chunk.source} страница {sc.chunk.page or 'неизвестна'}"
+            for sc in chunks
+        ]
         elapsed = time.perf_counter() - t0
         print(f"[OutputPipeline] Готово за {elapsed:.2f}s, shape={df.shape}")
         return df
@@ -110,6 +115,10 @@ class OutputPipeline:
             return data.get("title")
         except Exception:
             return None
+
+    @property
+    def sources(self) -> List[str]:
+        return self._last_chunk_sources
 
     # ------------------------------------------------------------------
     # Блок 1: Роль модели (system prompt)
