@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
-ENV_DIR = PROJECT_DIR / ".venv"
+ENV_DIR = PROJECT_DIR / "..venv"
 
 
 def in_venv() -> bool:
@@ -31,16 +31,16 @@ def main():
 
     if not in_venv():
         if not ENV_DIR.exists():
-            print("🔧 Создаём виртуальное окружение...")
+            print("Создаём виртуальное окружение...")
             venv.create(ENV_DIR, with_pip=True)
         else:
-            print("ℹ️ Виртуальное окружение уже существует.")
+            print("ℹВиртуальное окружение уже существует.")
 
-        print("🔁 Перезапуск через venv...")
+        print("Перезапуск через .venv...")
         subprocess.check_call([str(python_venv), __file__])
         sys.exit(0)
 
-    print("✅ Работаем внутри venv")
+    print("Работаем внутри .venv")
     print("Python:", sys.executable)
 
     req = PROJECT_DIR / "requirements.txt"
@@ -48,9 +48,9 @@ def main():
         subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", str(req)])
     else:
-        print("❌ requirements.txt не найден")
+        print("requirements.txt не найден")
 
-    print("🎉 Готово")
+    print("Готово")
 
 
 if __name__ == "__main__":

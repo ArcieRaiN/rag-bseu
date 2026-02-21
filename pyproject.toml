@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-bseu"
+version = "0.1.0"
+description = "RAG-based analytical system"
+authors = [{name = "Alex"}]
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]

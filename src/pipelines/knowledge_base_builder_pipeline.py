@@ -105,11 +105,11 @@ class KnowledgeBaseBuilder:
             # 6. Сохраняем промежуточные данные
             self._save_data_json([Chunk(**ch) for ch in all_chunks])
             self.faiss_indexer.save(index_path)
-            print(f"✅ Обновлен PDF {pdf_name} в FAISS и data.json")
+            print(f"Обновлен PDF {pdf_name} в FAISS и data.json")
 
         # 7. Сохраняем метаданные
         self._save_metadata([Chunk(**ch) for ch in all_chunks])
-        print("🎉 База знаний полностью построена!")
+        print("База знаний полностью построена!")
 
     def _save_data_json(self, chunks: List[Chunk]) -> None:
         data_path = self.output_dir / "data.json"

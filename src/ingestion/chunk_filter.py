@@ -34,9 +34,8 @@ class ChunkFilter:
         "предисловие", "foreword", "preface",
         "содержание", "contents", "table of contents",
         "ответственные", "responsible", "authors",
-        "контакты", "contacts", "contact information",
         "оглавление", "table of contents",
-        "список", "list",
+        "методологические пояснения", "methodological notes"
     }
 
     # Паттерны для определения служебных чанков
@@ -48,8 +47,9 @@ class ChunkFilter:
         re.compile(r"^FOREWORD", re.IGNORECASE),
         re.compile(r"^PREFACE", re.IGNORECASE),
         re.compile(r"ответственные за", re.IGNORECASE),
+        re.compile(r"ответственный за выпуск", re.IGNORECASE),
         re.compile(r"responsible for", re.IGNORECASE),
-        re.compile(r"телефон|phone|email|@", re.IGNORECASE),
+        re.compile(r"Редакционная коллегия:", re.IGNORECASE),
     ]
 
     def __init__(self, skip_first_pages: int = 3):
@@ -80,7 +80,7 @@ class ChunkFilter:
 
         # Служебные чанки по паттернам
         for pattern in self.SKIP_PATTERNS:
-            if pattern.search(text[:200]):
+            if pattern.search(text[:150]):
                 return ChunkType.METADATA
 
         # Ключевые слова в начале текста
@@ -141,29 +141,3 @@ class ChunkFilter:
 
         return has_cyrillic and has_latin_upper
 
-    @staticmethod
-    def normalize_chunk_id(chunk_id: str) -> str:
-        """
-        Нормализует chunk_id: удаляет NBSP, нормализует пробелы, убирает префиксы.
-
-        Args:
-            chunk_id: Исходный chunk_id
-
-        Returns:
-            Нормализованный chunk_id
-        """
-        if not chunk_id:
-            return ""
-
-        normalized = chunk_id.strip()
-        prefixes = ["ID:", "id:", "ID: ", "id: ", "chunk_id:", "chunk_id: "]
-        for prefix in prefixes:
-            if normalized.startswith(prefix):
-                normalized = normalized[len(prefix):].strip()
-
-        for nbspace in ["\u00A0", "\u2009", "\u2000", "\u2001"]:
-            normalized = normalized.replace(nbspace, " ")
-
-        # Множественные пробелы → один
-        normalized = " ".join(normalized.split())
-        return normalized

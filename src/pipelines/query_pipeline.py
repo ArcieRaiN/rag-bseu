@@ -20,6 +20,7 @@ from src.core.models import PipelineResult, ScoredChunk
 from src.core.config import RetrievalConfig
 from src.enrichers.client import OllamaClient
 from src.utils.spellchecker import QuerySpellChecker
+from src.utils.spellcheck_validator import SpellcheckValidator
 
 class QueryPipeline:
     def __init__(self, base_dir: Path, *, llm_model: str = "llama3-chatqa:latest",
@@ -40,6 +41,7 @@ class QueryPipeline:
         self._ollama = OllamaClient()
         self._vectorizer = SentenceVectorizer(dimension=vector_dim)
         self._spellchecker = QuerySpellChecker()
+        self._spellcheck_validator = SpellcheckValidator()
 
         vector_store_dir = self._base_dir / "usage" / "vector_store"
         self._semantic = FaissSemanticSearcher(
@@ -72,14 +74,18 @@ class QueryPipeline:
         print(f"\n[PIPELINE] Start query: {query!r}")
         t_pipeline = time.perf_counter()
 
-        # Исправление опечаток
+        # Исправление опечаток + валидация (не исказил ли смысл)
         t0 = time.perf_counter()
         corrected_query = self._spellchecker.correct_query(query)
-        print(f"[STEP 0] Spellcheck done in {time.perf_counter() - t0:.2f}s -> {corrected_query!r}")
+        validation = self._spellcheck_validator.validate(query, corrected_query)
+        query_for_pipeline = validation.query_to_use
+        if validation.was_corrupted:
+            print(f"[STEP 0] Spellcheck corrupted meaning ({validation.method}), using original")
+        print(f"[STEP 0] Spellcheck done in {time.perf_counter() - t0:.2f}s -> {query_for_pipeline!r}")
 
         # 1. Enrichment
         t0 = time.perf_counter()
-        enriched_query = self._enricher.enrich(corrected_query)
+        enriched_query = self._enricher.enrich(query_for_pipeline)
         print(f"[STEP 1] Enrichment done in {time.perf_counter() - t0:.2f}s")
 
         # 2. Hybrid search
