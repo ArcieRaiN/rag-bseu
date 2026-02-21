@@ -47,6 +47,7 @@ class ChunkFilter:
         re.compile(r"^FOREWORD", re.IGNORECASE),
         re.compile(r"^PREFACE", re.IGNORECASE),
         re.compile(r"ответственные за", re.IGNORECASE),
+        re.compile(r"ответственный за выпуск", re.IGNORECASE),
         re.compile(r"responsible for", re.IGNORECASE),
         re.compile(r"Редакционная коллегия:", re.IGNORECASE),
     ]
