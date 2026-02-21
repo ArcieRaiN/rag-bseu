@@ -9,7 +9,10 @@ USAGE: интерактивный запуск query_pipeline + output_pipeline.
 from __future__ import annotations
 
 import io
+import sys
 from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from src.pipelines.query_pipeline import QueryPipeline
 from src.pipelines.output_pipeline import OutputPipeline
