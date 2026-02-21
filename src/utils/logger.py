@@ -97,6 +97,33 @@ class RAGLogger:
 
         self.log("llm-enrichment-fails", record)
 
+    # =========================
+    # Output Validation Failures
+    # =========================
+    def log_output_validation_fail(
+        self,
+        *,
+        user_query: str,
+        raw_json: str,
+        errors: list[str],
+        system_prompt: str = "",
+        prompt: str = "",
+        **kwargs: Any,
+    ) -> None:
+        """
+        Логирование невалидного JSON-ответа от LLM в output pipeline.
+        """
+        record: Dict[str, Any] = {
+            "event": "output_validation_fail",
+            "user_query": user_query,
+            "errors": errors,
+            "system_prompt": system_prompt,
+            "prompt": prompt,
+            "raw_json": raw_json[:3000],
+            **kwargs,
+        }
+
+        self.log("output_df_fails", record)
 
 
 # =========================

@@ -47,9 +47,9 @@ class ParseDocumentsPipeline:
         """
         Запуск пайплайна.
         """
-        print("📥 Запуск ParseDocumentsPipeline...")
-        print(f"📂 Директория документов: {self.output_dir}")
+        print("Запуск ParseDocumentsPipeline...")
+        print(f"Директория документов: {self.output_dir}")
 
         self.site_parser.parse()
 
-        print("✅ Парсинг документов завершён")
+        print("Парсинг документов завершён")

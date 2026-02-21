@@ -1,26 +1,44 @@
 """
-USAGE: интерактивный запуск query_pipeline.
+USAGE: интерактивный запуск query_pipeline + output_pipeline.
 
-Запускает пайплайн запросов и выводит топ-3 чанка.
-В будущем — передаёт результат в output_pipeline.
+Два режима работы:
+- CLI:       python usage/query.py
+- Streamlit: streamlit run usage/query.py
 """
 
+from __future__ import annotations
+
+import io
 from pathlib import Path
 
 from src.pipelines.query_pipeline import QueryPipeline
-# from src.pipelines.output_pipeline import OutputPipeline  # ← будущая интеграция
+from src.pipelines.output_pipeline import OutputPipeline
 
 
-def main() -> None:
-    base_dir = Path(__file__).resolve().parent.parent  # rag-bseu
+BASE_DIR = Path(__file__).resolve().parent.parent  # rag-bseu
 
-    pipeline = QueryPipeline(base_dir=base_dir)
 
-    # output_dir = base_dir / "usage" / "outputs"
-    # output_pipeline = OutputPipeline(
-    #     output_dir=output_dir,
-    #     mode="raw",  # raw | table | chart | llm
-    # )
+# ================================================================
+# Streamlit detection
+# ================================================================
+
+def _is_streamlit() -> bool:
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+        return get_script_run_ctx() is not None
+    except Exception:
+        return False
+
+
+# ================================================================
+# CLI mode (python usage/query.py)
+# ================================================================
+
+def main_cli() -> None:
+    pipeline = QueryPipeline(base_dir=BASE_DIR)
+    output_pipeline = OutputPipeline(
+        output_dir=BASE_DIR / "usage" / "outputs",
+    )
 
     print("Интерактивный режим. Введите запрос (Ctrl+C для выхода).")
     try:
@@ -29,14 +47,12 @@ def main() -> None:
             if not query:
                 continue
 
-            # --- QUERY PIPELINE ---
             result = pipeline.run(query)
 
             if not result.top_chunks:
-                print("❌ Ничего не найдено.")
+                print("Ничего не найдено.")
                 continue
 
-            # --- ТЕКУЩИЙ RAW-ВЫВОД (DEV / DEBUG) ---
             print(f"Топ-{min(3, len(result.top_chunks))} чанков:")
             for i, sc in enumerate(result.top_chunks[:3], 1):
                 ch = sc.chunk
@@ -58,12 +74,123 @@ def main() -> None:
                 print(f"   context: {ch.context}")
                 print()
 
-            # --- БУДУЩИЙ OUTPUT PIPELINE ---
-            # output_pipeline.run(result)
+            df = output_pipeline.run(result, user_query=query)
+            if df is not None:
+                print("\n=== ТАБЛИЦА ===")
+                print(df.to_string(index=False))
+            else:
+                print("Не удалось сформировать таблицу.")
 
     except KeyboardInterrupt:
         print("\nВыход из программы.")
 
 
-if __name__ == "__main__":
-    main()
+# ================================================================
+# Streamlit mode (streamlit run usage/query.py)
+# ================================================================
+
+def main_streamlit() -> None:
+    import streamlit as st
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    import matplotlib
+    import pandas as pd
+
+    matplotlib.use("Agg")
+
+    st.set_page_config(page_title="RAG BSEU", layout="wide")
+    st.title("RAG BSEU — Статистические данные")
+
+    @st.cache_resource
+    def load_pipelines():
+        qp = QueryPipeline(base_dir=BASE_DIR)
+        op = OutputPipeline(output_dir=BASE_DIR / "usage" / "outputs")
+        return qp, op
+
+    query_pipeline, output_pipeline = load_pipelines()
+
+    query = st.text_input("Введите запрос", placeholder="Например: ВВП Беларуси 2018-2022")
+
+    if st.button("Найти", type="primary") and query.strip():
+        with st.spinner("Поиск по базе знаний..."):
+            result = query_pipeline.run(query.strip())
+
+        if not result.top_chunks:
+            st.warning("Ничего не найдено по запросу.")
+            return
+
+        with st.spinner("Генерация таблицы через LLM..."):
+            df = output_pipeline.run(result, user_query=query.strip())
+
+        if df is None:
+            st.error("Не удалось сформировать таблицу. Подробности в usage/logs/output_df_fails.json")
+            return
+
+        title = output_pipeline.title or "Результат"
+
+        # --- Заголовок ---
+        st.subheader(title)
+
+        # --- Seaborn barplot ---
+        _render_barplot(df, title)
+
+        # --- Таблица данных ---
+        st.markdown("**Таблица данных**")
+        st.dataframe(df, use_container_width=True)
+
+        # --- Скачивание xlsx ---
+        xlsx_buffer = io.BytesIO()
+        with pd.ExcelWriter(xlsx_buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False, sheet_name="data")
+        xlsx_buffer.seek(0)
+
+        st.download_button(
+            label="Скачать таблицу (.xlsx)",
+            data=xlsx_buffer,
+            file_name="output_data.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+
+def _render_barplot(df: "pd.DataFrame", title: str) -> None:
+    """Seaborn barplot: первый столбец — категории (X), остальные — значения (Y)."""
+    import streamlit as st
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    import pandas as pd
+
+    cols = list(df.columns)
+    if len(cols) < 2:
+        st.info("Недостаточно столбцов для построения графика.")
+        return
+
+    x_col = cols[0]
+    value_cols = cols[1:]
+
+    melted = df.melt(id_vars=[x_col], value_vars=value_cols,
+                     var_name="Показатель", value_name="Значение")
+
+    melted["Значение"] = pd.to_numeric(melted["Значение"], errors="coerce")
+    melted = melted.dropna(subset=["Значение"])
+
+    if melted.empty:
+        st.info("Нет числовых данных для графика.")
+        return
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    sns.barplot(data=melted, x=x_col, y="Значение", hue="Показатель", ax=ax)
+    ax.set_title(title, fontsize=14)
+    ax.tick_params(axis="x", rotation=45)
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close(fig)
+
+
+# ================================================================
+# Entry point
+# ================================================================
+
+if _is_streamlit():
+    main_streamlit()
+elif __name__ == "__main__":
+    main_cli()
