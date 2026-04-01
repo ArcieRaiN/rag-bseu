@@ -1,8 +1,7 @@
-"""
-Конфигурации модулей поиска (retrieval).
+from __future__ import annotations
 
-Содержит параметры гибридного поиска и лексического BM25-поиска,
-включая веса каналов, top-k и параметры ранжирования.
+"""
+Configuration for RAG retrieval pipeline.
 """
 
 from dataclasses import dataclass
@@ -10,32 +9,18 @@ from dataclasses import dataclass
 
 @dataclass
 class RetrievalConfig:
-    """
-    Конфигурация гибридного поиска.
-    """
-    semantic_top_k: int = 20
-    lexical_top_k: int = 20
-    final_top_k: int = 5
+    """Parameters for the hybrid retrieval pipeline."""
 
-    w_semantic: float = 0.55   # embedding similarity
-    w_lexical: float = 0.25    # BM25 / TF-IDF
-    w_metadata: float = 0.20   # geo / years / metrics
+    semantic_top_k: int = 40
+    lexical_top_k: int = 40
+    metadata_top_k: int = 30
+    final_top_k: int = 10
 
-    def __post_init__(self):
-        s = self.w_semantic + self.w_lexical + self.w_metadata
-        if not 0.99 <= s <= 1.01:
-            raise ValueError(f"Retrieval weights must sum to 1.0, got {s}")
+    rrf_k: int = 60
 
+    bm25_k1: float = 1.5
+    bm25_b: float = 0.75
 
-@dataclass
-class LexicalSearchConfig:
-    """
-    Конфигурация для BM25 / lexical search:
-    отдельные веса для разных полей документа.
-    """
-    w_text: float = 1.0      # вес основного текста chunk.text
-    w_context: float = 1.0   # вес context / описания
-    w_hints: float = 1.0     # вес метаданных: geo / metrics / years
-
-    k1: float = 1.5          # BM25-параметр k1
-    b: float = 0.75          # BM25-параметр b
+    use_reranker: bool = False
+    reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    reranker_top_k: int = 5

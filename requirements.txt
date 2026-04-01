@@ -4,13 +4,11 @@ pandas==2.2.2
 requests==2.31.0
 beautifulsoup4==4.12.3
 faiss-cpu==1.8.0
-natasha==1.6.0
 llama-index==0.10.56
 llama-index-readers-file==0.1.19
 sentence-transformers==3.4.1
 tqdm==4.67.2
 rank-bm25==0.2.2
-pyspellchecker==0.8.4
 streamlit==1.41.1
 seaborn==0.13.2
 matplotlib==3.9.2

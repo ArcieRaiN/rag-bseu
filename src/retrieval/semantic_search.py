@@ -76,13 +76,14 @@ class FaissSemanticSearcher:
                     text=item["text"],
                     source=item["source"],
                     page=int(item["page"]),
+                    section=item.get("section"),
                     geo=item.get("geo"),
                     metrics=item.get("metrics"),
                     years=item.get("years") or [],
                     time_granularity=item.get("time_granularity"),
                     oked=item.get("oked"),
                     extra={k: v for k, v in item.items() if k not in {
-                        "id", "context", "text", "source", "page",
+                        "id", "context", "text", "source", "page", "section",
                         "geo", "metrics", "years", "time_granularity", "oked"
                     }},
                 )
@@ -91,9 +92,9 @@ class FaissSemanticSearcher:
 
     @staticmethod
     def _prepare_query(embedded_query: np.ndarray) -> np.ndarray:
-        if embedded_query.ndim == 1:
-            return embedded_query.reshape(1, -1).astype("float32")
-        return embedded_query.astype("float32")
+        vec = embedded_query.reshape(1, -1).astype("float32") if embedded_query.ndim == 1 else embedded_query.astype("float32")
+        faiss.normalize_L2(vec)
+        return vec
 
     def _format_results(self, scores: np.ndarray, indices: np.ndarray) -> List[ScoredChunk]:
         results: List[ScoredChunk] = []

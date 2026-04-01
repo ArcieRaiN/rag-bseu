@@ -1,113 +1,62 @@
 from __future__ import annotations
 
 """
-Lexical Search через rank_bm25 с поддержкой весов полей (text/context/hints).
-Интерфейс search(query, top_k)
+Lexical (BM25) search over chunks.
+
+Simplified: single BM25 index over concatenated text+context.
+Tokenization: lowercase + split (no Natasha lemmatization for speed).
 """
 
+import re
 from typing import List
+
 from rank_bm25 import BM25Okapi
 
-from src.core.models import Chunk, ScoredChunk, EnrichedQuery
-from src.core.input_normalizer import normalize_text_lemmatized
-from src.core.config import LexicalSearchConfig
+from src.core.models import Chunk, ScoredChunk
 
 
-class RankBM25Search:
+_TOKEN_RE = re.compile(r'[а-яёa-z0-9]+', re.IGNORECASE)
+
+
+def _tokenize(text: str) -> List[str]:
+    """Simple tokenizer: lowercase + word-level split."""
+    return _TOKEN_RE.findall(text.lower())
+
+
+class BM25Search:
     """
-    Lexical search с использованием rank_bm25 + Cython для ускорения.
-    Поддерживает веса полей:
-        w_text, w_context, w_hints
+    BM25-based lexical search using rank_bm25.
+
+    Builds one index over `text + context` for each chunk.
     """
 
-    def __init__(self, chunks: List[Chunk], config: LexicalSearchConfig | None = None):
+    def __init__(self, chunks: List[Chunk], k1: float = 1.5, b: float = 0.75):
         self._chunks = chunks
-        self._config = config or LexicalSearchConfig()
+        self._corpus_tokens: List[List[str]] = []
 
-        # токенизация по документам и полям
-        self._text_tokens: List[List[str]] = []
-        self._context_tokens: List[List[str]] = []
-        self._hints_tokens: List[List[str]] = []
+        for ch in chunks:
+            combined = f"{ch.context or ''} {ch.text or ''}"
+            self._corpus_tokens.append(_tokenize(combined))
 
-        self._build()
+        self._bm25 = BM25Okapi(self._corpus_tokens, k1=k1, b=b)
 
-    # -------------------- Индексация -------------------- #
-    def _build(self) -> None:
-        for ch in self._chunks:
-            # text
-            text_tokens = [t for t in normalize_text_lemmatized(ch.text).split() if t]
-            self._text_tokens.append(text_tokens)
-
-            # context
-            context_tokens = [t for t in normalize_text_lemmatized(ch.context).split() if t]
-            self._context_tokens.append(context_tokens)
-
-            # hints: metrics / geo / years
-            hints_parts: list[str] = []
-            if ch.metrics:
-                hints_parts.append(" ".join(str(m) for m in ch.metrics[:3]) if isinstance(ch.metrics, list) else str(ch.metrics))
-            if ch.geo:
-                hints_parts.append(" ".join(str(g) for g in ch.geo) if isinstance(ch.geo, list) else str(ch.geo))
-            if ch.years:
-                if isinstance(ch.years, list):
-                    y_sorted = sorted(ch.years)
-                    years_repr = f"{y_sorted[0]}-{y_sorted[-1]}" if len(y_sorted) > 1 else str(y_sorted[0])
-                    hints_parts.append(years_repr)
-                else:
-                    hints_parts.append(str(ch.years))
-            hints_tokens = [t for t in normalize_text_lemmatized(" ".join(hints_parts)).split() if t]
-            self._hints_tokens.append(hints_tokens)
-
-        # Создаём BM25 объекты для каждого поля
-        self._bm25_text = BM25Okapi(self._text_tokens)
-        self._bm25_context = BM25Okapi(self._context_tokens)
-        self._bm25_hints = BM25Okapi(self._hints_tokens)
-
-    # -------------------- Подготовка запроса -------------------- #
-    def _make_query_terms(self, enriched_query: EnrichedQuery) -> List[str]:
-        terms = [t for t in normalize_text_lemmatized(enriched_query.query).split() if t]
-        if enriched_query.geo:
-            geo_str = (
-                " ".join(str(g) for g in enriched_query.geo)
-                if isinstance(enriched_query.geo, list)
-                else str(enriched_query.geo)
-            )
-            terms.extend([t for t in normalize_text_lemmatized(geo_str).split() if t])
-        if enriched_query.metrics:
-            for m in enriched_query.metrics:
-                terms.extend([t for t in normalize_text_lemmatized(str(m)).split() if t])
-        return terms
-
-    # -------------------- Поиск -------------------- #
-    def search(self, enriched_query: EnrichedQuery, top_k: int) -> List[ScoredChunk]:
-        query_terms = self._make_query_terms(enriched_query)
-        if not query_terms:
+    def search(self, query: str, top_k: int = 20) -> List[ScoredChunk]:
+        query_tokens = _tokenize(query)
+        if not query_tokens:
             return []
 
-        # ранжирование по каждому полю
-        scores_text = self._bm25_text.get_scores(query_terms)
-        scores_context = self._bm25_context.get_scores(query_terms)
-        scores_hints = self._bm25_hints.get_scores(query_terms)
+        scores = self._bm25.get_scores(query_tokens)
 
-        # суммируем с весами
-        combined_scores = []
-        for i, _ in enumerate(self._chunks):
-            score = (
-                self._config.w_text * scores_text[i] +
-                self._config.w_context * scores_context[i] +
-                self._config.w_hints * scores_hints[i]
-            )
-            combined_scores.append(score)
+        top_indices = scores.argsort()[::-1][:top_k]
 
-        # берём top_k
-        top_indices = sorted(range(len(combined_scores)), key=lambda i: combined_scores[i], reverse=True)[:top_k]
-
-        results = []
+        results: List[ScoredChunk] = []
         for idx in top_indices:
-            results.append(
-                ScoredChunk(
-                    chunk=self._chunks[idx],
-                    lexical_score=float(combined_scores[idx])
-                )
-            )
+            score = float(scores[idx])
+            if score <= 0:
+                break
+            results.append(ScoredChunk(
+                chunk=self._chunks[idx],
+                lexical_score=score,
+            ))
+
         return results
