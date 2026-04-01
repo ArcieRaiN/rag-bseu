@@ -10,7 +10,7 @@ Steps:
 
 from pathlib import Path
 import time
-from typing import List
+from typing import List, Optional
 
 from src.core.context_enrichment import QueryContextEnricher
 from src.retrieval.hybrid_search import HybridSearcher
@@ -54,7 +54,12 @@ class QueryPipeline:
 
         print(f"[INIT] QueryPipeline ready in {time.perf_counter() - t0:.2f}s")
 
-    def run(self, query: str) -> PipelineResult:
+    def get_available_sources(self) -> List[str]:
+        """Return sorted list of unique PDF source names from the vector store."""
+        chunks = self._semantic.get_all_chunks()
+        return sorted(set(ch.source for ch in chunks))
+
+    def run(self, query: str, source_filter: Optional[str] = None) -> PipelineResult:
         t_pipeline = time.perf_counter()
 
         # 1. Enrichment (embedding + regex, no LLM)
@@ -77,6 +82,10 @@ class QueryPipeline:
                 top_k=self._retrieval_config.reranker_top_k
             )
             t_rerank = time.perf_counter() - t0
+
+        # 4. Optional source filter
+        if source_filter:
+            candidates = [sc for sc in candidates if sc.chunk.source == source_filter]
 
         total = time.perf_counter() - t_pipeline
         print(f"[PIPELINE] query={query!r} enrich={t_enrich:.2f}s search={t_search:.2f}s "

@@ -124,9 +124,24 @@ def main_streamlit() -> None:
 
     query = st.text_input("Введите запрос", placeholder="Например: ВВП Беларуси 2018-2022")
 
+    all_sources = query_pipeline.get_available_sources()
+    file_search = st.text_input("Поиск по файлу", placeholder="Введите часть названия...")
+    if file_search.strip():
+        matched = [s for s in all_sources if file_search.strip().lower() in s.lower()]
+    else:
+        matched = all_sources
+
+    source_options = ["Все файлы"] + matched
+    selected_source = st.selectbox("Источник", source_options)
+
+    if not matched and file_search.strip():
+        st.caption("Ничего не найдено по названию файла.")
+
+    source_filter = None if selected_source == "Все файлы" else selected_source
+
     if st.button("Найти", type="primary") and query.strip():
         with st.spinner("Поиск по базе знаний..."):
-            result = query_pipeline.run(query.strip())
+            result = query_pipeline.run(query.strip(), source_filter=source_filter)
 
         if not result.top_chunks:
             st.warning("Ничего не найдено по запросу.")
