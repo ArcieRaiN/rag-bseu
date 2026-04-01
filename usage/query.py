@@ -179,7 +179,10 @@ def main_streamlit() -> None:
 
     # --- Таблица данных ---
     st.markdown("**Таблица данных**")
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(
+        df.style.format(_fmt_value),
+        use_container_width=True,
+    )
 
     # --- Источники ---
     sources = ui_state["sources"]
@@ -204,6 +207,17 @@ def main_streamlit() -> None:
         file_name=file_name,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+
+
+def _fmt_value(val):
+    """Format numbers: no thousands separator, comma for decimals."""
+    if isinstance(val, float):
+        if val == int(val):
+            return str(int(val))
+        return f"{val:g}".replace(".", ",")
+    if isinstance(val, int):
+        return str(val)
+    return val
 
 
 def _sanitize_filename(title: str) -> str:

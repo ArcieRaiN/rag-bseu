@@ -32,7 +32,7 @@ class OutputPipeline:
     валидация, конвертация в pandas DataFrame.
     """
 
-    MAX_CHUNK_TEXT_LEN = 1500
+    MAX_CHUNK_TEXT_LEN = 4000
     TOP_K_CHUNKS = 3
 
     def __init__(
@@ -95,9 +95,13 @@ class OutputPipeline:
             return None
 
         df = self._validator.to_dataframe(data)
-        top = chunks[0].chunk
+        frag_idx = data.get("source_fragment")
+        if isinstance(frag_idx, int) and 1 <= frag_idx <= len(chunks):
+            src_chunk = chunks[frag_idx - 1].chunk
+        else:
+            src_chunk = chunks[0].chunk
         self._last_chunk_sources = [
-            f"{top.source}, стр. {top.page}" if top.page else top.source
+            f"{src_chunk.source}, стр. {src_chunk.page}" if src_chunk.page else src_chunk.source
         ]
         elapsed = time.perf_counter() - t0
         print(f"[OutputPipeline] Готово за {elapsed:.2f}s, shape={df.shape}")
@@ -146,7 +150,8 @@ class OutputPipeline:
             '  "title": "<краткое описание таблицы>",\n'
             '  "columns": ["<название столбца 1>", "<название столбца 2>", ...],\n'
             '  "rows": [[значение1, значение2, ...], ...],\n'
-            '  "chart_type": "bar"\n'
+            '  "chart_type": "bar",\n'
+            '  "source_fragment": <номер фрагмента, из которого взяты данные (1, 2 или 3)>\n'
             "}\n\n"
             "Правила:\n"
             "1. columns — список строк, названия столбцов таблицы.\n"
@@ -155,8 +160,20 @@ class OutputPipeline:
             "4. Числовые значения — числа (int или float), НЕ строки.\n"
             "5. Не оставляй пустых (null) ячеек.\n"
             "6. chart_type всегда \"bar\".\n"
-            "7. Используй ТОЛЬКО данные из предоставленных фрагментов.\n"
-            "8. Ответ — ТОЛЬКО JSON, без markdown, без комментариев."
+            "7. Используй ТОЛЬКО данные из предоставленных фрагментов. Извлекай "
+            "числа ТОЧНО как они указаны в источнике — НЕ округляй, НЕ умножай, "
+            "НЕ выдумывай значения.\n"
+            "8. Включай ТОЛЬКО строки, непосредственно относящиеся к запросу "
+            "пользователя. НЕ включай все строки таблицы — только те, которые "
+            "отвечают на вопрос.\n"
+            "9. ОБЯЗАТЕЛЬНО читай сноски и примечания к таблицам (обычно внизу, "
+            "начинаются с цифры и скобки, например «1)»). Если указана деноминация "
+            "(например «с учетом деноминации, уменьшение в 10 000 раз»), ПРИВЕДИ "
+            "все значения к современному масштабу: раздели старые значения (до года "
+            "деноминации) на указанный коэффициент.\n"
+            "10. source_fragment — номер фрагмента (1, 2 или 3), из которого "
+            "ты взял основные данные для таблицы.\n"
+            "11. Ответ — ТОЛЬКО JSON, без markdown, без комментариев."
         )
 
         return (
