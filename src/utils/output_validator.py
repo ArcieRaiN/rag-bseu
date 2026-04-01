@@ -80,7 +80,14 @@ class OutputValidator:
     # Семантическая проверка
     # ------------------------------------------------------------------
     @staticmethod
+    def is_no_data(data: Dict[str, Any]) -> bool:
+        return data.get("no_data") is True
+
+    @staticmethod
     def _check_semantics(data: Dict[str, Any], errors: List[str]) -> None:
+        if data.get("no_data") is True:
+            return
+
         # title
         title = data.get("title")
         if not title or not isinstance(title, str):

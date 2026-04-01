@@ -151,7 +151,11 @@ def main_streamlit() -> None:
             with st.spinner("Генерация таблицы через LLM..."):
                 df = output_pipeline.run(result, user_query=query.strip())
 
-            if df is None:
+            if df is None and output_pipeline.no_data:
+                st.session_state["pipeline_output"].update(
+                    {"df": None, "title": "", "sources": [], "error": "no_data"}
+                )
+            elif df is None:
                 st.error("Не удалось сформировать таблицу. Подробности в usage/logs/output_df_fails.json")
                 st.session_state["pipeline_output"].update(
                     {"df": None, "title": "", "sources": [], "error": "LLM не вернула корректный JSON."}
@@ -164,7 +168,9 @@ def main_streamlit() -> None:
 
     ui_state = st.session_state["pipeline_output"]
     if ui_state["df"] is None:
-        if ui_state["error"]:
+        if ui_state["error"] == "no_data":
+            st.warning("По данному запросу информация в источниках не найдена.")
+        elif ui_state["error"]:
             st.info(ui_state["error"])
         return
 
