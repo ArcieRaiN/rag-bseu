@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 """
-Metadata Scoring.
+Metadata Scoring для гибридного поиска.
 
-Scores overlap between chunk metadata and query-extracted metadata:
-- geo (exact/partial)
-- metrics (fuzzy)
-- years (range intersection)
-- time_granularity (exact)
-- oked (prefix)
+Взвешенный скоринг совпадений метаданных чанка и запроса:
+- geo (35%): exact/partial token overlap
+- metrics (30%): Jaccard по нормализованным токенам
+- years (20%): intersection по множествам лет
+- time_granularity (5%): exact match
+- oked (10%): prefix match
+
+Возвращает значение в [0, 1].
 """
 
 import re

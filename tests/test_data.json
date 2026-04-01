@@ -1,226 +1,201 @@
 {
-  "version": "2.0",
-  "description": "Эталонные тестовые вопросы для оценки RAG retrieval quality. Каждый вопрос привязан к конкретным страницам сборников.",
+  "version": "3.0",
+  "description": "Расширенный набор тестовых вопросов для оценки RAG retrieval quality. Охватывает все разделы обоих сборников.",
   "tests": [
-    {
-      "query": "Численность населения Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page13", "Беларусь в цифрах, 2025.pdf::page14", "Беларусь и Россия, 2024.pdf::page37"],
-      "category": "demographics"
-    },
-    {
-      "query": "Население по областям и Минску",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page14"],
-      "category": "demographics"
-    },
-    {
-      "query": "Браки и разводы в Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page15", "Беларусь в цифрах, 2025.pdf::page16"],
-      "category": "demographics"
-    },
-    {
-      "query": "Национальный состав населения Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page15", "Беларусь в цифрах, 2025.pdf::page16"],
-      "category": "demographics"
-    },
-    {
-      "query": "Распределение населения по полу и возрастным группам",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page13", "Беларусь и Россия, 2024.pdf::page38"],
-      "category": "demographics"
-    },
-    {
-      "query": "Уровень безработицы в Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page16", "Беларусь в цифрах, 2025.pdf::page17"],
-      "category": "demographics"
-    },
-    {
-      "query": "ВВП Беларуси 2021-2024",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page31", "Беларусь в цифрах, 2025.pdf::page32", "Беларусь в цифрах, 2025.pdf::page33"],
-      "category": "economy"
-    },
-    {
-      "query": "Структура ВВП по видам экономической деятельности",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page33", "Беларусь и Россия, 2024.pdf::page87", "Беларусь и Россия, 2024.pdf::page95"],
-      "category": "economy"
-    },
-    {
-      "query": "Количество юридических лиц в Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page33", "Беларусь в цифрах, 2025.pdf::page34"],
-      "category": "economy"
-    },
-    {
-      "query": "Инвестиции в основной капитал",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page42", "Беларусь в цифрах, 2025.pdf::page43", "Беларусь в цифрах, 2025.pdf::page44"],
-      "category": "economy"
-    },
-    {
-      "query": "Индексы промышленного производства",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page40", "Беларусь в цифрах, 2025.pdf::page41"],
-      "category": "economy"
-    },
-    {
-      "query": "Розничный товарооборот Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page49", "Беларусь в цифрах, 2025.pdf::page50"],
-      "category": "trade"
-    },
-    {
-      "query": "Внешняя торговля товарами и услугами",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page56", "Беларусь в цифрах, 2025.pdf::page57"],
-      "category": "trade"
-    },
-    {
-      "query": "Экспорт и импорт Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page56", "Беларусь в цифрах, 2025.pdf::page57", "Беларусь в цифрах, 2025.pdf::page58"],
-      "category": "trade"
-    },
-    {
-      "query": "Структура экспорта и импорта по группам товаров",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page58"],
-      "category": "trade"
-    },
-    {
-      "query": "Иностранные инвестиции по странам",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page59", "Беларусь в цифрах, 2025.pdf::page60"],
-      "category": "trade"
-    },
-    {
-      "query": "Валовой сбор зерна в Беларуси и России",
-      "expected_sources": ["Беларусь и Россия, 2024.pdf::page110"],
-      "category": "agriculture"
-    },
-    {
-      "query": "Поголовье скота и птицы",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page39", "Беларусь и Россия, 2024.pdf::page111", "Беларусь и Россия, 2024.pdf::page112"],
-      "category": "agriculture"
-    },
-    {
-      "query": "Посевные площади сельскохозяйственных культур",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page37", "Беларусь и Россия, 2024.pdf::page109"],
-      "category": "agriculture"
-    },
-    {
-      "query": "Производство продукции сельского хозяйства на душу населения",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page39", "Беларусь и Россия, 2024.pdf::page108", "Беларусь и Россия, 2024.pdf::page198"],
-      "category": "agriculture"
-    },
-    {
-      "query": "Урожайность сельскохозяйственных культур",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page38"],
-      "category": "agriculture"
-    },
-    {
-      "query": "Основные показатели образования в Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page17", "Беларусь в цифрах, 2025.pdf::page18"],
-      "category": "social"
-    },
-    {
-      "query": "Число студентов в ВУЗах Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page17", "Беларусь в цифрах, 2025.pdf::page18"],
-      "category": "social"
-    },
-    {
-      "query": "Иностранные студенты в Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page19", "Беларусь в цифрах, 2025.pdf::page18", "Беларусь и Россия, 2024.pdf::page69", "Беларусь и Россия, 2024.pdf::page70"],
-      "category": "social"
-    },
-    {
-      "query": "Основные показатели здравоохранения",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page19", "Беларусь в цифрах, 2025.pdf::page20", "Беларусь и Россия, 2024.pdf::page72", "Беларусь и Россия, 2024.pdf::page77", "Беларусь и Россия, 2024.pdf::page78", "Беларусь и Россия, 2024.pdf::page181"],
-      "category": "social"
-    },
-    {
-      "query": "Число зарегистрированных преступлений в Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page26"],
-      "category": "social"
-    },
-    {
-      "query": "Мошенничество",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page26"],
-      "category": "social"
-    },
-    {
-      "query": "Заработная плата по видам экономической деятельности",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page23", "Беларусь в цифрах, 2025.pdf::page24", "Беларусь и Россия, 2024.pdf::page47", "Беларусь и Россия, 2024.pdf::page48"],
-      "category": "social"
-    },
-    {
-      "query": "Яблоки",
-      "expected_sources": ["Беларусь и Россия, 2024.pdf::page168", "Беларусь и Россия, 2024.pdf::page162", "Беларусь и Россия, 2024.pdf::page165", "Беларусь и Россия, 2024.pdf::page167", "Беларусь в цифрах, 2025.pdf::page22"],
-      "category": "prices"
-    },
-    {
-      "query": "Цена яблок",
-      "expected_sources": ["Беларусь и Россия, 2024.pdf::page168", "Беларусь и Россия, 2024.pdf::page167", "Беларусь в цифрах, 2025.pdf::page22"],
-      "category": "prices"
-    },
-    {
-      "query": "Индексы потребительских цен",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page61", "Беларусь и Россия, 2024.pdf::page159", "Беларусь и Россия, 2024.pdf::page160"],
-      "category": "prices"
-    },
-    {
-      "query": "Средние потребительские цены на мясо",
-      "expected_sources": ["Беларусь и Россия, 2024.pdf::page166", "Беларусь и Россия, 2024.pdf::page167"],
-      "category": "prices"
-    },
-    {
-      "query": "Средние цены на непродовольственные товары в Беларуси",
-      "expected_sources": ["Беларусь и Россия, 2024.pdf::page168", "Беларусь и Россия, 2024.pdf::page169"],
-      "category": "prices"
-    },
-    {
-      "query": "Численность населения Беларуси и России",
-      "expected_sources": ["Беларусь и Россия, 2024.pdf::page37", "Беларусь и Россия, 2024.pdf::page38", "Беларусь и Россия, 2024.pdf::page50", "Беларусь и Россия, 2024.pdf::page183"],
-      "category": "comparison"
-    },
-    {
-      "query": "Сравнение ВВП Беларуси и России",
-      "expected_sources": ["Беларусь и Россия, 2024.pdf::page86", "Беларусь и Россия, 2024.pdf::page87", "Беларусь и Россия, 2024.pdf::page85", "Беларусь и Россия, 2024.pdf::page88", "Беларусь и Россия, 2024.pdf::page185", "Беларусь и Россия, 2024.pdf::page193"],
-      "category": "comparison"
-    },
-    {
-      "query": "Потребление продуктов питания в Беларуси и России",
-      "expected_sources": ["Беларусь и Россия, 2024.pdf::page60", "Беларусь и Россия, 2024.pdf::page180", "Беларусь и Россия, 2024.pdf::page56", "Беларусь и Россия, 2024.pdf::page64"],
-      "category": "comparison"
-    },
-    {
-      "query": "Использование интернета населением",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page63", "Беларусь и Россия, 2024.pdf::page131", "Беларусь и Россия, 2024.pdf::page132"],
-      "category": "comparison"
-    },
-    {
-      "query": "Охрана окружающей среды заповедники",
-      "expected_sources": ["Беларусь и Россия, 2024.pdf::page34", "Беларусь и Россия, 2024.pdf::page35"],
-      "category": "comparison"
-    },
-    {
-      "query": "Туристические потоки в Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page51", "Беларусь в цифрах, 2025.pdf::page52"],
-      "category": "tourism"
-    },
-    {
-      "query": "Гостиницы и средства размещения",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page54", "Беларусь и Россия, 2024.pdf::page82"],
-      "category": "tourism"
-    },
-    {
-      "query": "Страны-лидеры по численности туристов 2024",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page53"],
-      "category": "tourism"
-    },
-    {
-      "query": "Музеи и театры в Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page28", "Беларусь в цифрах, 2025.pdf::page29", "Беларусь в цифрах, 2025.pdf::page30"],
-      "category": "tourism"
-    },
-    {
-      "query": "Покупательная способность доходов населения",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page21", "Беларусь в цифрах, 2025.pdf::page22", "Беларусь и Россия, 2024.pdf::page47", "Беларусь и Россия, 2024.pdf::page57", "Беларусь и Россия, 2024.pdf::page58"],
-      "category": "social"
-    },
-    {
-      "query": "Территория и площадь Беларуси",
-      "expected_sources": ["Беларусь в цифрах, 2025.pdf::page7", "Беларусь в цифрах, 2025.pdf::page8", "Беларусь и Россия, 2024.pdf::page13"],
-      "category": "demographics"
-    }
+    {"query": "Численность населения Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page13", "Беларусь в цифрах, 2025.pdf::page14", "Беларусь и Россия, 2024.pdf::page37"], "category": "demographics"},
+    {"query": "Население по областям и Минску", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page14"], "category": "demographics"},
+    {"query": "Браки и разводы в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page15", "Беларусь в цифрах, 2025.pdf::page16", "Беларусь и Россия, 2024.pdf::page41"], "category": "demographics"},
+    {"query": "Национальный состав населения Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page15", "Беларусь в цифрах, 2025.pdf::page16", "Беларусь и Россия, 2024.pdf::page39", "Беларусь и Россия, 2024.pdf::page40"], "category": "demographics"},
+    {"query": "Распределение населения по полу и возрастным группам", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page13", "Беларусь и Россия, 2024.pdf::page38"], "category": "demographics"},
+    {"query": "Уровень безработицы в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page16", "Беларусь в цифрах, 2025.pdf::page17"], "category": "demographics"},
+    {"query": "Территория и площадь Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page7", "Беларусь в цифрах, 2025.pdf::page8", "Беларусь и Россия, 2024.pdf::page13", "Беларусь и Россия, 2024.pdf::page27"], "category": "demographics"},
+    {"query": "Области и областные центры Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page8"], "category": "demographics"},
+    {"query": "Государственное устройство Республики Беларусь", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page9", "Беларусь в цифрах, 2025.pdf::page10"], "category": "demographics"},
+    {"query": "Индексы основных социально-экономических показателей", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page11", "Беларусь в цифрах, 2025.pdf::page12"], "category": "economy"},
+    {"query": "Численность населения Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page37", "Беларусь и Россия, 2024.pdf::page38", "Беларусь и Россия, 2024.pdf::page50"], "category": "comparison"},
+    {"query": "Плотность населения Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page37"], "category": "comparison"},
+    {"query": "Миграция населения Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page42", "Беларусь и Россия, 2024.pdf::page43", "Беларусь и Россия, 2024.pdf::page44", "Беларусь и Россия, 2024.pdf::page45"], "category": "demographics"},
+    {"query": "Сальдо миграции в Беларуси", "expected_sources": ["Беларусь и Россия, 2024.pdf::page44", "Беларусь и Россия, 2024.pdf::page45"], "category": "demographics"},
+    {"query": "Ожидаемая продолжительность жизни", "expected_sources": ["Беларусь и Россия, 2024.pdf::page46"], "category": "demographics"},
+    {"query": "Младенческая смертность", "expected_sources": ["Беларусь и Россия, 2024.pdf::page48"], "category": "demographics"},
+    {"query": "Смертность от отдельных причин", "expected_sources": ["Беларусь и Россия, 2024.pdf::page47", "Беларусь и Россия, 2024.pdf::page50"], "category": "demographics"},
+    {"query": "Естественное движение населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page51"], "category": "demographics"},
+    {"query": "Коэффициенты рождаемости по возрасту матери", "expected_sources": ["Беларусь и Россия, 2024.pdf::page52", "Беларусь и Россия, 2024.pdf::page54"], "category": "demographics"},
+    {"query": "Города с населением более 100 тысяч человек", "expected_sources": ["Беларусь и Россия, 2024.pdf::page39"], "category": "demographics"},
+
+    {"query": "ВВП Беларуси 2021-2024", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page31", "Беларусь в цифрах, 2025.pdf::page32", "Беларусь в цифрах, 2025.pdf::page33"], "category": "economy"},
+    {"query": "Структура ВВП по видам экономической деятельности", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page33", "Беларусь и Россия, 2024.pdf::page87", "Беларусь и Россия, 2024.pdf::page95"], "category": "economy"},
+    {"query": "Количество юридических лиц в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page33", "Беларусь в цифрах, 2025.pdf::page34"], "category": "economy"},
+    {"query": "Инвестиции в основной капитал", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page42", "Беларусь в цифрах, 2025.pdf::page43", "Беларусь в цифрах, 2025.pdf::page44"], "category": "economy"},
+    {"query": "Индексы промышленного производства", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page40", "Беларусь в цифрах, 2025.pdf::page41"], "category": "economy"},
+    {"query": "Сравнение ВВП Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page86", "Беларусь и Россия, 2024.pdf::page87", "Беларусь и Россия, 2024.pdf::page88", "Беларусь и Россия, 2024.pdf::page89"], "category": "comparison"},
+    {"query": "Валовая добавленная стоимость по отраслям", "expected_sources": ["Беларусь и Россия, 2024.pdf::page88", "Беларусь и Россия, 2024.pdf::page89", "Беларусь и Россия, 2024.pdf::page90"], "category": "economy"},
+    {"query": "Основные фонды по формам собственности", "expected_sources": ["Беларусь и Россия, 2024.pdf::page91", "Беларусь и Россия, 2024.pdf::page92", "Беларусь и Россия, 2024.pdf::page93"], "category": "economy"},
+    {"query": "Коэффициент обновления основных фондов", "expected_sources": ["Беларусь и Россия, 2024.pdf::page94"], "category": "economy"},
+    {"query": "Малое и среднее предпринимательство в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page34", "Беларусь в цифрах, 2025.pdf::page35"], "category": "economy"},
+    {"query": "Распределение юридических лиц по видам экономической деятельности", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page36"], "category": "economy"},
+    {"query": "Структура инвестиций по источникам финансирования", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page43", "Беларусь в цифрах, 2025.pdf::page44"], "category": "economy"},
+    {"query": "Структура промышленного производства", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page41", "Беларусь в цифрах, 2025.pdf::page42"], "category": "economy"},
+
+    {"query": "Розничный товарооборот Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page49", "Беларусь в цифрах, 2025.pdf::page50"], "category": "trade"},
+    {"query": "Внешняя торговля товарами и услугами", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page56", "Беларусь в цифрах, 2025.pdf::page57"], "category": "trade"},
+    {"query": "Экспорт и импорт Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page56", "Беларусь в цифрах, 2025.pdf::page57", "Беларусь в цифрах, 2025.pdf::page58"], "category": "trade"},
+    {"query": "Структура экспорта и импорта по группам товаров", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page58"], "category": "trade"},
+    {"query": "Иностранные инвестиции по странам", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page59", "Беларусь в цифрах, 2025.pdf::page60"], "category": "trade"},
+    {"query": "Общественное питание в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page49", "Беларусь в цифрах, 2025.pdf::page50"], "category": "trade"},
+    {"query": "Платные услуги населению", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page55", "Беларусь в цифрах, 2025.pdf::page56"], "category": "trade"},
+    {"query": "Внешняя торговля со странами СНГ", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page57", "Беларусь в цифрах, 2025.pdf::page58"], "category": "trade"},
+    {"query": "Иностранные инвестиции по видам деятельности", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page60"], "category": "trade"},
+
+    {"query": "Валовой сбор зерна в Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page110"], "category": "agriculture"},
+    {"query": "Поголовье скота и птицы", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page39", "Беларусь в цифрах, 2025.pdf::page40", "Беларусь и Россия, 2024.pdf::page111", "Беларусь и Россия, 2024.pdf::page112"], "category": "agriculture"},
+    {"query": "Посевные площади сельскохозяйственных культур", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page37", "Беларусь и Россия, 2024.pdf::page109"], "category": "agriculture"},
+    {"query": "Производство продукции сельского хозяйства на душу населения", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page39", "Беларусь и Россия, 2024.pdf::page108"], "category": "agriculture"},
+    {"query": "Урожайность сельскохозяйственных культур", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page38"], "category": "agriculture"},
+    {"query": "Производство продукции животноводства", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page38", "Беларусь в цифрах, 2025.pdf::page39"], "category": "agriculture"},
+    {"query": "Поголовье крупного рогатого скота", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page39", "Беларусь в цифрах, 2025.pdf::page40", "Беларусь и Россия, 2024.pdf::page111"], "category": "agriculture"},
+    {"query": "Производство молока и мяса", "expected_sources": ["Беларусь и Россия, 2024.pdf::page112", "Беларусь и Россия, 2024.pdf::page113"], "category": "agriculture"},
+    {"query": "Структура посевных площадей по культурам", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page37", "Беларусь и Россия, 2024.pdf::page109"], "category": "agriculture"},
+
+    {"query": "Основные показатели образования в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page17", "Беларусь в цифрах, 2025.pdf::page18"], "category": "social"},
+    {"query": "Число студентов в ВУЗах Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page17", "Беларусь в цифрах, 2025.pdf::page18"], "category": "social"},
+    {"query": "Иностранные студенты в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page19", "Беларусь в цифрах, 2025.pdf::page18", "Беларусь и Россия, 2024.pdf::page69", "Беларусь и Россия, 2024.pdf::page70"], "category": "social"},
+    {"query": "Основные показатели здравоохранения", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page19", "Беларусь в цифрах, 2025.pdf::page20", "Беларусь и Россия, 2024.pdf::page72", "Беларусь и Россия, 2024.pdf::page77"], "category": "social"},
+    {"query": "Число зарегистрированных преступлений в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page26"], "category": "social"},
+    {"query": "Мошенничество", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page26"], "category": "social"},
+    {"query": "Заработная плата по видам экономической деятельности", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page23", "Беларусь в цифрах, 2025.pdf::page24", "Беларусь и Россия, 2024.pdf::page47", "Беларусь и Россия, 2024.pdf::page48"], "category": "social"},
+    {"query": "Покупательная способность доходов населения", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page21", "Беларусь в цифрах, 2025.pdf::page22"], "category": "social"},
+    {"query": "Структура потребительских расходов домохозяйств", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page23", "Беларусь и Россия, 2024.pdf::page57", "Беларусь и Россия, 2024.pdf::page58"], "category": "social"},
+    {"query": "Реальная заработная плата", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page25"], "category": "social"},
+    {"query": "Денежные доходы населения", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page21", "Беларусь в цифрах, 2025.pdf::page22"], "category": "social"},
+    {"query": "Занятое население по видам экономической деятельности", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page17", "Беларусь в цифрах, 2025.pdf::page18"], "category": "social"},
+    {"query": "Образование в Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page67", "Беларусь и Россия, 2024.pdf::page68", "Беларусь и Россия, 2024.pdf::page69"], "category": "comparison"},
+    {"query": "Прием в аспирантуру", "expected_sources": ["Беларусь и Россия, 2024.pdf::page71"], "category": "social"},
+    {"query": "Заболеваемость населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page75", "Беларусь и Россия, 2024.pdf::page76", "Беларусь и Россия, 2024.pdf::page77"], "category": "social"},
+    {"query": "Число больничных коек", "expected_sources": ["Беларусь и Россия, 2024.pdf::page73", "Беларусь и Россия, 2024.pdf::page74"], "category": "social"},
+    {"query": "Инвалидность населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page80"], "category": "social"},
+    {"query": "Дома ребенка и детские учреждения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page79"], "category": "social"},
+    {"query": "Потребление продуктов питания на душу населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page60", "Беларусь и Россия, 2024.pdf::page64"], "category": "comparison"},
+    {"query": "Пищевая и энергетическая ценность рациона", "expected_sources": ["Беларусь и Россия, 2024.pdf::page61"], "category": "social"},
+    {"query": "Обеспеченность жильем на душу населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page64"], "category": "social"},
+    {"query": "Товары длительного пользования в домохозяйствах", "expected_sources": ["Беларусь и Россия, 2024.pdf::page62", "Беларусь и Россия, 2024.pdf::page63"], "category": "social"},
+
+    {"query": "Яблоки", "expected_sources": ["Беларусь и Россия, 2024.pdf::page168", "Беларусь и Россия, 2024.pdf::page162", "Беларусь и Россия, 2024.pdf::page165", "Беларусь и Россия, 2024.pdf::page167", "Беларусь в цифрах, 2025.pdf::page22"], "category": "prices"},
+    {"query": "Цена яблок", "expected_sources": ["Беларусь и Россия, 2024.pdf::page168", "Беларусь и Россия, 2024.pdf::page167", "Беларусь в цифрах, 2025.pdf::page22"], "category": "prices"},
+    {"query": "Индексы потребительских цен", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page61", "Беларусь и Россия, 2024.pdf::page159", "Беларусь и Россия, 2024.pdf::page160"], "category": "prices"},
+    {"query": "Средние потребительские цены на мясо", "expected_sources": ["Беларусь и Россия, 2024.pdf::page166", "Беларусь и Россия, 2024.pdf::page167"], "category": "prices"},
+    {"query": "Средние цены на непродовольственные товары в Беларуси", "expected_sources": ["Беларусь и Россия, 2024.pdf::page168", "Беларусь и Россия, 2024.pdf::page169"], "category": "prices"},
+    {"query": "Цена молока", "expected_sources": ["Беларусь и Россия, 2024.pdf::page167", "Беларусь и Россия, 2024.pdf::page168"], "category": "prices"},
+    {"query": "Цена хлеба", "expected_sources": ["Беларусь и Россия, 2024.pdf::page167", "Беларусь и Россия, 2024.pdf::page168"], "category": "prices"},
+    {"query": "Цена бензина", "expected_sources": ["Беларусь и Россия, 2024.pdf::page169", "Беларусь и Россия, 2024.pdf::page170"], "category": "prices"},
+    {"query": "Цены на продовольственные товары в России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page168"], "category": "prices"},
+    {"query": "Индексы цен производителей промышленной продукции", "expected_sources": ["Беларусь и Россия, 2024.pdf::page159", "Беларусь и Россия, 2024.pdf::page160"], "category": "prices"},
+    {"query": "Тарифы на коммунальные услуги", "expected_sources": ["Беларусь и Россия, 2024.pdf::page170", "Беларусь и Россия, 2024.pdf::page171"], "category": "prices"},
+    {"query": "Цена сахара", "expected_sources": ["Беларусь и Россия, 2024.pdf::page167", "Беларусь и Россия, 2024.pdf::page168"], "category": "prices"},
+    {"query": "Цена масла сливочного", "expected_sources": ["Беларусь и Россия, 2024.pdf::page167", "Беларусь и Россия, 2024.pdf::page168"], "category": "prices"},
+    {"query": "Цена яиц", "expected_sources": ["Беларусь и Россия, 2024.pdf::page167", "Беларусь и Россия, 2024.pdf::page168"], "category": "prices"},
+    {"query": "Цена картофеля", "expected_sources": ["Беларусь и Россия, 2024.pdf::page167", "Беларусь и Россия, 2024.pdf::page168"], "category": "prices"},
+
+    {"query": "Туристические потоки в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page51", "Беларусь в цифрах, 2025.pdf::page52"], "category": "tourism"},
+    {"query": "Гостиницы и средства размещения", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page54", "Беларусь и Россия, 2024.pdf::page82", "Беларусь и Россия, 2024.pdf::page83"], "category": "tourism"},
+    {"query": "Страны-лидеры по численности туристов 2024", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page53", "Беларусь в цифрах, 2025.pdf::page54"], "category": "tourism"},
+    {"query": "Музеи и театры в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page28", "Беларусь в цифрах, 2025.pdf::page29", "Беларусь в цифрах, 2025.pdf::page30"], "category": "tourism"},
+    {"query": "Иностранные туристы и экскурсанты по странам", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page53"], "category": "tourism"},
+    {"query": "Организованный туризм", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page51", "Беларусь в цифрах, 2025.pdf::page52"], "category": "tourism"},
+    {"query": "Туризм Беларусь Россия", "expected_sources": ["Беларусь и Россия, 2024.pdf::page82", "Беларусь и Россия, 2024.pdf::page83", "Беларусь и Россия, 2024.pdf::page84"], "category": "tourism"},
+    {"query": "Национальные парки и зоопарки", "expected_sources": ["Беларусь и Россия, 2024.pdf::page85", "Беларусь и Россия, 2024.pdf::page86"], "category": "tourism"},
+    {"query": "Культура и спорт в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page27", "Беларусь в цифрах, 2025.pdf::page28"], "category": "tourism"},
+    {"query": "Физическая культура и спорт", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page31", "Беларусь в цифрах, 2025.pdf::page32"], "category": "tourism"},
+    {"query": "Историко-культурные ценности Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page28"], "category": "tourism"},
+    {"query": "Театры в Беларуси 2024", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page29", "Беларусь в цифрах, 2025.pdf::page30"], "category": "tourism"},
+    {"query": "Детские оздоровительные лагеря", "expected_sources": ["Беларусь и Россия, 2024.pdf::page81", "Беларусь и Россия, 2024.pdf::page82"], "category": "tourism"},
+    {"query": "Санатории и базы отдыха", "expected_sources": ["Беларусь и Россия, 2024.pdf::page83"], "category": "tourism"},
+
+    {"query": "Грузооборот транспорта", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page47", "Беларусь в цифрах, 2025.pdf::page48"], "category": "transport"},
+    {"query": "Пассажирооборот транспорта", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page47", "Беларусь в цифрах, 2025.pdf::page48"], "category": "transport"},
+    {"query": "Основные показатели работы транспорта", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page47", "Беларусь в цифрах, 2025.pdf::page48"], "category": "transport"},
+    {"query": "Строительство жилых домов", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page45", "Беларусь в цифрах, 2025.pdf::page46"], "category": "economy"},
+    {"query": "Деятельность строительных организаций", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page45", "Беларусь в цифрах, 2025.pdf::page46"], "category": "economy"},
+    {"query": "Ввод в действие жилых домов", "expected_sources": ["Беларусь и Россия, 2024.pdf::page119", "Беларусь и Россия, 2024.pdf::page120", "Беларусь и Россия, 2024.pdf::page121"], "category": "economy"},
+
+    {"query": "Использование интернета населением", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page63", "Беларусь и Россия, 2024.pdf::page131", "Беларусь и Россия, 2024.pdf::page132"], "category": "comparison"},
+    {"query": "Охрана окружающей среды заповедники", "expected_sources": ["Беларусь и Россия, 2024.pdf::page34", "Беларусь и Россия, 2024.pdf::page35", "Беларусь и Россия, 2024.pdf::page36"], "category": "comparison"},
+    {"query": "Потребление продуктов питания в Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page60", "Беларусь и Россия, 2024.pdf::page64"], "category": "comparison"},
+    {"query": "Земельный фонд и структура земель", "expected_sources": ["Беларусь и Россия, 2024.pdf::page28"], "category": "environment"},
+    {"query": "Лесной фонд и лесовосстановление", "expected_sources": ["Беларусь и Россия, 2024.pdf::page29"], "category": "environment"},
+    {"query": "Лесные пожары", "expected_sources": ["Беларусь и Россия, 2024.pdf::page30"], "category": "environment"},
+    {"query": "Водные ресурсы и водопотребление", "expected_sources": ["Беларусь и Россия, 2024.pdf::page32", "Беларусь и Россия, 2024.pdf::page33"], "category": "environment"},
+    {"query": "Средняя температура по столицам", "expected_sources": ["Беларусь и Россия, 2024.pdf::page34"], "category": "environment"},
+    {"query": "Выбросы загрязняющих веществ в атмосферу", "expected_sources": ["Беларусь и Россия, 2024.pdf::page36"], "category": "environment"},
+    {"query": "Полезные ископаемые Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page31"], "category": "environment"},
+    {"query": "Отходы производства и потребления", "expected_sources": ["Беларусь и Россия, 2024.pdf::page36"], "category": "environment"},
+
+    {"query": "Производство основных видов промышленной продукции на душу населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page97", "Беларусь и Россия, 2024.pdf::page98", "Беларусь и Россия, 2024.pdf::page99"], "category": "economy"},
+    {"query": "Производство электроэнергии", "expected_sources": ["Беларусь и Россия, 2024.pdf::page98", "Беларусь и Россия, 2024.pdf::page99"], "category": "economy"},
+    {"query": "Производство стали и чугуна", "expected_sources": ["Беларусь и Россия, 2024.pdf::page98", "Беларусь и Россия, 2024.pdf::page99"], "category": "economy"},
+    {"query": "Производство минеральных удобрений", "expected_sources": ["Беларусь и Россия, 2024.pdf::page99", "Беларусь и Россия, 2024.pdf::page100"], "category": "economy"},
+    {"query": "Объем отгруженных товаров собственного производства", "expected_sources": ["Беларусь и Россия, 2024.pdf::page95", "Беларусь и Россия, 2024.pdf::page96"], "category": "economy"},
+    {"query": "Инвестиции в основной капитал Беларусь Россия", "expected_sources": ["Беларусь и Россия, 2024.pdf::page114", "Беларусь и Россия, 2024.pdf::page115", "Беларусь и Россия, 2024.pdf::page116"], "category": "economy"},
+    {"query": "Жилищный фонд", "expected_sources": ["Беларусь и Россия, 2024.pdf::page121", "Беларусь и Россия, 2024.pdf::page122"], "category": "economy"},
+
+    {"query": "Перевозка грузов железнодорожным транспортом", "expected_sources": ["Беларусь и Россия, 2024.pdf::page123", "Беларусь и Россия, 2024.pdf::page124"], "category": "transport"},
+    {"query": "Информационные технологии и связь", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page62", "Беларусь в цифрах, 2025.pdf::page63", "Беларусь и Россия, 2024.pdf::page131"], "category": "transport"},
+    {"query": "Преступность в Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page125", "Беларусь и Россия, 2024.pdf::page126", "Беларусь и Россия, 2024.pdf::page127"], "category": "social"},
+    {"query": "Торговля и общественное питание Беларусь Россия", "expected_sources": ["Беларусь и Россия, 2024.pdf::page137", "Беларусь и Россия, 2024.pdf::page138", "Беларусь и Россия, 2024.pdf::page139"], "category": "trade"},
+    {"query": "Оборот розничной торговли Беларусь Россия", "expected_sources": ["Беларусь и Россия, 2024.pdf::page138", "Беларусь и Россия, 2024.pdf::page139"], "category": "trade"},
+    {"query": "Экспорт и импорт товаров Беларусь Россия", "expected_sources": ["Беларусь и Россия, 2024.pdf::page144", "Беларусь и Россия, 2024.pdf::page145", "Беларусь и Россия, 2024.pdf::page146"], "category": "trade"},
+    {"query": "Внешняя торговля товарами со странами мира", "expected_sources": ["Беларусь и Россия, 2024.pdf::page147", "Беларусь и Россия, 2024.pdf::page148", "Беларусь и Россия, 2024.pdf::page149"], "category": "trade"},
+    {"query": "Товарная структура экспорта", "expected_sources": ["Беларусь и Россия, 2024.pdf::page150", "Беларусь и Россия, 2024.pdf::page149"], "category": "trade"},
+    {"query": "Наука и инновации", "expected_sources": ["Беларусь и Россия, 2024.pdf::page152", "Беларусь и Россия, 2024.pdf::page153", "Беларусь и Россия, 2024.pdf::page154"], "category": "economy"},
+    {"query": "Затраты на научные исследования", "expected_sources": ["Беларусь и Россия, 2024.pdf::page152", "Беларусь и Россия, 2024.pdf::page153"], "category": "economy"},
+    {"query": "Патенты и изобретения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page155", "Беларусь и Россия, 2024.pdf::page156"], "category": "economy"},
+
+    {"query": "Финансы и банковская деятельность", "expected_sources": ["Беларусь и Россия, 2024.pdf::page171", "Беларусь и Россия, 2024.pdf::page172"], "category": "economy"},
+    {"query": "Государственный бюджет Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page171", "Беларусь и Россия, 2024.pdf::page172", "Беларусь и Россия, 2024.pdf::page173"], "category": "economy"},
+    {"query": "Страхование в Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page175", "Беларусь и Россия, 2024.pdf::page176"], "category": "economy"},
+    {"query": "Курсы валют", "expected_sources": ["Беларусь и Россия, 2024.pdf::page174"], "category": "economy"},
+    {"query": "Денежная масса", "expected_sources": ["Беларусь и Россия, 2024.pdf::page173", "Беларусь и Россия, 2024.pdf::page174"], "category": "economy"},
+
+    {"query": "Цели устойчивого развития", "expected_sources": ["Беларусь и Россия, 2024.pdf::page181", "Беларусь и Россия, 2024.pdf::page182", "Беларусь и Россия, 2024.pdf::page183"], "category": "sdg"},
+    {"query": "Бедность и неравенство", "expected_sources": ["Беларусь и Россия, 2024.pdf::page183", "Беларусь и Россия, 2024.pdf::page184"], "category": "sdg"},
+    {"query": "Продовольственная безопасность", "expected_sources": ["Беларусь и Россия, 2024.pdf::page185", "Беларусь и Россия, 2024.pdf::page186"], "category": "sdg"},
+    {"query": "Доступ к чистой воде", "expected_sources": ["Беларусь и Россия, 2024.pdf::page189", "Беларусь и Россия, 2024.pdf::page190"], "category": "sdg"},
+    {"query": "Возобновляемая энергетика", "expected_sources": ["Беларусь и Россия, 2024.pdf::page190", "Беларусь и Россия, 2024.pdf::page191"], "category": "sdg"},
+    {"query": "Экономический рост и занятость ЦУР", "expected_sources": ["Беларусь и Россия, 2024.pdf::page191", "Беларусь и Россия, 2024.pdf::page192"], "category": "sdg"},
+    {"query": "Инфраструктура и инновации ЦУР", "expected_sources": ["Беларусь и Россия, 2024.pdf::page193", "Беларусь и Россия, 2024.pdf::page194"], "category": "sdg"},
+    {"query": "Устойчивые города ЦУР", "expected_sources": ["Беларусь и Россия, 2024.pdf::page195", "Беларусь и Россия, 2024.pdf::page196"], "category": "sdg"},
+
+    {"query": "Количество врачей на 10000 населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page74", "Беларусь и Россия, 2024.pdf::page73"], "category": "social"},
+    {"query": "Средняя зарплата в Беларуси", "expected_sources": ["Беларусь в цифрах, 2025.pdf::page24", "Беларусь в цифрах, 2025.pdf::page25"], "category": "social"},
+    {"query": "ВВП на душу населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page87", "Беларусь и Россия, 2024.pdf::page86"], "category": "economy"},
+    {"query": "Индекс потребительских цен на продовольственные товары", "expected_sources": ["Беларусь и Россия, 2024.pdf::page159", "Беларусь и Россия, 2024.pdf::page160", "Беларусь в цифрах, 2025.pdf::page61"], "category": "prices"},
+    {"query": "Число школ в Беларуси и России", "expected_sources": ["Беларусь и Россия, 2024.pdf::page67", "Беларусь и Россия, 2024.pdf::page68"], "category": "social"},
+    {"query": "Продолжительность жизни мужчин и женщин", "expected_sources": ["Беларусь и Россия, 2024.pdf::page46"], "category": "demographics"},
+    {"query": "Рождения вне брака", "expected_sources": ["Беларусь и Россия, 2024.pdf::page53"], "category": "demographics"},
+    {"query": "Уровень бедности", "expected_sources": ["Беларусь и Россия, 2024.pdf::page183", "Беларусь и Россия, 2024.pdf::page184"], "category": "sdg"},
+    {"query": "Коэффициент Джини", "expected_sources": ["Беларусь и Россия, 2024.pdf::page183", "Беларусь и Россия, 2024.pdf::page184"], "category": "sdg"},
+    {"query": "Производство тракторов", "expected_sources": ["Беларусь и Россия, 2024.pdf::page99", "Беларусь и Россия, 2024.pdf::page100"], "category": "economy"},
+    {"query": "Производство автомобилей", "expected_sources": ["Беларусь и Россия, 2024.pdf::page100", "Беларусь и Россия, 2024.pdf::page101"], "category": "economy"},
+    {"query": "Телефонная связь и интернет", "expected_sources": ["Беларусь и Россия, 2024.pdf::page131", "Беларусь и Россия, 2024.pdf::page132"], "category": "transport"},
+    {"query": "Численность пенсионеров", "expected_sources": ["Беларусь и Россия, 2024.pdf::page56", "Беларусь и Россия, 2024.pdf::page57"], "category": "social"},
+    {"query": "Структура расходов бюджета", "expected_sources": ["Беларусь и Россия, 2024.pdf::page172", "Беларусь и Россия, 2024.pdf::page173"], "category": "economy"},
+    {"query": "Цены на электроэнергию", "expected_sources": ["Беларусь и Россия, 2024.pdf::page170", "Беларусь и Россия, 2024.pdf::page171"], "category": "prices"},
+    {"query": "Цена водки", "expected_sources": ["Беларусь и Россия, 2024.pdf::page167", "Беларусь и Россия, 2024.pdf::page168"], "category": "prices"},
+    {"query": "Стоимость минимального набора продуктов", "expected_sources": ["Беларусь и Россия, 2024.pdf::page161", "Беларусь и Россия, 2024.pdf::page162"], "category": "prices"},
+    {"query": "Число научных работников", "expected_sources": ["Беларусь и Россия, 2024.pdf::page152", "Беларусь и Россия, 2024.pdf::page153"], "category": "economy"},
+    {"query": "Вылов рыбы", "expected_sources": ["Беларусь и Россия, 2024.pdf::page113"], "category": "agriculture"},
+    {"query": "Площадь сельскохозяйственных угодий", "expected_sources": ["Беларусь и Россия, 2024.pdf::page107", "Беларусь и Россия, 2024.pdf::page108"], "category": "agriculture"},
+    {"query": "Производство зерна на душу населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page108"], "category": "agriculture"},
+    {"query": "Объем строительных работ", "expected_sources": ["Беларусь и Россия, 2024.pdf::page117", "Беларусь и Россия, 2024.pdf::page118"], "category": "economy"},
+    {"query": "Перевозка пассажиров автобусами", "expected_sources": ["Беларусь и Россия, 2024.pdf::page123", "Беларусь и Россия, 2024.pdf::page124"], "category": "transport"},
+    {"query": "ДТП и аварии на дорогах", "expected_sources": ["Беларусь и Россия, 2024.pdf::page128"], "category": "social"},
+    {"query": "Число абонентов мобильной связи", "expected_sources": ["Беларусь и Россия, 2024.pdf::page131", "Беларусь и Россия, 2024.pdf::page132"], "category": "transport"},
+    {"query": "Платные услуги населению по видам", "expected_sources": ["Беларусь и Россия, 2024.pdf::page139", "Беларусь и Россия, 2024.pdf::page140", "Беларусь и Россия, 2024.pdf::page141"], "category": "trade"},
+    {"query": "Средние цены на овощи", "expected_sources": ["Беларусь и Россия, 2024.pdf::page167", "Беларусь и Россия, 2024.pdf::page168"], "category": "prices"},
+    {"query": "Цены на жилье", "expected_sources": ["Беларусь и Россия, 2024.pdf::page170", "Беларусь и Россия, 2024.pdf::page171"], "category": "prices"},
+    {"query": "Абортивность населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page55", "Беларусь и Россия, 2024.pdf::page56"], "category": "demographics"},
+    {"query": "Миграционный обмен между Беларусью и Россией", "expected_sources": ["Беларусь и Россия, 2024.pdf::page43", "Беларусь и Россия, 2024.pdf::page44"], "category": "demographics"},
+    {"query": "Смертность от самоубийств", "expected_sources": ["Беларусь и Россия, 2024.pdf::page50"], "category": "demographics"},
+    {"query": "Возрастная структура населения", "expected_sources": ["Беларусь и Россия, 2024.pdf::page38", "Беларусь и Россия, 2024.pdf::page49"], "category": "demographics"}
   ]
 }

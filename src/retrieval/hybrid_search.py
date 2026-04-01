@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 """
-Hybrid Search with Reciprocal Rank Fusion (RRF).
+Гибридный поиск с Reciprocal Rank Fusion (RRF).
 
-Combines:
-- Semantic Search (FAISS)
-- Lexical Search (BM25)
-- Metadata Scoring
+Объединяет три канала:
+- Semantic Search (FAISS, cosine similarity, top-40)
+- Lexical Search (BM25Okapi по text+context, top-40)
+- Metadata Scoring (geo/years/metrics overlap, top-30)
 
-Uses RRF for robust score-agnostic fusion instead of weighted combination.
+RRF: score(d) = Σ 1/(K + rank_i), K=60.
+Score-agnostic fusion — не требует нормализации между каналами.
 """
 
 from collections import defaultdict

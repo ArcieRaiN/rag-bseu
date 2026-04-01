@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 """
-PIPELINE: user query processing (RAG + hybrid retrieval).
+PIPELINE: обработка пользовательских запросов (RAG + гибридный поиск).
 
-Steps:
-1. Query enrichment (embedding + regex extraction, no LLM)
-2. Hybrid search (BM25 + semantic FAISS + metadata)
+Этапы:
+1. Обогащение запроса (embedding + regex-извлечение years/geo, без LLM)
+2. Гибридный поиск (Semantic FAISS + BM25 + Metadata) → RRF → Top-K
+3. Опциональный reranking (cross-encoder, по умолчанию выключен)
+4. Опциональная фильтрация по источнику (PDF-файлу)
 """
 
 from pathlib import Path

@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 """
-Semantic Search поверх FAISS (PIPELINE 3.1).
+Семантический поиск через FAISS.
 
-Ответственность:
-- загрузка FAISS‑индекса и массива чанков (data.json)
-- выдача Top‑K по cosine similarity для embedded_query
-
-Не знает ни о BM25, ни о metadata‑score, ни о reranking.
+Загружает IndexFlatIP + data.json, выдаёт Top-K по cosine similarity.
+Эмбеддинги: paraphrase-multilingual-MiniLM-L12-v2, 384d, L2-нормализованные.
+Изолирован от BM25, metadata scoring и reranking.
 """
 
 from pathlib import Path

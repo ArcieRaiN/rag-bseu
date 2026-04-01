@@ -1,12 +1,14 @@
 """
-Automated evaluator for RAG retrieval quality.
+Автоматическая оценка качества retrieval в RAG-системе.
 
-Measures Hit@k, MRR, and average query time against a golden test set.
+Метрики: Hit@1, Hit@3, Hit@5, MRR, Average Query Time.
+Тестовые вопросы: tests/test_data.json (v3, 182 вопроса, 11 категорий).
+Результаты: tests/results/eval_YYYYMMDD_HHMMSS.json.
 
 Usage:
-    python -m tests.evaluator              # full run
-    python -m tests.evaluator --quick      # first 10 questions only
-    python -m tests.evaluator --category prices  # specific category
+    python -m tests.evaluator                      # полный прогон
+    python -m tests.evaluator --quick              # первые 10 вопросов
+    python -m tests.evaluator --category prices    # только категория prices
 """
 
 from __future__ import annotations

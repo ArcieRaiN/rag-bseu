@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 """
-Валидатор JSON-ответа output pipeline.
+Валидатор JSON-ответа OutputPipeline.
 
 Двухуровневая проверка:
 1. Синтаксическая — парсится ли JSON?
 2. Семантическая — корректна ли структура (columns, rows, title)?
+
+Поддерживает флаг no_data: true — LLM сигнализирует об отсутствии данных.
+При no_data семантические проверки пропускаются.
 """
 
 import json

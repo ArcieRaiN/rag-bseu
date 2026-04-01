@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 """
-Lexical (BM25) search over chunks.
+Лексический поиск (BM25Okapi) по чанкам.
 
-Simplified: single BM25 index over concatenated text+context.
-Tokenization: lowercase + split (no Natasha lemmatization for speed).
+Один индекс по конкатенации text+context каждого чанка.
+Токенизация: lowercase + regex split (без лемматизации для скорости).
+Параметры по умолчанию: k1=1.5, b=0.75.
 """
 
 import re

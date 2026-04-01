@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 """
-Configuration for RAG retrieval pipeline.
+Конфигурация гибридного retrieval pipeline.
+
+Параметры RRF: K=60 (сглаживание рангов).
+По умолчанию cross-encoder reranking выключен (use_reranker=False).
 """
 
 from dataclasses import dataclass
