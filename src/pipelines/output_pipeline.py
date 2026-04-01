@@ -13,7 +13,6 @@ PIPELINE: формирование пользовательского вывод
 import json
 import logging
 import time
-from collections import defaultdict
 from pathlib import Path
 from typing import Optional, List
 
@@ -96,15 +95,9 @@ class OutputPipeline:
             return None
 
         df = self._validator.to_dataframe(data)
-        source_pages: dict[str, list[int]] = defaultdict(list)
-        for sc in chunks:
-            page = sc.chunk.page
-            if page and page not in source_pages[sc.chunk.source]:
-                source_pages[sc.chunk.source].append(page)
+        top = chunks[0].chunk
         self._last_chunk_sources = [
-            f"{src}, стр. {', '.join(str(p) for p in sorted(pages))}"
-            if pages else src
-            for src, pages in source_pages.items()
+            f"{top.source}, стр. {top.page}" if top.page else top.source
         ]
         elapsed = time.perf_counter() - t0
         print(f"[OutputPipeline] Готово за {elapsed:.2f}s, shape={df.shape}")
