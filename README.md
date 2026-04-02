@@ -127,7 +127,7 @@ python -m tests.evaluator --category prices
 python -m tests.compare_embeddings
 ```
 
-Результаты сохраняются в `tests/results/`.
+Результаты сохраняются в `tests/results/`. Сводный журнал для диплома и повторных замеров: `tests/test_results.md`. Запуск из произвольного каталога: `python scripts/run_evaluator.py`.
 
 ## Результаты оценки
 
