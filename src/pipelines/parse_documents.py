@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 """
-PIPELINE: парсинг и загрузка документов (PDF).
+Загрузка статистических сборников (PDF) с сайта Белстата.
 
-Назначение:
-- Скачать статистические сборники (compilation) с Белстата
-- Сохранить PDF в usage/documents
+Оркестрирует SiteParser для скачивания PDF-файлов
+из раздела compilations и сохраняет их в указанную директорию.
 """
 
 from pathlib import Path
@@ -14,13 +13,7 @@ from src.ingestion.site_parser import SiteParser
 
 
 class ParseDocumentsPipeline:
-    """Pipeline для подготовки документов.
-
-    SRC-уровень:
-    - не знает про CLI
-    - не парсит аргументы
-    - только orchestrates ingestion
-    """
+    """Скачивание PDF-сборников с Белстата в локальную директорию."""
 
     def __init__(
         self,

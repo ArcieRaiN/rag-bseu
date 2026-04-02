@@ -30,7 +30,7 @@ from tests.evaluator import (
     TEST_DATA_PATH,
     RESULTS_DIR,
 )
-from src.pipelines.query_pipeline import QueryPipeline
+from src.pipelines.query import QueryPipeline
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 VECTOR_STORE_DIR = BASE_DIR / "usage" / "vector_store"

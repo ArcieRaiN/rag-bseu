@@ -1,9 +1,10 @@
 """
-LLM-обогащение чанков метаданными.
+LLM-обогащение чанков метаданными через Ollama.
 
-Модуль содержит LLMEnricher, который последовательно обрабатывает чанки
-через Ollama LLM, извлекая структурированные метаданные (context, geo,
-metrics, years) для последующего поиска.
+LLMEnricher последовательно обрабатывает чанки, извлекая
+структурированные метаданные (context, geo, metrics, years)
+для гибридного поиска. Поддерживает retry, периодический
+сброс контекста модели и постобработку результатов.
 """
 
 from __future__ import annotations
@@ -14,14 +15,14 @@ from tqdm import tqdm
 from sys import stdout
 
 from src.core.models import Chunk
-from src.enrichers.client import OllamaClient
+from src.enrichers.ollama_client import OllamaClient
 from src.enrichers.config import EnricherConfig
 from src.enrichers.parsers import parse_single_enrichment
 
 # Optional project-specific helpers
 try:
     from src.utils.logger import get_logger
-    from src.utils.json_validator import ChunkValidator
+    from src.utils.chunk_validator import ChunkValidator
     from src.ingestion.chunk_filter import ChunkFilter
     from src.utils.post_processor import EnrichmentPostProcessor
 except Exception:

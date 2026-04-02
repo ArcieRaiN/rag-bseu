@@ -1,9 +1,8 @@
 """
-USAGE: интерактивный запуск query_pipeline + output_pipeline.
+Точка входа: интерактивный RAG-запрос.
 
-Два режима работы:
-- CLI:       python usage/query.py
-- Streamlit: streamlit run usage/query.py
+  CLI:       python usage/query.py
+  Streamlit: streamlit run usage/query.py
 """
 
 from __future__ import annotations
@@ -14,8 +13,8 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from src.pipelines.query_pipeline import QueryPipeline
-from src.pipelines.output_pipeline import OutputPipeline
+from src.pipelines.query import QueryPipeline
+from src.pipelines.output import OutputPipeline
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # rag-bseu

@@ -1,9 +1,8 @@
 """
-Пакет pipelines -- оркестрация этапов RAG-пайплайна.
+Пакет pipelines — оркестрация этапов RAG-пайплайна.
 
-Пайплайны:
-- ParseDocumentsPipeline: скачивание PDF с сайта Белстата
-- KnowledgeBaseBuilder: построение базы знаний (PDF -> Chunks -> FAISS)
-- QueryPipeline: обработка запроса (spellcheck -> enrichment -> hybrid search)
-- OutputPipeline: генерация табличного вывода через LLM
+  parse_documents     Скачивание PDF с сайта Белстата
+  knowledge_base_builder  Построение базы знаний (PDF → Chunks → FAISS)
+  query               Обработка запроса (enrichment → hybrid search → Top-K)
+  output              LLM-генерация табличного вывода → валидация → DataFrame
 """

@@ -23,7 +23,7 @@ from typing import List, Dict, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.pipelines.query_pipeline import QueryPipeline
+from src.pipelines.query import QueryPipeline
 from src.core.models import ScoredChunk
 
 TEST_DATA_PATH = Path(__file__).resolve().parent / "test_data.json"

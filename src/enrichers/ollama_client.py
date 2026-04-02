@@ -1,8 +1,8 @@
 """
-HTTP-клиент для взаимодействия с Ollama API.
+HTTP-клиент для Ollama API.
 
-Предоставляет OllamaClient с поддержкой retry, сброса контекста
-и Dependency Injection через Protocol для тестирования.
+OllamaClient поддерживает retry с экспоненциальным backoff,
+сброс контекста модели и Dependency Injection через Protocol.
 """
 
 from __future__ import annotations

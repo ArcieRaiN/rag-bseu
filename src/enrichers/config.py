@@ -1,5 +1,5 @@
 """
-Конфигурация LLM-обогащения чанков.
+Конфигурация LLMEnricher: параллельность, reset-интервал, retry, параметры запроса.
 """
 
 from __future__ import annotations

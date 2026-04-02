@@ -1,12 +1,12 @@
 """
-Пакет src -- ядро RAG-системы.
+Пакет src — ядро RAG-системы.
 
-Содержит модули для всех этапов пайплайна:
-- core: доменные модели и конфигурации
-- enrichers: взаимодействие с LLM (Ollama) для обогащения данных
-- ingestion: парсинг PDF и классификация чанков
-- pipelines: оркестрация этапов обработки
-- retrieval: гибридный поиск (semantic + lexical + metadata)
-- utils: вспомогательные утилиты (логирование, валидация, спеллчекер)
-- vectorstore: векторное хранилище FAISS и генерация эмбеддингов
+Модули:
+  core         Доменные модели (Chunk, ScoredChunk, EnrichedQuery) и конфигурация
+  enrichers    HTTP-клиент Ollama, LLM-обогащение чанков метаданными
+  ingestion    Парсинг PDF, чанкинг по страницам, маппинг секций
+  pipelines    Оркестрация: QueryPipeline, OutputPipeline, KnowledgeBaseBuilder
+  retrieval    Гибридный поиск (FAISS + BM25 + Metadata → RRF), reranker
+  utils        Валидация, логирование, постобработка
+  vectorstore  Генерация эмбеддингов (sentence-transformers), FAISS-хранилище
 """

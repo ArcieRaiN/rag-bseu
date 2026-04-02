@@ -1,8 +1,5 @@
 """
-USAGE: кнопка "Parse Documents".
-
-Запускает pipeline парсинга документов
-и сохраняет PDF в usage/archive_documents (см. main).
+Точка входа: скачивание PDF-сборников с Белстата в usage/archive_documents.
 """
 
 from __future__ import annotations
@@ -11,7 +8,7 @@ import logging
 import time
 from pathlib import Path
 
-from src.pipelines.parse_documents_pipeline import ParseDocumentsPipeline
+from src.pipelines.parse_documents import ParseDocumentsPipeline
 
 logging.basicConfig(
     level=logging.INFO,

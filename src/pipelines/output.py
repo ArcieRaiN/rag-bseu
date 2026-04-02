@@ -1,19 +1,15 @@
 from __future__ import annotations
 
 """
-PIPELINE: формирование пользовательского вывода (LLM → таблица).
+Генерация табличного ответа через LLM.
 
 Этапы:
-1. Построение 4-блочного промпта (роль, запрос, чанки, JSON-инструкция)
-2. Вызов LLM (Ollama, JSON mode, temperature=0) → JSON-строка
-3. Сохранение raw JSON в output_df.json
-4. Валидация JSON-схемы (OutputValidator) + конвертация в DataFrame
+  1. Построение 4-блочного промпта (роль, запрос, чанки, JSON-инструкция)
+  2. Вызов LLM (Ollama, JSON mode, temperature=0)
+  3. Валидация JSON-схемы (OutputValidator) + конвертация в DataFrame
 
-JSON-схема ответа:
-- 1NF: годы/категории — значения в столбцах, не заголовки
-- unit: единица измерения включается в название числового столбца
-- no_data: true если данных по запросу нет (защита от галлюцинаций)
-- source_fragment: номер фрагмента (1–3), использованного LLM
+JSON-схема: 1NF-таблица, unit в скобках в названии столбца,
+no_data: true при отсутствии данных, source_fragment для атрибуции.
 """
 
 import json
@@ -25,7 +21,7 @@ from typing import Optional, List
 import pandas as pd
 
 from src.core.models import PipelineResult, ScoredChunk
-from src.enrichers.client import OllamaClient, OllamaConfig
+from src.enrichers.ollama_client import OllamaClient, OllamaConfig
 from src.utils.output_validator import OutputValidator
 from src.utils.logger import get_logger
 

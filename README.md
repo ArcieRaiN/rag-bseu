@@ -40,12 +40,12 @@ OutputPipeline формирует 4-блочный промпт (роль, за�
 |--------|-----------|
 | `src/core/` | Доменные модели (`Chunk`, `EnrichedQuery`, `ScoredChunk`, `PipelineResult`), конфигурация `RetrievalConfig` |
 | `src/ingestion/` | Парсинг сайта (`SiteParser`), чанкинг PDF (`PDFChunker`), маппинг секций (`SectionMapper`) |
-| `src/enrichers/` | HTTP-клиент Ollama (`OllamaClient`), LLM-обогащение чанков метаданными |
+| `src/enrichers/` | HTTP-клиент Ollama (`ollama_client`), LLM-обогащение чанков (`llm_enricher`) |
 | `src/retrieval/` | `FaissSemanticSearcher`, `BM25Search`, `MetadataScorer`, `HybridSearcher` (RRF), `CrossEncoderReranker` |
 | `src/vectorstore/` | Эмбеддинги (`SentenceVectorizer`), хранение (`FAISSStore`) |
-| `src/pipelines/` | Оркестрация: `ParseDocumentsPipeline`, `KnowledgeBaseBuilder`, `QueryPipeline`, `OutputPipeline` |
-| `src/utils/` | `OutputValidator` (JSON-схема), `Logger` (JSONL), спеллчекер |
-| `tests/` | Тестовая база `test_data.json` (182 вопроса), `evaluator.py` (Hit@k, MRR), `compare_embeddings.py` |
+| `src/pipelines/` | Оркестрация: `parse_documents`, `knowledge_base_builder`, `query`, `output` |
+| `src/utils/` | `OutputValidator`, `ChunkValidator`, `RAGLogger` (JSONL), постобработка |
+| `tests/` | Тестовая база (182 вопроса), `evaluator.py` (Hit@k, MRR), `compare_embeddings.py`, скрипты запуска |
 | `usage/` | Точки входа: `query.py` (CLI + Streamlit), `cli.py`, скрипты загрузки и построения |
 
 ## Стек технологий
@@ -98,7 +98,8 @@ python usage/prepare_vector_store.py
 ```bash
 # Streamlit (таблицы + графики + фильтр по источнику)
 streamlit run usage/query.py
-
+```
+```bash
 # CLI
 python usage/query.py
 ```
@@ -127,7 +128,7 @@ python -m tests.evaluator --category prices
 python -m tests.compare_embeddings
 ```
 
-Результаты сохраняются в `tests/results/`. Сводный журнал для диплома и повторных замеров: `tests/test_results.md`. Запуск из произвольного каталога: `python scripts/run_evaluator.py`.
+Результаты сохраняются в `tests/results/`. Сводный журнал для диплома и повторных замеров: `tests/test_results.md`. Запуск из произвольного каталога: `python tests/run_evaluator.py`.
 
 ## Результаты оценки
 
@@ -181,17 +182,19 @@ python -m tests.compare_embeddings
 ```
 rag-bseu/
 ├── src/
-│   ├── core/               # Модели данных, конфигурация, обогащение запросов
-│   ├── enrichers/           # Ollama-клиент, LLM-обогащение чанков
+│   ├── core/               # Доменные модели, конфигурация, обогащение запросов
+│   ├── enrichers/           # ollama_client, llm_enricher, parsers
 │   ├── ingestion/           # Парсинг PDF, чанкинг, маппинг секций
-│   ├── pipelines/           # QueryPipeline, OutputPipeline, KnowledgeBaseBuilder
+│   ├── pipelines/           # query, output, knowledge_base_builder, parse_documents
 │   ├── retrieval/           # FAISS, BM25, metadata scoring, RRF, reranker
-│   ├── utils/               # OutputValidator, Logger, спеллчекер
+│   ├── utils/               # chunk_validator, output_validator, logger, post_processor
 │   └── vectorstore/         # SentenceVectorizer, FAISSStore
 ├── tests/
 │   ├── test_data.json       # 182 тестовых вопроса (v3)
 │   ├── evaluator.py         # Автоматическая оценка retrieval
 │   ├── compare_embeddings.py # Сравнение embedding-моделей
+│   ├── run_evaluator.py     # Запуск evaluator из произвольного каталога
+│   ├── run_rebuild_index.py # Запуск rebuild_index из произвольного каталога
 │   └── results/             # JSON-результаты прогонов
 ├── usage/
 │   ├── documents/           # Исходные PDF-сборники

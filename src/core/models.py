@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 """
-Data models for the RAG pipeline.
+Доменные модели RAG-пайплайна: Chunk, ScoredChunk, EnrichedQuery, PipelineResult.
 """
 
 from dataclasses import dataclass, field

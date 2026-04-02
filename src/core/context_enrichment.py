@@ -1,9 +1,9 @@
 from __future__ import annotations
 """
-Обогащение пользовательских запросов для retrieval.
+Обогащение пользовательских запросов для retrieval (без LLM).
 
-Regex-извлечение структурированных полей (years, geo) без LLM-вызовов.
-Время: <10ms vs ~60s при LLM-обогащении — ускорение ~6000x.
+Regex-извлечение years и geo + embedding через SentenceVectorizer.
+Время: <10 ms (vs ~60 s при LLM-обогащении).
 """
 
 import re

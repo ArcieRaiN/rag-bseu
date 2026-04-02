@@ -1,15 +1,29 @@
-# Python 3.12.7
+# Python 3.12
+
+# Core
 numpy==1.26.4
 pandas==2.2.2
-requests==2.31.0
-beautifulsoup4==4.12.3
-faiss-cpu==1.8.0
+tqdm==4.67.2
+
+# PDF parsing
 llama-index==0.10.56
 llama-index-readers-file==0.1.19
+
+# Embeddings & vector search
 sentence-transformers==3.4.1
-tqdm==4.67.2
+faiss-cpu==1.8.0
+
+# Lexical search
 rank-bm25==0.2.2
+
+# Web scraping
+requests==2.31.0
+beautifulsoup4==4.12.3
+
+# Web UI & visualization
 streamlit==1.41.1
 seaborn==0.13.2
 matplotlib==3.9.2
+
+# Data export
 openpyxl==3.1.5

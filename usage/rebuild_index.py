@@ -1,5 +1,5 @@
 """
-Rebuild FAISS index from existing data.json without re-running LLM enrichment.
+Пересборка FAISS-индекса из data.json без повторного LLM-обогащения.
 
 Usage: python usage/rebuild_index.py
 """

@@ -6,8 +6,8 @@ import time
 from src.core.models import Chunk
 from src.ingestion.pdf_chunker import PDFChunker
 from src.ingestion.section_mapper import SectionMapper
-from src.enrichers.client import OllamaClient, OllamaConfig
-from src.enrichers.enrichers import LLMEnricher
+from src.enrichers.ollama_client import OllamaClient, OllamaConfig
+from src.enrichers.llm_enricher import LLMEnricher
 from src.utils.post_processor import EnrichmentPostProcessor
 from src.vectorstore.vectorizer import SentenceVectorizer
 from src.vectorstore.faiss_store import FAISSStore
@@ -15,9 +15,9 @@ from src.vectorstore.faiss_store import FAISSStore
 
 class KnowledgeBaseBuilder:
     """
-    Pipeline для построения базы знаний (PDF -> Chunk -> LLM -> FAISS).
+    Построение базы знаний: PDF → Chunk → LLM-обогащение → FAISS.
 
-    Full rebuild: каждый запуск полностью пересоздает индекс.
+    Каждый запуск полностью пересоздаёт индекс и data.json.
     """
 
     def __init__(

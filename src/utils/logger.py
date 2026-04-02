@@ -1,12 +1,8 @@
-# C:\Users\Alex\Downloads\projects\rag-bseu\src\utils\logger.py
-
 """
-Централизованное логирование для RAG-системы.
+Централизованное JSONL-логирование для RAG-системы.
 
-Логи сохраняются в формате JSONL (JSON Lines) для удобства анализа и отладки.
-Поддерживаются отдельные методы для:
-- LLM reranking
-- LLM enrichment
+RAGLogger — потокобезопасная запись в файлы по одному JSON-объекту на строку.
+Специализированные методы: log_llm_enrichment_fail, log_output_validation_fail.
 """
 
 import json

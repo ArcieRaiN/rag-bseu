@@ -1,8 +1,8 @@
 """
-Векторное хранилище на базе FAISS.
+Векторное хранилище FAISS (IndexFlatIP).
 
-Использует простой IndexFlatIP с позиционной адресацией (position == index в data.json).
-Cosine similarity достигается через нормализованные векторы + inner product.
+Позиционная адресация: index[i] соответствует chunks[i] в data.json.
+L2-нормализация + inner product = cosine similarity.
 """
 
 from __future__ import annotations

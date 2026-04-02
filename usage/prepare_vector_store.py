@@ -1,7 +1,5 @@
 """
-USAGE: построение векторной базы знаний.
-
-Парсит PDF из usage/documents и строит FAISS индекс + data.json.
+Точка входа: построение базы знаний (PDF → FAISS индекс + data.json).
 """
 
 from __future__ import annotations
@@ -11,7 +9,7 @@ import logging
 import time
 from pathlib import Path
 
-from src.pipelines.knowledge_base_builder_pipeline import KnowledgeBaseBuilder
+from src.pipelines.knowledge_base_builder import KnowledgeBaseBuilder
 
 logging.basicConfig(
     level=logging.INFO,

@@ -1,14 +1,15 @@
 """
-Пакет enrichers -- обогащение данных через LLM (Ollama).
+Пакет enrichers — обогащение данных через LLM (Ollama).
 
-Предоставляет OllamaClient для HTTP-взаимодействия с Ollama API,
-LLMEnricher для обогащения чанков метаданными и парсеры JSON-ответов.
+  OllamaClient   HTTP-клиент для Ollama API с retry и сбросом контекста
+  LLMEnricher    Последовательное обогащение чанков метаданными
+  parsers        Парсинг JSON-ответов от LLM (code fences, несбалансированные скобки)
 """
 
-from .client import OllamaClient, OllamaConfig
+from .ollama_client import OllamaClient, OllamaConfig
 from .config import EnricherConfig
 from .parsers import parse_single_enrichment
-from .enrichers import LLMEnricher
+from .llm_enricher import LLMEnricher
 
 __all__ = [
     "OllamaClient",

@@ -1,10 +1,10 @@
 """
-CLI для rag-bseu: единый вход для всех pipeline-кнопок.
+CLI для rag-bseu: единый вход для всех пайплайнов.
 
 Доступные команды:
-- parse_documents_pipeline.py        → загрузка / парсинг источников
-- prepare_vector_store.py   → построение базы знаний и FAISS
-- query.py                  → интерактивный RAG-запрос
+  --parse-documents      загрузка / парсинг источников
+  --prepare-vector-store построение базы знаний и FAISS
+  --query                интерактивный RAG-запрос
 """
 
 import argparse

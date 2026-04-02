@@ -1,9 +1,9 @@
 """
-Пакет usage -- точки входа для запуска RAG-системы.
+Пакет usage — точки входа для запуска RAG-системы.
 
-Скрипты:
-- cli.py: единый CLI для всех пайплайнов
-- parse_documents.py: скачивание документов с Белстата
-- prepare_vector_store.py: построение базы знаний и FAISS-индекса
-- query.py: интерактивный запрос (CLI и Streamlit)
+  cli.py                  Единый CLI для всех пайплайнов
+  parse_documents.py      Скачивание документов с Белстата
+  prepare_vector_store.py Построение базы знаний и FAISS-индекса
+  query.py                RAG-запрос (CLI + Streamlit)
+  rebuild_index.py        Пересборка FAISS-индекса без LLM-обогащения
 """
