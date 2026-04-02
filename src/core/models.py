@@ -21,8 +21,6 @@ class Chunk:
     geo: Optional[List[str]] = None
     metrics: Optional[List[str]] = None
     years: Optional[List[int]] = field(default_factory=list)
-    time_granularity: Optional[str] = None
-    oked: Optional[str] = None
     extra: Optional[Dict[str, Any]] = None
 
 
@@ -42,8 +40,6 @@ class EnrichedQuery:
     geo: Optional[List[str]] = None
     years: Optional[List[int]] = None
     metrics: Optional[List[str]] = None
-    time_granularity: Optional[str] = None
-    oked: Optional[str] = None
     raw_llm_response: Optional[str] = None
 
 

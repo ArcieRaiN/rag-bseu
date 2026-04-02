@@ -8,9 +8,7 @@
     "section": null,
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page3::chunk1",
@@ -21,9 +19,7 @@
     "section": null,
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page4::chunk2",
@@ -34,9 +30,7 @@
     "section": null,
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page5::chunk3",
@@ -47,9 +41,7 @@
     "section": null,
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page6::chunk4",
@@ -60,9 +52,7 @@
     "section": null,
     "geo": [],
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page7::chunk5",
@@ -77,9 +67,7 @@
     "metrics": null,
     "years": [
       2025
-    ],
-    "time_granularity": null,
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page8::chunk6",
@@ -98,9 +86,7 @@
       "Гомель"
     ],
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": "ОСНОВНЫЕ ХАРАКТЕРИСТИКИ"
+    "years": []
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page9::chunk7",
@@ -113,9 +99,7 @@
       "Республика Беларусь"
     ],
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page10::chunk8",
@@ -128,9 +112,7 @@
       "Республика Беларусь"
     ],
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page11::chunk9",
@@ -148,9 +130,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page12::chunk10",
@@ -168,9 +148,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page13::chunk11",
@@ -195,9 +173,7 @@
       2023,
       2024,
       2025
-    ],
-    "time_granularity": null,
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page14::chunk12",
@@ -222,9 +198,7 @@
       2023,
       2024,
       2025
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page15::chunk13",
@@ -235,9 +209,7 @@
     "section": "НАСЕЛЕНИЕ",
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page16::chunk14",
@@ -248,9 +220,7 @@
     "section": "ТРУД",
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page17::chunk15",
@@ -266,9 +236,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page18::chunk16",
@@ -284,9 +252,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": null,
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page19::chunk17",
@@ -311,9 +277,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page20::chunk18",
@@ -331,9 +295,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page21::chunk19",
@@ -354,9 +316,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page22::chunk20",
@@ -374,9 +334,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page23::chunk21",
@@ -396,9 +354,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page24::chunk22",
@@ -416,9 +372,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page25::chunk23",
@@ -436,9 +390,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page26::chunk24",
@@ -460,9 +412,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page27::chunk25",
@@ -480,9 +430,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page28::chunk26",
@@ -500,9 +448,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page29::chunk27",
@@ -520,9 +466,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page30::chunk28",
@@ -540,9 +484,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page31::chunk29",
@@ -560,9 +502,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page32::chunk30",
@@ -580,9 +520,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page33::chunk31",
@@ -604,9 +542,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page34::chunk32",
@@ -628,9 +564,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page35::chunk33",
@@ -651,9 +585,7 @@
       2023,
       2024,
       2025
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page36::chunk34",
@@ -675,9 +607,7 @@
       2023,
       2024,
       2025
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page37::chunk35",
@@ -695,9 +625,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page38::chunk36",
@@ -719,9 +647,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page39::chunk37",
@@ -742,9 +668,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page40::chunk38",
@@ -765,9 +689,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page41::chunk39",
@@ -785,9 +707,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page42::chunk40",
@@ -808,9 +728,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page43::chunk41",
@@ -830,9 +748,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page44::chunk42",
@@ -850,9 +766,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page45::chunk43",
@@ -870,9 +784,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page46::chunk44",
@@ -888,9 +800,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page47::chunk45",
@@ -911,9 +821,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page48::chunk46",
@@ -934,9 +842,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page49::chunk47",
@@ -954,9 +860,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page50::chunk48",
@@ -974,9 +878,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page51::chunk49",
@@ -994,9 +896,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page52::chunk50",
@@ -1016,9 +916,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page53::chunk51",
@@ -1036,9 +934,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page54::chunk52",
@@ -1056,9 +952,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page55::chunk53",
@@ -1079,9 +973,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page56::chunk54",
@@ -1099,9 +991,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page57::chunk55",
@@ -1125,9 +1015,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page58::chunk56",
@@ -1150,9 +1038,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page59::chunk57",
@@ -1171,9 +1057,7 @@
       2019,
       2020,
       2021
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page60::chunk58",
@@ -1191,9 +1075,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page61::chunk59",
@@ -1211,9 +1093,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page62::chunk60",
@@ -1231,9 +1111,7 @@
       2022,
       2023,
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь в цифрах, 2025.pdf::page63::chunk61",
@@ -1248,9 +1126,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page2::chunk0",
@@ -1261,9 +1137,7 @@
     "section": null,
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page3::chunk1",
@@ -1274,9 +1148,7 @@
     "section": null,
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page4::chunk2",
@@ -1287,9 +1159,7 @@
     "section": null,
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page5::chunk3",
@@ -1300,9 +1170,7 @@
     "section": null,
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page6::chunk4",
@@ -1319,9 +1187,7 @@
       "млрд",
       "трлн"
     ],
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page7::chunk5",
@@ -1337,9 +1203,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page8::chunk6",
@@ -1350,9 +1214,7 @@
     "section": null,
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page9::chunk7",
@@ -1363,9 +1225,7 @@
     "section": "ТЕРРИТОРИЯ И ПРИРОДНЫЕ РЕСУРСЫ",
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page10::chunk8",
@@ -1376,9 +1236,7 @@
     "section": "ТЕРРИТОРИЯ И ПРИРОДНЫЕ РЕСУРСЫ",
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page11::chunk9",
@@ -1389,9 +1247,7 @@
     "section": "ТЕРРИТОРИЯ И ПРИРОДНЫЕ РЕСУРСЫ",
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page12::chunk10",
@@ -1402,9 +1258,7 @@
     "section": "ТЕРРИТОРИЯ И ПРИРОДНЫЕ РЕСУРСЫ",
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page13::chunk11",
@@ -1420,9 +1274,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page14::chunk12",
@@ -1438,9 +1290,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page15::chunk13",
@@ -1456,9 +1306,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page16::chunk14",
@@ -1474,9 +1322,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": null,
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page17::chunk15",
@@ -1492,9 +1338,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": null,
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page18::chunk16",
@@ -1516,9 +1360,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page19::chunk17",
@@ -1540,9 +1382,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page20::chunk18",
@@ -1564,9 +1404,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page21::chunk19",
@@ -1588,9 +1426,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page22::chunk20",
@@ -1612,9 +1448,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page23::chunk21",
@@ -1636,9 +1470,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page24::chunk22",
@@ -1662,9 +1494,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page25::chunk23",
@@ -1686,9 +1516,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page26::chunk24",
@@ -1704,9 +1532,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page27::chunk25",
@@ -1722,9 +1548,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page28::chunk26",
@@ -1746,9 +1570,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page29::chunk27",
@@ -1770,9 +1592,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page30::chunk28",
@@ -1796,9 +1616,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page31::chunk29",
@@ -1822,9 +1640,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page32::chunk30",
@@ -1850,9 +1666,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page33::chunk31",
@@ -1874,9 +1688,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page34::chunk32",
@@ -1898,9 +1710,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page35::chunk33",
@@ -1920,9 +1730,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page36::chunk34",
@@ -1938,9 +1746,7 @@
     "metrics": null,
     "years": [
       2005
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page37::chunk35",
@@ -1966,9 +1772,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page38::chunk36",
@@ -1988,9 +1792,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page39::chunk37",
@@ -2012,9 +1814,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page40::chunk38",
@@ -2030,9 +1830,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page41::chunk39",
@@ -2048,9 +1846,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page42::chunk40",
@@ -2074,9 +1870,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page43::chunk41",
@@ -2097,9 +1891,7 @@
       2015,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page44::chunk42",
@@ -2118,9 +1910,7 @@
       2015,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page45::chunk43",
@@ -2141,9 +1931,7 @@
       2015,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page46::chunk44",
@@ -2165,9 +1953,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page47::chunk45",
@@ -2183,9 +1969,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": null,
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page48::chunk46",
@@ -2201,9 +1985,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page49::chunk47",
@@ -2219,9 +2001,7 @@
     "metrics": null,
     "years": [
       2020
-    ],
-    "time_granularity": "quarter",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page50::chunk48",
@@ -2240,9 +2020,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page51::chunk49",
@@ -2267,9 +2045,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page52::chunk50",
@@ -2291,9 +2067,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page53::chunk51",
@@ -2309,9 +2083,7 @@
     "metrics": null,
     "years": [
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page54::chunk52",
@@ -2333,9 +2105,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page55::chunk53",
@@ -2359,9 +2129,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page56::chunk54",
@@ -2387,9 +2155,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page57::chunk55",
@@ -2408,9 +2174,7 @@
     ],
     "years": [
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page58::chunk56",
@@ -2429,9 +2193,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page59::chunk57",
@@ -2450,9 +2212,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page60::chunk58",
@@ -2472,9 +2232,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page61::chunk59",
@@ -2496,9 +2254,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page62::chunk60",
@@ -2523,9 +2279,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page63::chunk61",
@@ -2545,9 +2299,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page64::chunk62",
@@ -2571,9 +2323,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page65::chunk63",
@@ -2589,9 +2339,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page66::chunk64",
@@ -2607,9 +2355,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page67::chunk65",
@@ -2631,9 +2377,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page68::chunk66",
@@ -2655,9 +2399,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page69::chunk67",
@@ -2676,9 +2418,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page70::chunk68",
@@ -2701,9 +2441,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page71::chunk69",
@@ -2727,9 +2465,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page72::chunk70",
@@ -2745,9 +2481,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page73::chunk71",
@@ -2763,9 +2497,7 @@
     "metrics": null,
     "years": [
       2015
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page74::chunk72",
@@ -2781,9 +2513,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page75::chunk73",
@@ -2807,9 +2537,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page76::chunk74",
@@ -2833,9 +2561,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page77::chunk75",
@@ -2859,9 +2585,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page78::chunk76",
@@ -2883,9 +2607,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page79::chunk77",
@@ -2906,9 +2628,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page80::chunk78",
@@ -2930,9 +2650,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page81::chunk79",
@@ -2948,9 +2666,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page82::chunk80",
@@ -2966,9 +2682,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page83::chunk81",
@@ -2986,9 +2700,7 @@
     ],
     "years": [
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page84::chunk82",
@@ -3008,9 +2720,7 @@
       2015,
       2020,
       2021
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page85::chunk83",
@@ -3032,9 +2742,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page86::chunk84",
@@ -3058,9 +2766,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page87::chunk85",
@@ -3076,9 +2782,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page88::chunk86",
@@ -3097,9 +2801,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page89::chunk87",
@@ -3120,9 +2822,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page90::chunk88",
@@ -3143,9 +2843,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page91::chunk89",
@@ -3163,9 +2861,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page92::chunk90",
@@ -3186,9 +2882,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page93::chunk91",
@@ -3207,9 +2901,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page94::chunk92",
@@ -3233,9 +2925,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page95::chunk93",
@@ -3253,9 +2943,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page96::chunk94",
@@ -3271,9 +2959,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page97::chunk95",
@@ -3295,9 +2981,7 @@
       2019,
       2020,
       2021
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page98::chunk96",
@@ -3313,9 +2997,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page99::chunk97",
@@ -3331,9 +3013,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page100::chunk98",
@@ -3352,9 +3032,7 @@
       2019,
       2020,
       2021
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page101::chunk99",
@@ -3376,9 +3054,7 @@
       2019,
       2020,
       2021
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page102::chunk100",
@@ -3397,9 +3073,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page103::chunk101",
@@ -3418,9 +3092,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page104::chunk102",
@@ -3441,9 +3113,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page105::chunk103",
@@ -3464,9 +3134,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page106::chunk104",
@@ -3485,9 +3153,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page107::chunk105",
@@ -3503,9 +3169,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page108::chunk106",
@@ -3527,9 +3191,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page109::chunk107",
@@ -3551,9 +3213,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page110::chunk108",
@@ -3577,9 +3237,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page111::chunk109",
@@ -3601,9 +3259,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page112::chunk110",
@@ -3621,9 +3277,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page113::chunk111",
@@ -3641,9 +3295,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page114::chunk112",
@@ -3659,9 +3311,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page115::chunk113",
@@ -3677,9 +3327,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page116::chunk114",
@@ -3701,9 +3349,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page117::chunk115",
@@ -3723,9 +3369,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page118::chunk116",
@@ -3745,9 +3389,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page119::chunk117",
@@ -3771,9 +3413,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page120::chunk118",
@@ -3795,9 +3435,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page121::chunk119",
@@ -3813,9 +3451,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page122::chunk120",
@@ -3831,9 +3467,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page123::chunk121",
@@ -3857,9 +3491,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page124::chunk122",
@@ -3877,9 +3509,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page125::chunk123",
@@ -3904,9 +3534,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page126::chunk124",
@@ -3922,9 +3550,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page127::chunk125",
@@ -3940,9 +3566,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page128::chunk126",
@@ -3958,9 +3582,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page129::chunk127",
@@ -3976,9 +3598,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page130::chunk128",
@@ -3999,9 +3619,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page131::chunk129",
@@ -4021,9 +3639,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page132::chunk130",
@@ -4047,9 +3663,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page133::chunk131",
@@ -4070,9 +3684,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page134::chunk132",
@@ -4092,9 +3704,7 @@
       2015,
       2020,
       2021
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page135::chunk133",
@@ -4115,9 +3725,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page136::chunk134",
@@ -4133,9 +3741,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page137::chunk135",
@@ -4151,9 +3757,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page138::chunk136",
@@ -4175,9 +3779,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page139::chunk137",
@@ -4199,9 +3801,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page140::chunk138",
@@ -4224,9 +3824,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page141::chunk139",
@@ -4242,9 +3840,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page142::chunk140",
@@ -4270,9 +3866,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page143::chunk141",
@@ -4288,9 +3882,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page144::chunk142",
@@ -4306,9 +3898,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page145::chunk143",
@@ -4329,9 +3919,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page146::chunk144",
@@ -4353,9 +3941,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page147::chunk145",
@@ -4371,9 +3957,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page148::chunk146",
@@ -4392,9 +3976,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page149::chunk147",
@@ -4416,9 +3998,7 @@
     "years": [
       2020,
       2021
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page150::chunk148",
@@ -4440,9 +4020,7 @@
       2015,
       2020,
       2021
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page151::chunk149",
@@ -4464,9 +4042,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page152::chunk150",
@@ -4485,9 +4061,7 @@
     ],
     "years": [
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page153::chunk151",
@@ -4502,9 +4076,7 @@
     "metrics": null,
     "years": [
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page154::chunk152",
@@ -4526,9 +4098,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page155::chunk153",
@@ -4550,9 +4120,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page156::chunk154",
@@ -4568,9 +4136,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page157::chunk155",
@@ -4586,9 +4152,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page158::chunk156",
@@ -4604,9 +4168,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page159::chunk157",
@@ -4628,9 +4190,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page160::chunk158",
@@ -4655,9 +4215,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page161::chunk159",
@@ -4678,9 +4236,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page162::chunk160",
@@ -4707,9 +4263,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page163::chunk161",
@@ -4735,9 +4289,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page164::chunk162",
@@ -4759,9 +4311,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page165::chunk163",
@@ -4788,9 +4338,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page166::chunk164",
@@ -4816,9 +4364,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page167::chunk165",
@@ -4839,9 +4385,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page168::chunk166",
@@ -4858,9 +4402,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page169::chunk167",
@@ -4881,9 +4423,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page170::chunk168",
@@ -4908,9 +4448,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page171::chunk169",
@@ -4931,9 +4469,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page172::chunk170",
@@ -4951,9 +4487,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page173::chunk171",
@@ -4972,9 +4506,7 @@
     ],
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page174::chunk172",
@@ -4990,9 +4522,7 @@
     "metrics": null,
     "years": [
       2024
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page175::chunk173",
@@ -5014,9 +4544,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page176::chunk174",
@@ -5036,9 +4564,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page177::chunk175",
@@ -5058,9 +4584,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page178::chunk176",
@@ -5082,9 +4606,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page179::chunk177",
@@ -5105,9 +4627,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page180::chunk178",
@@ -5128,9 +4648,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page181::chunk179",
@@ -5151,9 +4669,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page182::chunk180",
@@ -5174,9 +4690,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page183::chunk181",
@@ -5197,9 +4711,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page184::chunk182",
@@ -5220,9 +4732,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page185::chunk183",
@@ -5243,9 +4753,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page186::chunk184",
@@ -5268,9 +4776,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page187::chunk185",
@@ -5291,9 +4797,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page188::chunk186",
@@ -5314,9 +4818,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page189::chunk187",
@@ -5337,9 +4839,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page190::chunk188",
@@ -5360,9 +4860,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page191::chunk189",
@@ -5386,9 +4884,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page192::chunk190",
@@ -5410,9 +4906,7 @@
       2019,
       2020,
       2021
-    ],
-    "time_granularity": "quarter",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page193::chunk191",
@@ -5434,9 +4928,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page194::chunk192",
@@ -5456,9 +4948,7 @@
     ],
     "years": [
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page195::chunk193",
@@ -5476,9 +4966,7 @@
     ],
     "years": [
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page196::chunk194",
@@ -5497,9 +4985,7 @@
     "years": [
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page197::chunk195",
@@ -5521,9 +5007,7 @@
       2019,
       2020,
       2021
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page198::chunk196",
@@ -5545,9 +5029,7 @@
       2019,
       2020,
       2021
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page199::chunk197",
@@ -5566,9 +5048,7 @@
     "years": [
       2022,
       2023
-    ],
-    "time_granularity": "month",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page200::chunk198",
@@ -5590,9 +5070,7 @@
       2021,
       2022,
       2023
-    ],
-    "time_granularity": "year",
-    "oked": null
+    ]
   },
   {
     "id": "Беларусь и Россия, 2024.pdf::page201::chunk199",
@@ -5603,8 +5081,6 @@
     "section": null,
     "geo": null,
     "metrics": null,
-    "years": [],
-    "time_granularity": null,
-    "oked": null
+    "years": []
   }
 ]

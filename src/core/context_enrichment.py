@@ -4,16 +4,10 @@ from __future__ import annotations
 
 Regex-извлечение структурированных полей (years, geo) без LLM-вызовов.
 Время: <10ms vs ~60s при LLM-обогащении — ускорение ~6000x.
-
-Текущие ограничения:
-- metrics всегда None (не извлекаются из запроса)
-- time_granularity, oked — не извлекаются
 """
 
 import re
-from typing import Any, Dict, List, Optional, Set
-
-import numpy as np
+from typing import List, Optional
 
 from src.core.models import EnrichedQuery
 from src.vectorstore.vectorizer import SentenceVectorizer
@@ -51,10 +45,9 @@ class QueryContextEnricher:
 
     def __init__(self, vectorizer: SentenceVectorizer, llm_client=None):
         self._vectorizer = vectorizer
-        # llm_client accepted for backward compatibility but not used
 
     def enrich(self, query: str) -> EnrichedQuery:
-        embedded = self._vectorizer.embed(query)
+        embedded = self._vectorizer.embed(query, is_query=True)
 
         years = _extract_years(query)
         geo = _extract_geo(query)
@@ -65,7 +58,4 @@ class QueryContextEnricher:
             geo=geo if geo else None,
             years=years if years else None,
             metrics=None,
-            time_granularity=None,
-            oked=None,
-            raw_llm_response=None,
         )

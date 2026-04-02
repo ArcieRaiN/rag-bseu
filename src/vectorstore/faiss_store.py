@@ -36,7 +36,6 @@ class FAISSStore:
 
     @staticmethod
     def _build_embed_text(chunk: Chunk) -> str:
-        """Concatenate context and text prefix for embedding."""
         context = (chunk.context or "").strip()
         text_prefix = (chunk.text or "")[:500].strip()
         if context and text_prefix:
@@ -50,7 +49,7 @@ class FAISSStore:
         self._ensure_index()
 
         texts = [self._build_embed_text(ch) for ch in chunks]
-        embeddings = self._vectorizer.embed_many(texts)
+        embeddings = self._vectorizer.embed_many(texts, is_query=False)
         embeddings = np.ascontiguousarray(embeddings, dtype=np.float32)
         faiss.normalize_L2(embeddings)
 

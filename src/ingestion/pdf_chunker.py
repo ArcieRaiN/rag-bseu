@@ -83,16 +83,14 @@ class PDFChunker:
                     continue
 
                 chunk = Chunk(
-                    id="",              # будет назначен позже
-                    context="",         # заполнится в LLMEnricher
+                    id="",
+                    context="",
                     text=page_text,
                     source=pdf_path.name,
                     page=page_number,
                     geo=None,
                     metrics=None,
                     years=None,
-                    time_granularity=None,
-                    oked=None,
                 )
                 chunks.append(chunk)
 

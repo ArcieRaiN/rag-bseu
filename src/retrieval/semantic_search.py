@@ -4,7 +4,8 @@ from __future__ import annotations
 Семантический поиск через FAISS.
 
 Загружает IndexFlatIP + data.json, выдаёт Top-K по cosine similarity.
-Эмбеддинги: paraphrase-multilingual-MiniLM-L12-v2, 384d, L2-нормализованные.
+Эмбеддинг-модель задаётся через SentenceVectorizer (по умолчанию intfloat/multilingual-e5-large, 1024d).
+Векторы L2-нормализованы — inner product == cosine similarity.
 Изолирован от BM25, metadata scoring и reranking.
 """
 
@@ -78,11 +79,9 @@ class FaissSemanticSearcher:
                     geo=item.get("geo"),
                     metrics=item.get("metrics"),
                     years=item.get("years") or [],
-                    time_granularity=item.get("time_granularity"),
-                    oked=item.get("oked"),
                     extra={k: v for k, v in item.items() if k not in {
                         "id", "context", "text", "source", "page", "section",
-                        "geo", "metrics", "years", "time_granularity", "oked"
+                        "geo", "metrics", "years",
                     }},
                 )
             )

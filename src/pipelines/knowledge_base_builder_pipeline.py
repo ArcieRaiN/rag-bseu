@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 import json
+import time
 
 from src.core.models import Chunk
 from src.ingestion.pdf_chunker import PDFChunker
@@ -45,32 +46,48 @@ class KnowledgeBaseBuilder:
     def build(self) -> None:
         chunk_id_counter = 0
         all_chunks: List[Chunk] = []
+        build_start = time.perf_counter()
 
         pdf_files = sorted(self.documents_dir.glob("*.pdf"))
         for pdf_path in pdf_files:
             pdf_name = pdf_path.name
+            pdf_start = time.perf_counter()
 
             raw_chunks = self.pdf_chunker.chunk_pdf(pdf_path)
             for ch in raw_chunks:
                 ch.id = f"{pdf_name}::page{ch.page}::chunk{chunk_id_counter}"
                 chunk_id_counter += 1
 
-            # Apply section mapping from TOC
             section_mapper = SectionMapper(pdf_name, raw_chunks)
             raw_chunks = section_mapper.apply_to_chunks(raw_chunks)
 
             enriched_chunks = self.llm_enricher.enrich_chunks(pdf_name, raw_chunks, show_progress=True)
             processed_chunks = [self.post_processor.process_chunk(ch) for ch in enriched_chunks]
             all_chunks.extend(processed_chunks)
-            print(f"Processed PDF {pdf_name}: {len(processed_chunks)} chunks")
 
-        # Build FAISS index over all chunks at once (positional)
+            pdf_elapsed = time.perf_counter() - pdf_start
+            n_pages = len(processed_chunks)
+            avg_per_page = pdf_elapsed / max(n_pages, 1)
+            print(
+                f"[{pdf_name}] {n_pages} страниц за {pdf_elapsed:.1f}s "
+                f"(в среднем {avg_per_page:.2f}s/стр)"
+            )
+
+        t0 = time.perf_counter()
         self.faiss_indexer.add_chunks(all_chunks)
+        embed_elapsed = time.perf_counter() - t0
 
         self._save_data_json(all_chunks)
         self.faiss_indexer.save(self.output_dir / "index.faiss")
         self._save_metadata(all_chunks)
-        print(f"Knowledge base built: {len(all_chunks)} chunks, dim={self.vectorizer.dimension}")
+
+        total_elapsed = time.perf_counter() - build_start
+        print(
+            f"\nБаза знаний построена: {len(all_chunks)} чанков, "
+            f"dim={self.vectorizer.dimension}\n"
+            f"  Embedding:  {embed_elapsed:.1f}s\n"
+            f"  Всего:      {total_elapsed:.1f}s"
+        )
 
     def _save_data_json(self, chunks: List[Chunk]) -> None:
         data_path = self.output_dir / "data.json"
@@ -87,8 +104,6 @@ class KnowledgeBaseBuilder:
                         "geo": ch.geo,
                         "metrics": ch.metrics,
                         "years": ch.years,
-                        "time_granularity": ch.time_granularity,
-                        "oked": ch.oked,
                     }
                     for ch in chunks
                 ],
@@ -103,6 +118,7 @@ class KnowledgeBaseBuilder:
             json.dump(
                 {
                     "vectorizer": type(self.vectorizer).__name__,
+                    "model": self.vectorizer.model_name,
                     "dimension": self.vectorizer.dimension,
                     "chunks": len(chunks),
                 },

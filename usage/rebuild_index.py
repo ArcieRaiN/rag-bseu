@@ -38,8 +38,6 @@ def main() -> None:
             geo=item.get("geo"),
             metrics=item.get("metrics"),
             years=item.get("years") or [],
-            time_granularity=item.get("time_granularity"),
-            oked=item.get("oked"),
         ))
 
     print(f"Loaded {len(chunks)} chunks")
@@ -66,8 +64,6 @@ def main() -> None:
             "geo": ch.geo,
             "metrics": ch.metrics,
             "years": ch.years,
-            "time_granularity": ch.time_granularity,
-            "oked": ch.oked,
         }
         updated_data.append(item)
 
@@ -90,6 +86,7 @@ def main() -> None:
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump({
             "vectorizer": type(vectorizer).__name__,
+            "model": vectorizer.model_name,
             "dimension": vectorizer.dimension,
             "chunks": len(chunks),
         }, f, ensure_ascii=False, indent=2)

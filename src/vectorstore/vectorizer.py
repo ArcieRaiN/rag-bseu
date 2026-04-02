@@ -2,7 +2,7 @@
 Генерация векторных представлений текста (эмбеддингов).
 
 Использует sentence-transformers для кодирования текста в вектор.
-Размерность определяется моделью (384d для paraphrase-multilingual-MiniLM-L12-v2).
+Для e5-моделей автоматически применяет текстовые префиксы ("query: ", "passage: ").
 """
 
 from __future__ import annotations
@@ -23,13 +23,21 @@ else:
     _ST_IMPORT_ERROR = None
 
 
+def _is_e5_model(name: str) -> bool:
+    return "e5" in name.lower()
+
+
 class SentenceVectorizer:
     """
     Embedding generator based on sentence-transformers.
 
     Uses the native model dimension (no projection).
     Vectors are L2-normalized for cosine similarity via inner product.
+    For e5 models, text prefixes ("query: " / "passage: ") are applied automatically.
     """
+
+    QUERY_PREFIX = "query: "
+    PASSAGE_PREFIX = "passage: "
 
     def __init__(
         self,
@@ -37,7 +45,6 @@ class SentenceVectorizer:
         *,
         model_name: Optional[str] = None,
         device: Optional[str] = None,
-        dimension: Optional[int] = None,
     ):
         if SentenceTransformer is None:
             raise ImportError(
@@ -46,23 +53,24 @@ class SentenceVectorizer:
 
         self.normalize = normalize
         self.model_name = model_name or os.getenv(
-            "RAG_ST_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+            "RAG_ST_MODEL", "intfloat/multilingual-e5-large"
         )
         self.device = device or os.getenv("RAG_ST_DEVICE")
+        self._is_e5 = _is_e5_model(self.model_name)
 
         self._model: Optional[SentenceTransformer] = None
         self._model_dim: Optional[int] = None
 
         self._init_model()
-
-        # dimension is now always the native model dimension
-        # the parameter is accepted for backward compatibility but ignored
         self.dimension = self._model_dim
 
     def _init_model(self) -> None:
         if self._model is not None:
             return
-        self._model = SentenceTransformer(self.model_name, device=self.device)
+        kwargs = {}
+        if self.device:
+            kwargs["device"] = self.device
+        self._model = SentenceTransformer(self.model_name, **kwargs)
         self._model_dim = self._model.get_sentence_embedding_dimension()
 
     def _encode_many(self, texts: List[str]) -> np.ndarray:
@@ -76,17 +84,24 @@ class SentenceVectorizer:
             convert_to_numpy=True,
             normalize_embeddings=self.normalize,
         ).astype(np.float32)
-
         return vecs
 
-    def embed(self, text: str) -> np.ndarray:
+    def embed(self, text: str, *, is_query: bool = True) -> np.ndarray:
+        """Embed a single text. For e5 models, is_query controls the prefix."""
         if text is None:
             raise ValueError("text must not be None")
         text = text.strip()
         if not text:
             raise ValueError("text must be non-empty")
+        if self._is_e5:
+            prefix = self.QUERY_PREFIX if is_query else self.PASSAGE_PREFIX
+            text = prefix + text
         return self._encode_many([text])[0]
 
-    def embed_many(self, texts: Iterable[str]) -> np.ndarray:
+    def embed_many(self, texts: Iterable[str], *, is_query: bool = True) -> np.ndarray:
+        """Embed multiple texts. For e5 models, is_query controls the prefix."""
         items = [str(t).strip() for t in texts if t and str(t).strip()]
+        if self._is_e5:
+            prefix = self.QUERY_PREFIX if is_query else self.PASSAGE_PREFIX
+            items = [prefix + t for t in items]
         return self._encode_many(items)

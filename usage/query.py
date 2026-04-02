@@ -66,10 +66,6 @@ def main_cli() -> None:
                     meta.append(f"years={ch.years}")
                 if ch.metrics:
                     meta.append(f"metrics={ch.metrics}")
-                if ch.time_granularity:
-                    meta.append(f"time={ch.time_granularity}")
-                if ch.oked:
-                    meta.append(f"oked={ch.oked}")
 
                 print(f"{i}. [source={ch.source}, page={ch.page}, id={ch.id}]")
                 if meta:
