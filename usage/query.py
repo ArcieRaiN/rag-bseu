@@ -98,7 +98,7 @@ def main_streamlit() -> None:
     matplotlib.use("Agg")
 
     st.set_page_config(page_title="RAG BSEU", layout="wide")
-    st.title("RAG BSEU — Статистические данные")
+    st.title("RAG BSEU — Система поиска, анализа и выдачи статистических данных")
 
     @st.cache_resource
     def load_pipelines():
