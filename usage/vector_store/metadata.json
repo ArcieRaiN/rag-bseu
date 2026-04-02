@@ -1,5 +1,6 @@
 {
   "vectorizer": "SentenceVectorizer",
-  "dimension": 256,
+  "model": "intfloat/multilingual-e5-large",
+  "dimension": 1024,
   "chunks": 262
 }

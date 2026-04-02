@@ -1,0 +1,39 @@
+[
+  {
+    "model": "MiniLM-384d",
+    "hf_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "dimension": 384,
+    "embed_time_s": 3.5,
+    "hit_at_1": 0.2692,
+    "hit_at_3": 0.456,
+    "hit_at_5": 0.5385,
+    "mrr": 0.3854,
+    "avg_query_s": 0.011
+  },
+  {
+    "model": "bge-m3-1024d",
+    "hf_name": "BAAI/bge-m3",
+    "dimension": 1024,
+    "embed_time_s": 89.6,
+    "hit_at_1": 0.2967,
+    "hit_at_3": 0.467,
+    "hit_at_5": 0.5879,
+    "mrr": 0.4139,
+    "avg_query_s": 0.0647
+  },
+  {
+    "model": "USER-bge-m3-1024d",
+    "hf_name": "deepvk/USER-bge-m3",
+    "dimension": 1024,
+    "embed_time_s": 89.3,
+    "hit_at_1": 0.3077,
+    "hit_at_3": 0.4451,
+    "hit_at_5": 0.5824,
+    "mrr": 0.4153,
+    "avg_query_s": 0.0756
+  },
+  {
+    "model": "e5-large-1024d",
+    "error": "Prompt name 'passage' not found in the configured prompts dictionary with keys ['query', 'document']."
+  }
+]

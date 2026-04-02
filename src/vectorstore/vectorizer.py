@@ -1,14 +1,12 @@
 """
 Генерация векторных представлений текста (эмбеддингов).
 
-Использует sentence-transformers для кодирования текста в вектор фиксированной
-размерности. При несовпадении размерности модели и целевой размерности
-применяется детерминированная случайная проекция (Gaussian random projection).
+Использует sentence-transformers для кодирования текста в вектор.
+Для e5-моделей автоматически применяет текстовые префиксы ("query: ", "passage: ").
 """
 
 from __future__ import annotations
 
-import hashlib
 import os
 from typing import Iterable, Optional, List
 
@@ -18,77 +16,64 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 try:
     from sentence_transformers import SentenceTransformer
-except ImportError as e:  # pragma: no cover
+except ImportError as e:
     SentenceTransformer = None  # type: ignore[assignment]
     _ST_IMPORT_ERROR = e
 else:
     _ST_IMPORT_ERROR = None
 
 
+def _is_e5_model(name: str) -> bool:
+    return "e5" in name.lower()
+
+
 class SentenceVectorizer:
     """
-    Генератор эмбеддингов на основе sentence-transformers.
+    Embedding generator based on sentence-transformers.
 
-    Особенности:
-    - Ленивая инициализация модели
-    - Детерминированная случайная проекция для приведения к целевой размерности
-      (seed привязан к имени модели для воспроизводимости)
-    - Нормализация векторов к единичной длине для cosine similarity
+    Uses the native model dimension (no projection).
+    Vectors are L2-normalized for cosine similarity via inner product.
+    For e5 models, text prefixes ("query: " / "passage: ") are applied automatically.
     """
+
+    QUERY_PREFIX = "query: "
+    PASSAGE_PREFIX = "passage: "
 
     def __init__(
         self,
-        dimension: int = 256,
         normalize: bool = True,
         *,
         model_name: Optional[str] = None,
         device: Optional[str] = None,
     ):
-        if dimension <= 0:
-            raise ValueError("`dimension` must be positive")
         if SentenceTransformer is None:
             raise ImportError(
                 "sentence-transformers is required"
             ) from _ST_IMPORT_ERROR
 
-        self.dimension = dimension
         self.normalize = normalize
         self.model_name = model_name or os.getenv(
-            "RAG_ST_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+            "RAG_ST_MODEL", "intfloat/multilingual-e5-large"
         )
         self.device = device or os.getenv("RAG_ST_DEVICE")
+        self._is_e5 = _is_e5_model(self.model_name)
 
         self._model: Optional[SentenceTransformer] = None
         self._model_dim: Optional[int] = None
-        self._proj: Optional[np.ndarray] = None
 
         self._init_model()
+        self.dimension = self._model_dim
 
     def _init_model(self) -> None:
-        """Инициализация модели и матрицы проекции (при несовпадении размерностей)."""
         if self._model is not None:
             return
-        self._model = SentenceTransformer(self.model_name, device=self.device)
+        kwargs = {}
+        if self.device:
+            kwargs["device"] = self.device
+        self._model = SentenceTransformer(self.model_name, **kwargs)
         self._model_dim = self._model.get_sentence_embedding_dimension()
-        if self.dimension != self._model_dim:
-            self._proj = self._make_projection(self._model_dim, self.dimension, seed=self.model_name)
-
-    @staticmethod
-    def _make_projection(input_dim: int, output_dim: int, *, seed: str) -> np.ndarray:
-        """
-        Детерминированная гауссова случайная проекция.
-
-        Seed вычисляется из имени модели (SHA-256), что гарантирует
-        одинаковую матрицу проекции при одинаковой модели.
-        """
-        digest = hashlib.sha256(seed.encode("utf-8")).hexdigest()
-        rng_seed = int(digest[:16], 16)
-        rng = np.random.default_rng(rng_seed)
-        proj = rng.standard_normal((output_dim, input_dim), dtype=np.float32) / np.sqrt(output_dim)
-        return proj
 
     def _encode_many(self, texts: List[str]) -> np.ndarray:
-        """Генерирует эмбеддинги для списка текстов с проекцией и нормализацией."""
         if not texts:
             return np.zeros((0, self.dimension), dtype=np.float32)
 
@@ -97,28 +82,26 @@ class SentenceVectorizer:
             batch_size=int(os.getenv("RAG_ST_BATCH_SIZE", "32")),
             show_progress_bar=False,
             convert_to_numpy=True,
-            normalize_embeddings=False,
+            normalize_embeddings=self.normalize,
         ).astype(np.float32)
-
-        if self._proj is not None:
-            vecs = (self._proj @ vecs.T).T.astype(np.float32)
-
-        if self.normalize:
-            norms = np.linalg.norm(vecs, axis=1, keepdims=True)
-            vecs = vecs / (norms + 1e-9)
-
         return vecs
 
-    def embed(self, text: str) -> np.ndarray:
-        """Генерирует эмбеддинг для одного текста."""
+    def embed(self, text: str, *, is_query: bool = True) -> np.ndarray:
+        """Embed a single text. For e5 models, is_query controls the prefix."""
         if text is None:
             raise ValueError("text must not be None")
         text = text.strip()
         if not text:
             raise ValueError("text must be non-empty")
+        if self._is_e5:
+            prefix = self.QUERY_PREFIX if is_query else self.PASSAGE_PREFIX
+            text = prefix + text
         return self._encode_many([text])[0]
 
-    def embed_many(self, texts: Iterable[str]) -> np.ndarray:
-        """Генерирует эмбеддинги для нескольких текстов (пустые строки отфильтровываются)."""
+    def embed_many(self, texts: Iterable[str], *, is_query: bool = True) -> np.ndarray:
+        """Embed multiple texts. For e5 models, is_query controls the prefix."""
         items = [str(t).strip() for t in texts if t and str(t).strip()]
+        if self._is_e5:
+            prefix = self.QUERY_PREFIX if is_query else self.PASSAGE_PREFIX
+            items = [prefix + t for t in items]
         return self._encode_many(items)

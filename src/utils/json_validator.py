@@ -2,7 +2,7 @@
 Валидация и нормализация данных обогащения чанков.
 
 Проверяет корректность структуры JSON-ответов от LLM (context, metrics,
-years, geo, time_granularity) и нормализует значения полей.
+years, geo) и нормализует значения полей.
 """
 
 from __future__ import annotations
@@ -85,17 +85,10 @@ class ChunkValidator:
                         except (ValueError, TypeError):
                             errors.append(f"years[{i}] должен быть целым числом")
 
-        # geo
+        # geo (list of strings or a single string)
         geo = chunk_data.get("geo")
-        if geo is not None and not isinstance(geo, str):
-            warnings.append("geo должен быть строкой или null")
-
-        # time_granularity
-        tg = chunk_data.get("time_granularity")
-        if tg is not None:
-            valid_tg = {"year", "quarter", "month", "day"}
-            if tg not in valid_tg:
-                warnings.append(f"time_granularity '{tg}' не в {valid_tg}")
+        if geo is not None and not isinstance(geo, (str, list)):
+            warnings.append("geo должен быть null, строкой или списком строк")
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors, warnings=warnings)
 

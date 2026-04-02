@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 """
-Semantic Search поверх FAISS (PIPELINE 3.1).
+Семантический поиск через FAISS.
 
-Ответственность:
-- загрузка FAISS‑индекса и массива чанков (data.json)
-- выдача Top‑K по cosine similarity для embedded_query
-
-Не знает ни о BM25, ни о metadata‑score, ни о reranking.
+Загружает IndexFlatIP + data.json, выдаёт Top-K по cosine similarity.
+Эмбеддинг-модель задаётся через SentenceVectorizer (по умолчанию intfloat/multilingual-e5-large, 1024d).
+Векторы L2-нормализованы — inner product == cosine similarity.
+Изолирован от BM25, metadata scoring и reranking.
 """
 
 from pathlib import Path
@@ -76,14 +75,13 @@ class FaissSemanticSearcher:
                     text=item["text"],
                     source=item["source"],
                     page=int(item["page"]),
+                    section=item.get("section"),
                     geo=item.get("geo"),
                     metrics=item.get("metrics"),
                     years=item.get("years") or [],
-                    time_granularity=item.get("time_granularity"),
-                    oked=item.get("oked"),
                     extra={k: v for k, v in item.items() if k not in {
-                        "id", "context", "text", "source", "page",
-                        "geo", "metrics", "years", "time_granularity", "oked"
+                        "id", "context", "text", "source", "page", "section",
+                        "geo", "metrics", "years",
                     }},
                 )
             )
@@ -91,9 +89,9 @@ class FaissSemanticSearcher:
 
     @staticmethod
     def _prepare_query(embedded_query: np.ndarray) -> np.ndarray:
-        if embedded_query.ndim == 1:
-            return embedded_query.reshape(1, -1).astype("float32")
-        return embedded_query.astype("float32")
+        vec = embedded_query.reshape(1, -1).astype("float32") if embedded_query.ndim == 1 else embedded_query.astype("float32")
+        faiss.normalize_L2(vec)
+        return vec
 
     def _format_results(self, scores: np.ndarray, indices: np.ndarray) -> List[ScoredChunk]:
         results: List[ScoredChunk] = []

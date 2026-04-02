@@ -66,10 +66,6 @@ def main_cli() -> None:
                     meta.append(f"years={ch.years}")
                 if ch.metrics:
                     meta.append(f"metrics={ch.metrics}")
-                if ch.time_granularity:
-                    meta.append(f"time={ch.time_granularity}")
-                if ch.oked:
-                    meta.append(f"oked={ch.oked}")
 
                 print(f"{i}. [source={ch.source}, page={ch.page}, id={ch.id}]")
                 if meta:
@@ -122,11 +118,25 @@ def main_streamlit() -> None:
     _reset_state()
     query_pipeline, output_pipeline = load_pipelines()
 
-    query = st.text_input("Введите запрос", placeholder="Например: ВВП Беларуси 2018-2022")
+    query = st.text_input(
+        "Введите запрос",
+        placeholder="Например: ВВП Беларуси 2018-2022",
+        help="Ключевые слова или фраза по теме: показатель, страна, год. "
+             "Примеры: «Численность населения», «Экспорт и импорт 2023», «Цена яблок»",
+    )
+
+    all_sources = query_pipeline.get_available_sources()
+    selected_source = st.selectbox(
+        "Источник",
+        all_sources,
+        index=None,
+        placeholder="Все файлы (по умолчанию)",
+    )
+    source_filter = selected_source
 
     if st.button("Найти", type="primary") and query.strip():
         with st.spinner("Поиск по базе знаний..."):
-            result = query_pipeline.run(query.strip())
+            result = query_pipeline.run(query.strip(), source_filter=source_filter)
 
         if not result.top_chunks:
             st.warning("Ничего не найдено по запросу.")
@@ -137,7 +147,11 @@ def main_streamlit() -> None:
             with st.spinner("Генерация таблицы через LLM..."):
                 df = output_pipeline.run(result, user_query=query.strip())
 
-            if df is None:
+            if df is None and output_pipeline.no_data:
+                st.session_state["pipeline_output"].update(
+                    {"df": None, "title": "", "sources": [], "error": "no_data"}
+                )
+            elif df is None:
                 st.error("Не удалось сформировать таблицу. Подробности в usage/logs/output_df_fails.json")
                 st.session_state["pipeline_output"].update(
                     {"df": None, "title": "", "sources": [], "error": "LLM не вернула корректный JSON."}
@@ -150,7 +164,9 @@ def main_streamlit() -> None:
 
     ui_state = st.session_state["pipeline_output"]
     if ui_state["df"] is None:
-        if ui_state["error"]:
+        if ui_state["error"] == "no_data":
+            st.warning("По данному запросу информация в источниках не найдена.")
+        elif ui_state["error"]:
             st.info(ui_state["error"])
         return
 
@@ -165,7 +181,10 @@ def main_streamlit() -> None:
 
     # --- Таблица данных ---
     st.markdown("**Таблица данных**")
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(
+        df.style.format(_fmt_value),
+        use_container_width=True,
+    )
 
     # --- Источники ---
     sources = ui_state["sources"]
@@ -190,6 +209,17 @@ def main_streamlit() -> None:
         file_name=file_name,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+
+
+def _fmt_value(val):
+    """Format numbers: no thousands separator, comma for decimals."""
+    if isinstance(val, float):
+        if val == int(val):
+            return str(int(val))
+        return f"{val:g}".replace(".", ",")
+    if isinstance(val, int):
+        return str(val)
+    return val
 
 
 def _sanitize_filename(title: str) -> str:

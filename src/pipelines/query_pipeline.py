@@ -1,47 +1,36 @@
 from __future__ import annotations
 
 """
-PIPELINE: обработка пользовательского запроса (RAG + hybrid retrieval).
+PIPELINE: обработка пользовательских запросов (RAG + гибридный поиск).
 
 Этапы:
-1. Query enrichment (LLM / vectorizer)
-2. Hybrid search (BM25 + semantic FAISS)
+1. Обогащение запроса (embedding + regex-извлечение years/geo, без LLM)
+2. Гибридный поиск (Semantic FAISS + BM25 + Metadata) → RRF → Top-K
+3. Опциональный reranking (cross-encoder, по умолчанию выключен)
+4. Опциональная фильтрация по источнику (PDF-файлу)
 """
 
 from pathlib import Path
 import time
-from typing import List
+from typing import List, Optional
 
 from src.core.context_enrichment import QueryContextEnricher
 from src.retrieval.hybrid_search import HybridSearcher
+from src.retrieval.reranker import CrossEncoderReranker
 from src.retrieval.semantic_search import FaissSemanticSearcher
 from src.vectorstore.vectorizer import SentenceVectorizer
 from src.core.models import PipelineResult, ScoredChunk
 from src.core.config import RetrievalConfig
-from src.enrichers.client import OllamaClient
-from src.utils.spellchecker import QuerySpellChecker
-from src.utils.spellcheck_validator import SpellcheckValidator
+
 
 class QueryPipeline:
-    def __init__(self, base_dir: Path, *, llm_model: str = "llama3-chatqa:latest",
-                 vector_dim: int = 256, retrieval_config: RetrievalConfig | None = None):
-        """
-        Инициализация пайплайна.
-
-        Args:
-            base_dir: Корень проекта (rag-bseu).
-            llm_model: Модель LLM для enrichment.
-            vector_dim: Размерность эмбеддингов.
-            retrieval_config: Настройки гибридного поиска.
-        """
+    def __init__(self, base_dir: Path, *,
+                 retrieval_config: RetrievalConfig | None = None):
         t0 = time.perf_counter()
-        print("[INIT] QueryPipeline: инициализация...")
+        print("[INIT] QueryPipeline: initializing...")
 
         self._base_dir = Path(base_dir)
-        self._ollama = OllamaClient()
-        self._vectorizer = SentenceVectorizer(dimension=vector_dim)
-        self._spellchecker = QuerySpellChecker()
-        self._spellcheck_validator = SpellcheckValidator()
+        self._vectorizer = SentenceVectorizer()
 
         vector_store_dir = self._base_dir / "usage" / "vector_store"
         self._semantic = FaissSemanticSearcher(
@@ -57,49 +46,57 @@ class QueryPipeline:
 
         self._enricher = QueryContextEnricher(
             vectorizer=self._vectorizer,
-            llm_client=self._ollama,
         )
 
-        print(f"[INIT] QueryPipeline готов за {time.perf_counter() - t0:.2f}s")
+        self._reranker = None
+        if self._retrieval_config.use_reranker:
+            self._reranker = CrossEncoderReranker(
+                model_name=self._retrieval_config.reranker_model
+            )
 
-    def run(self, query: str) -> PipelineResult:
-        """
-        Основной метод пайплайна.
+        print(f"[INIT] QueryPipeline ready in {time.perf_counter() - t0:.2f}s")
 
-        Args:
-            query: Строка запроса пользователя
-        Returns:
-            PipelineResult с кандидатами (без rerank)
-        """
-        print(f"\n[PIPELINE] Start query: {query!r}")
+    def get_available_sources(self) -> List[str]:
+        """Return sorted list of unique PDF source names from the vector store."""
+        chunks = self._semantic.get_all_chunks()
+        return sorted(set(ch.source for ch in chunks))
+
+    def run(self, query: str, source_filter: Optional[str] = None) -> PipelineResult:
         t_pipeline = time.perf_counter()
 
-        # Исправление опечаток + валидация (не исказил ли смысл)
+        # 1. Enrichment (embedding + regex, no LLM)
         t0 = time.perf_counter()
-        corrected_query = self._spellchecker.correct_query(query)
-        validation = self._spellcheck_validator.validate(query, corrected_query)
-        query_for_pipeline = validation.query_to_use
-        if validation.was_corrupted:
-            print(f"[STEP 0] Spellcheck corrupted meaning ({validation.method}), using original")
-        print(f"[STEP 0] Spellcheck done in {time.perf_counter() - t0:.2f}s -> {query_for_pipeline!r}")
-
-        # 1. Enrichment
-        t0 = time.perf_counter()
-        enriched_query = self._enricher.enrich(query_for_pipeline)
-        print(f"[STEP 1] Enrichment done in {time.perf_counter() - t0:.2f}s")
+        enriched_query = self._enricher.enrich(query)
+        t_enrich = time.perf_counter() - t0
 
         # 2. Hybrid search
         t0 = time.perf_counter()
         hybrid_result = self._hybrid.search(enriched_query)
         candidates: List[ScoredChunk] = hybrid_result.candidates
-        print(f"[STEP 2] Hybrid search done in {time.perf_counter() - t0:.2f}s "
-              f"(candidates={len(candidates)})")
+        t_search = time.perf_counter() - t0
 
-        print(f"[PIPELINE] Finished in {time.perf_counter() - t_pipeline:.2f}s")
+        # 3. Optional reranking
+        t_rerank = 0.0
+        if self._reranker is not None:
+            t0 = time.perf_counter()
+            candidates = self._reranker.rerank(
+                query, candidates,
+                top_k=self._retrieval_config.reranker_top_k
+            )
+            t_rerank = time.perf_counter() - t0
+
+        # 4. Optional source filter
+        if source_filter:
+            candidates = [sc for sc in candidates if sc.chunk.source == source_filter]
+
+        total = time.perf_counter() - t_pipeline
+        print(f"[PIPELINE] query={query!r} enrich={t_enrich:.2f}s search={t_search:.2f}s "
+              f"rerank={t_rerank:.2f}s total={total:.2f}s candidates={len(candidates)}")
 
         return PipelineResult(
             query=query,
             enriched_query=enriched_query,
             candidates=candidates,
-            top_chunks=candidates,  # теперь без rerank
+            top_chunks=candidates,
+            timings={"enrich": t_enrich, "search": t_search, "rerank": t_rerank, "total": total},
         )
