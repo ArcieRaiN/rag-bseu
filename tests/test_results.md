@@ -117,3 +117,19 @@
 1. Из корня `rag-bseu`: `pip install -r requirements.txt`, Ollama с `llama3-chatqa:latest` для полной пересборки KB.
 2. Оценка извлечения **не требует** Ollama: достаточно актуального `usage/vector_store` и зависимостей Python.
 3. После каждого полного прогона обновляйте таблицы в §3 и строку с именем `eval_*.json` в этом файле.
+
+---
+
+## 7. Замеры длительности этапов (диплом, §1.2)
+
+Скрипты в каталоге `tests/`:
+
+| Задача | Команда (из корня `rag-bseu`) | Выход |
+|--------|-------------------------------|--------|
+| Подготовительный этап, одна страница (полный PDF-пайплайн в временный индекс) | `python -m tests.benchmark_stage_prepare` или `python -m tests.benchmark_stage_prepare --pdf "C:\path\doc.pdf"` | `tests/results/benchmark_prepare_*.json` (`avg_seconds_per_page`, `chunks_pages`) |
+| Этап обработки запросов, только ретривал (как в evaluator) | `python -m tests.benchmark_stage_query` (182 вопроса) или `--quick` (10) | `tests/results/benchmark_query_*.json` |
+| Этап обработки запросов, ретривал + генерация таблицы (Ollama) | `python -m tests.benchmark_stage_query --e2e --e2e-limit 10` | тот же шаблон JSON, поле `mode`: `retrieval_plus_output_llm` |
+
+**Прогон 2026-04-06 (ноутбук, ретривал, 182 запроса):** среднее время запроса 0,12 с, суммарное время стенки 21,9 с — см. [results/eval_20260406_011635.json](results/eval_20260406_011635.json). Инициализация `QueryPipeline` (~3,5 с) выполняется один раз и в среднее по запросам не входит.
+
+Для `benchmark_stage_prepare` нужны PDF в `usage/documents/` или явный `--pdf`; нужен Ollama с `llama3-chatqa:latest`. Для режима `--e2e` дополнительно должен отвечать Ollama с моделью генерации ответа (в проекте по умолчанию qwen2.5:7b, см. `OutputPipeline`).

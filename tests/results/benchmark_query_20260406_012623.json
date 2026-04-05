@@ -1,0 +1,10 @@
+{
+  "mode": "retrieval_only",
+  "queries": 10,
+  "wall_time_total_s": 1.27,
+  "avg_query_s": 0.1267,
+  "median_query_s": 0.1166,
+  "stdev_query_s": 0.0343,
+  "avg_enrich_s": 0.1249,
+  "avg_search_s": 0.0018
+}
