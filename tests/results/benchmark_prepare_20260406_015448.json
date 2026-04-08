@@ -1,0 +1,8 @@
+{
+  "stage": "preparatory",
+  "pdf": "Беларусь в цифрах, 2025.pdf",
+  "chunks_pages": 62,
+  "wall_time_s": 473.47,
+  "avg_seconds_per_page": 7.637,
+  "output_dir": "C:\\Users\\Alex\\AppData\\Local\\Temp\\rag_benchmark_out_xpnikknh\\vector_store"
+}
