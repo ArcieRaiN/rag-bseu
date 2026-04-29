@@ -3,8 +3,8 @@ from __future__ import annotations
 """
 Детерминированная постобработка обогащённых чанков.
 
-Фильтрация невалидных метрик, эвристическое обогащение context
-ключевыми словами и добавление метаданных в context.
+Фильтрация невалидных метрик и сборка единого search_context
+из заголовков, показателей и структурированных метаданных.
 Никаких LLM-вызовов — только правила и словари.
 """
 
@@ -20,9 +20,9 @@ class EnrichmentPostProcessor:
     """
 
     # 1. Паттерны для определения "не метрик"
-    # Пока ровно одна проверка: длина метрики
     NON_METRIC_PATTERNS = [
-        re.compile(r"^.{20,}$", re.IGNORECASE),  # длина строки >= 20
+        re.compile(r"^.{120,}$", re.IGNORECASE),
+        re.compile(r"^[\d\s,.;:%–—-]+$", re.IGNORECASE),
     ]
 
     # 2. Словарь эвристического обогащения контекста
@@ -51,18 +51,8 @@ class EnrichmentPostProcessor:
         if chunk.metrics:
             chunk.metrics = self._filter_valid_metrics(chunk.metrics)
 
-        # 2. Эвристическое обогащение context
-        chunk.context = self._enrich_context_with_heuristics(
-            context=chunk.context,
-            text=chunk.text,
-        )
-
-        # 3. Усиление context метаданными
-        chunk.context = self._enrich_context_with_metadata(chunk)
-
-        # 4. Очистка context
-        if chunk.context:
-            chunk.context = self._clean_context(chunk.context)
+        # 2. Единственный поисковый контекст используется для FAISS/BM25.
+        chunk.search_context = self._build_search_context(chunk)
 
         return chunk
 
@@ -91,23 +81,20 @@ class EnrichmentPostProcessor:
             if is_invalid:
                 continue
 
-            valid.append(m.lower())
+            valid.append(m)
 
         return valid or None
 
     # ------------------------------------------------------------------
-    # ЭТАП 2. Эвристическое обогащение context
+    # ЭТАП 2. Эвристические тематические подсказки
     # ------------------------------------------------------------------
 
-    def _enrich_context_with_heuristics(
+    def _extract_heuristic_terms(
         self,
-        context: Optional[str],
         text: Optional[str],
-    ) -> Optional[str]:
-        """
-        Добавляет слова в context на основе словаря эвристик.
-        """
-        base = f"{context or ''} {text or ''}".lower()
+    ) -> List[str]:
+        """Возвращает тематические подсказки на основе словаря эвристик."""
+        base = (text or "").lower()
 
         additions: List[str] = []
 
@@ -117,64 +104,47 @@ class EnrichmentPostProcessor:
                     additions.append(word)
                     break
 
-        if not additions:
-            return context
+        return sorted(set(additions))
 
-        additions_str = ", ".join(sorted(set(additions)))
-
-        if context:
-            return f"{context} | {additions_str}"
-        return additions_str
-
-    # ------------------------------------------------------------------
-    # ЭТАП 3. Усиление метаданными
-    # ------------------------------------------------------------------
-
-    def _enrich_context_with_metadata(self, chunk: Chunk) -> Optional[str]:
-        """
-        Добавляет в context:
-        - показатели
-        - географию
-        - годы
-        """
+    def _build_search_context(self, chunk: Chunk) -> str:
         parts: List[str] = []
-
+        if chunk.search_context:
+            parts.append(chunk.search_context)
+        if chunk.section and chunk.section.lower() not in " ".join(parts).lower():
+            parts.append(f"раздел: {chunk.section}")
+        heuristic_terms = self._extract_heuristic_terms(chunk.text)
+        if heuristic_terms:
+            parts.append("темы: " + ", ".join(heuristic_terms))
         if chunk.metrics:
-            parts.append(f"показатели: {', '.join(chunk.metrics)}")
-
+            parts.append("показатели: " + ", ".join(chunk.metrics[:6]))
+        if chunk.units:
+            parts.append("единицы измерения: " + ", ".join(chunk.units[:4]))
         if chunk.geo:
-            parts.append(f"география: {chunk.geo}")
-
+            geo_values = chunk.geo if isinstance(chunk.geo, list) else [chunk.geo]
+            parts.append("география: " + ", ".join(str(g) for g in geo_values[:8]))
         if chunk.years:
-            years_sorted = sorted(chunk.years)
-            if len(years_sorted) > 1:
-                years_repr = f"{years_sorted[0]}-{years_sorted[-1]}"
-            else:
-                years_repr = str(years_sorted[0])
+            years_sorted = sorted(set(chunk.years))
+            years_repr = (
+                f"{years_sorted[0]}-{years_sorted[-1]}"
+                if len(years_sorted) > 6
+                else ", ".join(str(y) for y in years_sorted)
+            )
             parts.append(f"годы: {years_repr}")
-
-        if not parts:
-            return chunk.context
-
-        meta = "; ".join(parts)
-
-        if chunk.context:
-            return f"{chunk.context} | {meta}"
-        return meta
+        return self._clean_search_context(" | ".join(parts), max_length=700)
 
     # ------------------------------------------------------------------
-    # ЭТАП 4. Очистка context
+    # ЭТАП 3. Очистка search_context
     # ------------------------------------------------------------------
 
-    def _clean_context(self, context: str) -> str:
+    def _clean_search_context(self, search_context: str, *, max_length: int = 700) -> str:
         """
         Минимальная очистка:
         - замена \n на пробел
         - ограничение длины
         """
-        cleaned = context.replace("\n", " ").strip()
+        cleaned = search_context.replace("\n", " ").strip()
 
-        if len(cleaned) > 256:
-            cleaned = cleaned[:256]
+        if len(cleaned) > max_length:
+            cleaned = cleaned[:max_length]
 
         return cleaned

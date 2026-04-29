@@ -80,7 +80,7 @@ class PDFChunker:
 
                 chunk = Chunk(
                     id="",
-                    context="",
+                    search_context="",
                     text=page_text,
                     source=pdf_path.name,
                     page=page_number,

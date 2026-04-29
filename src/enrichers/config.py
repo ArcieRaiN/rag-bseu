@@ -17,6 +17,7 @@ class EnricherConfig:
         reset_interval: Через сколько чанков сбрасывать контекст LLM.
         max_retries: Количество повторных попыток при ошибке парсинга.
         keep_alive: Время жизни модели в памяти Ollama (например, ``"5m"``).
+        prompt_char_limit: Сколько символов текста страницы передавать LLM.
         request_options: Низкоуровневые параметры запроса к Ollama.
     """
     # concurrency (currently unused if processing one chunk at a time)
@@ -31,9 +32,12 @@ class EnricherConfig:
     # keep_alive value for Ollama (string, e.g. "5m") or None
     keep_alive: str | None = "5m"
 
+    # longer than the historical 800 chars: table headers and units often appear later
+    prompt_char_limit: int = 2400
+
     # low-level request options passed to Ollama (wrapper)
     request_options: Dict[str, Any] = None
 
     def __post_init__(self):
         if self.request_options is None:
-            self.request_options = {"temperature": 0, "top_p": 1, "num_predict": 512}
+            self.request_options = {"temperature": 0, "top_p": 1, "num_predict": 768}

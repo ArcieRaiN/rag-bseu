@@ -1,0 +1,45 @@
+{
+  "label": "search_context_only_v4_control",
+  "data_path": "usage\\vector_store\\data.json",
+  "chunks": 2974,
+  "sources": 12,
+  "coverage": {
+    "section": {
+      "present": 2927,
+      "missing": 47,
+      "present_pct": 98.42,
+      "missing_pct": 1.58
+    },
+    "geo": {
+      "present": 2964,
+      "missing": 10,
+      "present_pct": 99.66,
+      "missing_pct": 0.34
+    },
+    "metrics": {
+      "present": 2974,
+      "missing": 0,
+      "present_pct": 100.0,
+      "missing_pct": 0.0
+    },
+    "units": {
+      "present": 2217,
+      "missing": 757,
+      "present_pct": 74.55,
+      "missing_pct": 25.45
+    },
+    "years": {
+      "present": 2950,
+      "missing": 24,
+      "present_pct": 99.19,
+      "missing_pct": 0.81
+    },
+    "search_context": {
+      "present": 2974,
+      "missing": 0,
+      "present_pct": 100.0,
+      "missing_pct": 0.0
+    }
+  },
+  "avg_search_context_length": 648.29
+}

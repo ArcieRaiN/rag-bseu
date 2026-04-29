@@ -1,0 +1,16 @@
+{
+  "benchmark": "tests/benchmarks/benchmark_v4.json",
+  "limit": null,
+  "variants": [
+    {
+      "name": "current",
+      "status": "ok",
+      "hit_at_1": 0.364,
+      "hit_at_3": 0.5353333333333333,
+      "hit_at_5": 0.6126666666666667,
+      "mrr": 0.46857301587301586,
+      "avg_time_s": 0.14602872966664412,
+      "queries": 1500
+    }
+  ]
+}

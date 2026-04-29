@@ -2,8 +2,8 @@
 Валидация и нормализация метаданных обогащённых чанков.
 
 ChunkValidator проверяет корректность полей LLM-ответа
-(context, metrics, years, geo) и нормализует значения:
-обрезка длины context, фильтрация невалидных метрик, приведение years к int.
+(search_context, metrics, years, geo) и нормализует значения:
+обрезка длины search_context, фильтрация невалидных метрик, приведение years к int.
 """
 
 from __future__ import annotations
@@ -24,8 +24,8 @@ class ChunkValidator:
     Валидатор и нормализатор для данных обогащения чанков.
     """
 
-    MAX_CONTEXT_LENGTH = 256
-    MAX_METRICS_COUNT = 5
+    MAX_SEARCH_CONTEXT_LENGTH = 700
+    MAX_METRICS_COUNT = 8
 
     def __init__(self):
         self._seen_chunk_ids: Set[str] = set()
@@ -50,13 +50,13 @@ class ChunkValidator:
             else:
                 self._seen_chunk_ids.add(chunk_id)
 
-        # context
-        context = chunk_data.get("context")
-        if context:
-            if not isinstance(context, str):
-                errors.append("context должен быть строкой")
-            elif len(context) > self.MAX_CONTEXT_LENGTH:
-                warnings.append(f"context обрезан до {self.MAX_CONTEXT_LENGTH} символов")
+        # search_context
+        search_context = chunk_data.get("search_context")
+        if search_context:
+            if not isinstance(search_context, str):
+                errors.append("search_context должен быть строкой")
+            elif len(search_context) > self.MAX_SEARCH_CONTEXT_LENGTH:
+                warnings.append(f"search_context обрезан до {self.MAX_SEARCH_CONTEXT_LENGTH} символов")
 
         # metrics
         metrics = chunk_data.get("metrics")
@@ -110,18 +110,41 @@ class ChunkValidator:
 
     # -------------------- Нормализация для LLMEnricher -------------------- #
 
-    def normalize_context(self, context: str) -> str:
-        """Обрезает context до 256 символов"""
-        return context[:self.MAX_CONTEXT_LENGTH] if context else ""
+    def normalize_search_context(self, search_context: str) -> str:
+        """Обрезает search_context до допустимой длины."""
+        return search_context[:self.MAX_SEARCH_CONTEXT_LENGTH] if search_context else ""
 
     def normalize_metrics(self, metrics: Optional[List[str]]) -> Optional[List[str]]:
-        """Обрезает до MAX_METRICS_COUNT, оставляет только русские строки"""
+        """Обрезает до MAX_METRICS_COUNT, оставляет содержательные строки."""
         if not metrics or not isinstance(metrics, list):
             return None
         normalized = []
         for metric in metrics[:self.MAX_METRICS_COUNT]:
-            if isinstance(metric, str) and any('\u0400' <= ch <= '\u04FF' for ch in metric):
-                normalized.append(metric.strip())
+            if not isinstance(metric, str):
+                continue
+            clean = re.sub(r"\s+", " ", metric).strip(" .;:")
+            if not clean:
+                continue
+            has_letters = any(ch.isalpha() for ch in clean)
+            digit_share = sum(ch.isdigit() for ch in clean) / max(len(clean), 1)
+            if has_letters and digit_share < 0.35:
+                normalized.append(clean)
+        return normalized if normalized else None
+
+    def normalize_units(self, units: Optional[List[str]]) -> Optional[List[str]]:
+        """Нормализует список единиц измерения."""
+        if not units or not isinstance(units, list):
+            return None
+        normalized = []
+        seen = set()
+        for unit in units[:8]:
+            if not isinstance(unit, str):
+                continue
+            clean = re.sub(r"\s+", " ", unit.lower()).strip(" .;:")
+            if not clean or clean in seen:
+                continue
+            seen.add(clean)
+            normalized.append(clean)
         return normalized if normalized else None
 
     def normalize_years(self, years: Optional[List[Any]]) -> Optional[List[int]]:

@@ -90,16 +90,79 @@ class SectionMapper:
 
     def _build_from_chunks(self, chunks: List[Chunk]) -> None:
         """Try to extract section headers from early pages (TOC)."""
-        toc_chunks = [ch for ch in chunks if ch.page <= 8]
+        toc_chunks = [ch for ch in chunks if ch.page <= 12]
+        entries: List[Tuple[int, str]] = []
         for ch in toc_chunks:
-            for pattern, has_number in SECTION_PATTERNS:
-                for match in pattern.finditer(ch.text or ""):
-                    if has_number:
-                        section_name = match.group(2).strip()
-                    else:
-                        section_name = match.group(1).strip()
-                    if len(section_name) > 3:
-                        pass
+            entries.extend(self._extract_toc_entries(ch.text or ""))
+
+        if not entries:
+            self._build_from_page_headers(chunks)
+            return
+
+        # Keep the first title seen for each page and map until the next TOC page.
+        dedup: Dict[int, str] = {}
+        for page, title in sorted(entries, key=lambda item: item[0]):
+            if page not in dedup and 1 <= page <= max(ch.page for ch in chunks):
+                dedup[page] = title
+
+        pages = sorted(dedup)
+        max_page = max(ch.page for ch in chunks)
+        for idx, start_page in enumerate(pages):
+            end_page = (pages[idx + 1] - 1) if idx + 1 < len(pages) else max_page
+            title = dedup[start_page]
+            for page in range(start_page, end_page + 1):
+                self._page_to_section[page] = title
+
+    @staticmethod
+    def _extract_toc_entries(text: str) -> List[Tuple[int, str]]:
+        entries: List[Tuple[int, str]] = []
+        normalized = re.sub(r"\s+", " ", text.replace("\xa0", " "))
+        # Split before numbered TOC items while keeping unnumbered headings usable.
+        parts = re.split(r"(?=(?:\d+\.){1,3}\s+[А-ЯЁA-Z])", normalized)
+        line_like = []
+        for part in parts:
+            line_like.extend(re.split(r"\s{2,}|Стр\.|Pg\.", part))
+
+        for raw in line_like:
+            clean = raw.strip(" .;\t")
+            if len(clean) < 8:
+                continue
+            match = re.search(r"(?P<title>[А-ЯЁа-яёA-Za-z0-9№.,«»() /-]{6,140}?)\s+(?P<page>\d{1,3})(?:\s|$)", clean)
+            if not match:
+                continue
+            title = re.sub(r"^\d+(?:\.\d+)*\.\s*", "", match.group("title")).strip(" .;")
+            title = re.sub(r"^\d+\s+", "", title).strip(" .;")
+            page = int(match.group("page"))
+            if page <= 0 or len(title) < 4 or len(title) > 90 or re.match(r"^\d", title):
+                continue
+            if title.lower() in {"содержание", "contents", "продолжение", "continued"}:
+                continue
+            entries.append((page, title.upper() if title.isupper() else title))
+        return entries
+
+    def _build_from_page_headers(self, chunks: List[Chunk]) -> None:
+        current: Optional[str] = None
+        for ch in sorted(chunks, key=lambda item: item.page):
+            header = self._first_header(ch.text or "")
+            if header:
+                current = header
+            if current:
+                self._page_to_section[ch.page] = current
+
+    @staticmethod
+    def _first_header(text: str) -> Optional[str]:
+        for raw in text.splitlines()[:8]:
+            clean = re.sub(r"\s+", " ", raw).strip(" .;")
+            if not clean or len(clean) < 6 or len(clean) > 120:
+                continue
+            if re.search(r"\d", clean):
+                continue
+            if clean.lower().startswith(("www.", "стр", "page", "содержание", "contents")):
+                continue
+            letters = [ch for ch in clean if ch.isalpha()]
+            if letters and sum(ch.isupper() for ch in letters) / len(letters) > 0.6:
+                return clean
+        return None
 
     def get_section(self, page: int) -> Optional[str]:
         return self._page_to_section.get(page)
@@ -110,6 +173,6 @@ class SectionMapper:
             section = self.get_section(ch.page)
             if section:
                 ch.section = section
-                if ch.context and section.upper() not in (ch.context or "").upper():
-                    ch.context = f"{section}. {ch.context}"
+                if ch.search_context and section.upper() not in (ch.search_context or "").upper():
+                    ch.search_context = f"{section}. {ch.search_context}"
         return chunks

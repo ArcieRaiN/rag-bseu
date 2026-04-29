@@ -1,6 +1,10 @@
 {
+  "chunks": 2974,
+  "sources": 12,
+  "schema_version": "4.0",
+  "enrichment": "rules+existing-llm",
   "vectorizer": "SentenceVectorizer",
   "model": "intfloat/multilingual-e5-large",
   "dimension": 1024,
-  "chunks": 262
+  "index_elapsed_s": 1606.859
 }

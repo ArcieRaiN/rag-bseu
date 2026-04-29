@@ -3,7 +3,7 @@ from __future__ import annotations
 """
 Лексический поиск (BM25Okapi) по чанкам.
 
-Один индекс по конкатенации text+context каждого чанка.
+Один индекс по конкатенации search_context+text каждого чанка.
 Токенизация: lowercase + regex split (без лемматизации для скорости).
 Параметры по умолчанию: k1=1.5, b=0.75.
 """
@@ -28,7 +28,7 @@ class BM25Search:
     """
     BM25-based lexical search using rank_bm25.
 
-    Builds one index over `text + context` for each chunk.
+    Builds one index over `search_context + text` for each chunk.
     """
 
     def __init__(self, chunks: List[Chunk], k1: float = 1.5, b: float = 0.75):
@@ -36,7 +36,7 @@ class BM25Search:
         self._corpus_tokens: List[List[str]] = []
 
         for ch in chunks:
-            combined = f"{ch.context or ''} {ch.text or ''}"
+            combined = f"{ch.search_context or ''} {ch.text or ''}"
             self._corpus_tokens.append(_tokenize(combined))
 
         self._bm25 = BM25Okapi(self._corpus_tokens, k1=k1, b=b)

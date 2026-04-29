@@ -24,7 +24,7 @@ def main() -> None:
 
     pipeline = ParseDocumentsPipeline(
         output_dir=documents_dir,
-        max_pages=1,
+        max_pages=2,
     )
 
     log.info(

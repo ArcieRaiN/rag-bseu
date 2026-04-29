@@ -36,11 +36,11 @@ class FAISSStore:
 
     @staticmethod
     def _build_embed_text(chunk: Chunk) -> str:
-        context = (chunk.context or "").strip()
+        search_context = (chunk.search_context or "").strip()
         text_prefix = (chunk.text or "")[:500].strip()
-        if context and text_prefix:
-            return f"{context}\n{text_prefix}"
-        return context or text_prefix or ""
+        if search_context and text_prefix:
+            return f"{search_context}\n{text_prefix}"
+        return search_context or text_prefix or ""
 
     def add_chunks(self, chunks: List[Chunk]):
         if not chunks:

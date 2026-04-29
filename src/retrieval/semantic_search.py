@@ -21,7 +21,7 @@ from src.core.models import Chunk, ScoredChunk
 
 class FaissSemanticSearcher:
     """
-    Обёртка над FAISS для поиска по embeddings поля `context`.
+    Обёртка над FAISS для поиска по embeddings поля `search_context`.
     """
 
     def __init__(self, index_path: Path, data_path: Path):
@@ -71,18 +71,20 @@ class FaissSemanticSearcher:
             chunks.append(
                 Chunk(
                     id=str(item["id"]),
-                    context=item["context"],
+                    search_context=item.get("search_context", ""),
                     text=item["text"],
                     source=item["source"],
                     page=int(item["page"]),
                     section=item.get("section"),
                     geo=item.get("geo"),
                     metrics=item.get("metrics"),
+                    units=item.get("units"),
                     years=item.get("years") or [],
                     extra={k: v for k, v in item.items() if k not in {
-                        "id", "context", "text", "source", "page", "section",
-                        "geo", "metrics", "years",
+                        "id", "text", "source", "page", "section",
+                        "search_context", "geo", "metrics", "units", "years", "metadata_quality",
                     }},
+                    metadata_quality=item.get("metadata_quality"),
                 )
             )
         return chunks

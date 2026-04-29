@@ -30,19 +30,22 @@ def main() -> None:
     for item in raw:
         chunks.append(Chunk(
             id=str(item["id"]),
-            context=item.get("context", ""),
+            search_context=item.get("search_context", ""),
             text=item.get("text", ""),
             source=item["source"],
             page=int(item["page"]),
             section=item.get("section"),
             geo=item.get("geo"),
             metrics=item.get("metrics"),
+            units=item.get("units"),
             years=item.get("years") or [],
+            extra=item.get("extra"),
+            metadata_quality=item.get("metadata_quality"),
         ))
 
     print(f"Loaded {len(chunks)} chunks")
 
-    # Apply section mapping from TOC (enrich context with section names)
+    # Apply section mapping from TOC (enrich search_context with section names)
     sources = set(ch.source for ch in chunks)
     for source in sources:
         source_chunks = [ch for ch in chunks if ch.source == source]
@@ -56,14 +59,17 @@ def main() -> None:
     for ch in chunks:
         item = {
             "id": ch.id,
-            "context": ch.context,
+            "search_context": ch.search_context,
             "text": ch.text,
             "source": ch.source,
             "page": ch.page,
             "section": ch.section,
             "geo": ch.geo,
             "metrics": ch.metrics,
+            "units": ch.units,
             "years": ch.years,
+            "extra": ch.extra,
+            "metadata_quality": ch.metadata_quality,
         }
         updated_data.append(item)
 

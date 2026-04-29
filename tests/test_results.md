@@ -1,135 +1,57 @@
 # Результаты тестирования rag-bseu
 
-Сводный журнал замеров для дипломной работы и воспроизводимости. Подробная методика описана в [README.md](../README.md) (раздел «Тестирование» и «Результаты оценки»).
+Сводный журнал для дипломной работы. Подробности архитектуры — в [README.md](../README.md).
 
-## 1. Методология оценки извлечения (retrieval)
+## 1. Методология (набор тестов по 12 PDF)
 
-- **Скрипт:** `python -m tests.evaluator` → [evaluator.py](evaluator.py).
-- **Данные:** [test_data.json](test_data.json) — **182** вопроса с полями `query`, `expected_sources` (эталонные PDF-файлы), `category`.
-- **Процедура:** для каждого вопроса вызывается `QueryPipeline.run()`; из результата берётся упорядоченный список источников топ-кандидатов (как в коде evaluator: первые позиции соответствуют ранжированию после гибридного поиска).
-- **Метрики:**
-  - **Hit@1 / Hit@3 / Hit@5** — доля запросов, для которых среди топ-1, топ-3 или топ-5 источников встречается хотя бы один из `expected_sources`.
-  - **MRR (Mean Reciprocal Rank)** — среднее по запросам значение \(1/r\), где \(r\) — позиция первого релевантного источника; 0, если релевантного нет в выдаче evaluator.
-  - **Avg time** — среднее время одного запроса (секунды), как в `evaluator.py`.
-- **Не использовались:** метрики RAGAS Context Precision / Context Recall и методика **LLM-as-a-judge** для массовой оценки — они в репозитории не реализованы и в отчёте не применялись.
+- **Скрипты:** `python -m tests.run_v4_experiments` (основной прогон), `python -m tests.run_v4_ablation_experiments` (ablation), `python -m tests.validate_benchmark` (проверка набора).
+- **Вспомогательный модуль:** [retrieval_eval.py](retrieval_eval.py) — загрузка `benchmark_v4.json`, Hit@k, MRR.
+- **Данные:** `tests/benchmarks/benchmark_v4.json` — 1500 вопросов, эталон `source::page`.
+- **База знаний:** `usage/vector_store` (`data.json`, `index.faiss`), 2974 чанка по 12 сборникам из `usage/documents`.
+- **Метрики:** Hit@1/3/5, MRR, среднее время запроса (см. `QueryPipeline.run`).
 
-## 2. Исторические результаты (зафиксированы в README)
+## 2. Актуальные артефакты
 
-### 2.1. Конфигурация v2 (44 вопроса), эмбеддинги MiniLM
+| Артефакт | Путь |
+|----------|------|
+| Набор тестов | `tests/benchmarks/benchmark_v4.json` |
+| Детальный прогон | `tests/results/v4/v4_experiments.json` |
+| Ablation | `tests/results/v4/v4_ablation_experiments.json` |
+| Сводка экспериментов | `reports/v4/experiment_summary.json` |
+| Сводка ablation | `reports/v4/ablation_summary.json` |
+| Отчёт | `reports/v4/v4_experiment_report.md` |
+| Контроль search_context-only | `reports/v4/search_context_only_control_report.md` |
 
-Замеры автора на ПК с **NVIDIA GeForce RTX 3080** (базовая линия для ранней версии пайплайна; модель `paraphrase-multilingual-MiniLM-L12-v2`, 384d).
+## 3. Извлечение (текущая конфигурация)
 
-| Метрика  | Значение |
-|----------|----------|
-| Hit@1    | 50.0%    |
-| Hit@3    | 88.6%    |
-| Hit@5    | 95.5%    |
-| MRR      | 0.693    |
-| Avg time | 0.012s   |
-
-### 2.2. Конфигурация v3 (182 вопроса), эмбеддинги e5-large
-
-Тот же метод подсчёта, расширенный набор запросов, модель `intfloat/multilingual-e5-large` (1024d). Значения перенесены из README (изначально получены на машине разработчика с дискретной GPU NVIDIA; для сопоставления с табл. 2.1).
-
-| Метрика  | Значение |
-|----------|----------|
-| Hit@1    | 33.5%    |
-| Hit@3    | 46.2%    |
-| Hit@5    | 59.3%    |
-| MRR      | 0.432    |
-| Avg time | 0.08s    |
-
-**Hit@5 по категориям (v3)** — см. таблицу в [README.md](../README.md).
-
-### 2.3. Сравнение моделей эмбеддингов (v3, 182 вопроса)
-
-См. таблицу в README («Сравнение embedding-моделей»): MiniLM, bge-m3, USER-bge-m3, multilingual-e5-large.
-
----
-
-## 3. Текущая машина (AMD Ryzen 7 8845HS, Radeon 780M)
-
-**Целевая конфигурация для актуальных прогонов:** CPU **AMD Ryzen 7 8845HS**, встроенная графика **Radeon 780M**, ОС Windows 10/11, Python 3.12, зависимости из `requirements.txt`.
-
-### 3.1. Полный прогон `tests.evaluator` (182 вопроса)
-
-**Актуальный прогон от 2026-04-02** (файл [results/eval_20260402_225557.json](results/eval_20260402_225557.json)) — полный прогон без ошибок (`failures: []`). Перед прогоном выполнена пересборка FAISS и обновление `section` в `data.json` через `python usage/rebuild_index.py` (без повторного LLM-обогащения чанков). Зафиксируйте в пояснении к диплому платформу, на которой выполнялся замер.
+Источник чисел: `reports/v4/experiment_summary.json`.
 
 | Метрика | Значение |
 |---------|----------|
-| Total queries | 182 |
-| Errors | 0 |
-| Hit@1 | 31.3% |
-| Hit@3 | 46.7% |
-| Hit@5 | 56.0% |
-| MRR | 0.422 |
-| Avg time | 0.24 s |
-| Суммарное время прогона (wall) | ~43.6 s |
+| Hit@1 | 36,4 % |
+| Hit@3 | 53,5 % |
+| Hit@5 | 61,3 % |
+| MRR | 0,469 |
+| Среднее время запроса | 0,146 с |
 
-**Исторический прогон** (для сравнения): [eval_20260402_014505.json](results/eval_20260402_014505.json) — Hit@5 53.8 %, MRR 0.385, avg time 0.0125 s (иной снимок индекса/окружения).
+## 4. Ablation (индекс без пересборки, метаданные в памяти)
 
-**Сопоставление с таблицей v3 в README (Hit@5 59.3 %, MRR 0.432):** после пересборки индекса на **multilingual-e5-large** метрики **eval_20260402_225557** согласуются с README по порядку величины (отличия — состав чанков, версии зависимостей, железо). Прежнее расхождение с README у прогона **014505** было сильнее и указывало на несовпадение конфигурации индекса с эталоном README. После любой полной пересборки `vector_store` или смены эмбеддинга снова выполните `python tests/run_evaluator.py` и обновите эту таблицу.
+| Вариант | Hit@1 | Hit@3 | Hit@5 | MRR | Среднее время |
+|---------|------:|------:|------:|----:|--------------:|
+| regex_geo_only | 26,9 % | 47,0 % | 57,7 % | 0,394 | 0,081 с |
+| years_metrics_units_only | 36,7 % | 53,5 % | 60,9 % | 0,470 | 0,139 с |
+| search_context_only | 28,2 % | 48,3 % | 58,6 % | 0,407 | 0,072 с |
+| final_best_full | 36,4 % | 53,5 % | 61,3 % | 0,469 | 0,147 с |
 
-**Повторный прогон на этой же машине:** из корня `rag-bseu` выполните `python -m tests.evaluator` (или `python tests/run_evaluator.py`). Результат сохранится в `tests/results/eval_YYYYMMDD_HHMMSS.json` — имя нового файла добавьте сюда.
+## 5. Обогащение (2974 чанка)
 
-**Известная проблема среды:** при отсутствии `usage/vector_store/index.faiss` воспользуйтесь `python usage/rebuild_index.py` (без LLM). Если `faiss.write_index` завершается ошибкой «could not open … for writing» на пути с **кириллицей** в каталогах, скопируйте проект в путь только с латиницей (например `C:\work\rag-bseu`) и повторите пересборку индекса — это ограничение совместимости FAISS/ОС с Unicode-путями.
+По `reports/v4/enrichment_quality_rules_v4.json`: `section` 98,42 %, `geo` 99,66 %, `metrics` 100,00 %, `units` 74,55 %, `years` 99,19 %, `search_context` 100,00 %.
 
----
+## 6. Воспроизведение
 
-## 4. Пайплайн построения базы знаний (`prepare_vector_store.py`)
+1. `pip install -r requirements.txt`
+2. При отсутствии индекса: `python usage/rebuild_index.py`
+3. Проверка набора: `python -m tests.validate_benchmark`
+4. Полный прогон извлечения: `python -m tests.run_v4_experiments` (долго; опционально `--limit 50`)
 
-Логи скрипта фиксируют время полного `KnowledgeBaseBuilder.build()`, пути и (после сборки) сводку из `metadata.json`.
-
-| Параметр | Значение |
-|----------|----------|
-| Дата/время (пересборка индекса) | 2026-04-02 |
-| Скрипт | `python usage/rebuild_index.py` (индекс + section mapping из `data.json`) |
-| Wall time (сек) | **~192** |
-| documents_dir | *(для полного KB — `usage/documents`)* |
-| output_dir | `usage/vector_store` |
-| chunks (из metadata.json) | **262** |
-| embedding model | `intfloat/multilingual-e5-large` |
-| dimension | 1024 |
-
-*Полный пайплайн `python usage/prepare_vector_store.py` (PDF → LLM-обогащение → FAISS) при запущенном Ollama и модели `llama3-chatqa:latest` занимает на CPU много часов; в актуальном цикле использовано уже обогащённое `data.json` и выполнена только пересборка индекса. Для заново обогатить все чанки — локально запустите `prepare_vector_store.py` и затем снова `run_evaluator.py`.*
-
----
-
-## 5. Пайплайн загрузки PDF (`parse_documents.py`)
-
-Скрипт сохраняет файлы в `usage/archive_documents`, `max_pages=1` в `usage/parse_documents.py`.
-
-| Параметр | Значение |
-|----------|----------|
-| Дата/время запуска | *(заполнить при запуске)* |
-| Wall time (сек) | *(строка `[parse_documents] wall_time=…`)* |
-| output_dir | `usage/archive_documents` |
-| max_pages | 1 |
-| Файлов скачано | |
-| Суммарный размер (байт) | |
-
-*Автоматический прогон против сайта Белстата в среде агента не выполнялся. При локальном запуске `python usage/parse_documents.py` метрики дублируются в логах и финальной строке stdout.*
-
----
-
-## 6. Примечание по воспроизведению
-
-1. Из корня `rag-bseu`: `pip install -r requirements.txt`, Ollama с `llama3-chatqa:latest` для полной пересборки KB.
-2. Оценка извлечения **не требует** Ollama: достаточно актуального `usage/vector_store` и зависимостей Python.
-3. После каждого полного прогона обновляйте таблицы в §3 и строку с именем `eval_*.json` в этом файле.
-
----
-
-## 7. Замеры длительности этапов (диплом, §1.2)
-
-Скрипты в каталоге `tests/`:
-
-| Задача | Команда (из корня `rag-bseu`) | Выход |
-|--------|-------------------------------|--------|
-| Подготовительный этап, одна страница (полный PDF-пайплайн в временный индекс) | `python -m tests.benchmark_stage_prepare` или `python -m tests.benchmark_stage_prepare --pdf "C:\path\doc.pdf"` | `tests/results/benchmark_prepare_*.json` (`avg_seconds_per_page`, `chunks_pages`) |
-| Этап обработки запросов, только ретривал (как в evaluator) | `python -m tests.benchmark_stage_query` (182 вопроса) или `--quick` (10) | `tests/results/benchmark_query_*.json` |
-| Этап обработки запросов, ретривал + генерация таблицы (Ollama) | `python -m tests.benchmark_stage_query --e2e --e2e-limit 10` | тот же шаблон JSON, поле `mode`: `retrieval_plus_output_llm` |
-
-**Прогон 2026-04-06 (ноутбук, ретривал, 182 запроса):** среднее время запроса 0,12 с, суммарное время стенки 21,9 с — см. [results/eval_20260406_011635.json](results/eval_20260406_011635.json). Инициализация `QueryPipeline` (~3,5 с) выполняется один раз и в среднее по запросам не входит.
-
-Для `benchmark_stage_prepare` нужны PDF в `usage/documents/` или явный `--pdf`; нужен Ollama с `llama3-chatqa:latest`. Для режима `--e2e` дополнительно должен отвечать Ollama с моделью генерации ответа (в проекте по умолчанию qwen2.5:7b, см. `OutputPipeline`).
+**Замечание:** на путях с кириллицей Windows иногда падает запись `index.faiss` — см. README.

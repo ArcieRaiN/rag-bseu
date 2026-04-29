@@ -56,8 +56,8 @@ class CrossEncoderReranker:
 
     @staticmethod
     def _chunk_text(sc: ScoredChunk) -> str:
-        context = (sc.chunk.context or "").strip()
+        search_context = (sc.chunk.search_context or "").strip()
         text = (sc.chunk.text or "")[:500].strip()
-        if context and text:
-            return f"{context}\n{text}"
-        return context or text or ""
+        if search_context and text:
+            return f"{search_context}\n{text}"
+        return search_context or text or ""

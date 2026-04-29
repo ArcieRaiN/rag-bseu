@@ -69,7 +69,7 @@ def main_cli() -> None:
                 print(f"{i}. [source={ch.source}, page={ch.page}, id={ch.id}]")
                 if meta:
                     print("   " + "; ".join(meta))
-                print(f"   context: {ch.context}")
+                print(f"   search_context: {ch.search_context}")
                 print()
 
             df = output_pipeline.run(result, user_query=query)

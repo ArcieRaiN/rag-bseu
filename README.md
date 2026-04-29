@@ -8,8 +8,8 @@ RAG-система для работы со статистическими сб�
 
 ```
 1. Загрузка       SiteParser → PDF-файлы в usage/documents/
-2. Построение БЗ  PDFChunker → LLM-обогащение → FAISS + data.json
-3. Запрос          Regex-обогащение → Hybrid Search (Semantic + BM25 + Metadata) → RRF → Top-K
+2. Построение БЗ  PDFChunker → RuleMetadataExtractor → LLM-обогащение → FAISS + data.json
+3. Запрос          Regex/rule-обогащение → Hybrid Search (Semantic + BM25 + Metadata) → RRF → Top-K
 4. Ответ           Top-K чанков → LLM (Ollama) → JSON → DataFrame → Streamlit
 ```
 
@@ -19,8 +19,8 @@ RAG-система для работы со статистическими сб�
 
 | Канал | Описание | Top-K |
 |-------|----------|-------|
-| Semantic (FAISS) | Cosine similarity по эмбеддингам `context` (intfloat/multilingual-e5-large, 1024d) | 40 |
-| Lexical (BM25) | BM25Okapi по `text + context` | 40 |
+| Semantic (FAISS) | Cosine similarity по эмбеддингам `search_context + text` (intfloat/multilingual-e5-large, 1024d) | 40 |
+| Lexical (BM25) | BM25Okapi по `search_context + text` | 40 |
 | Metadata | Скоринг совпадений `geo`, `metrics`, `years` | 30 |
 
 **RRF**: `score(d) = Σ 1/(K + rank_i)`, K=60. Финальный Top-10 передаётся LLM.
@@ -40,12 +40,12 @@ OutputPipeline формирует 4-блочный промпт (роль, за�
 |--------|-----------|
 | `src/core/` | Доменные модели (`Chunk`, `EnrichedQuery`, `ScoredChunk`, `PipelineResult`), конфигурация `RetrievalConfig` |
 | `src/ingestion/` | Парсинг сайта (`SiteParser`), чанкинг PDF (`PDFChunker`), маппинг секций (`SectionMapper`) |
-| `src/enrichers/` | HTTP-клиент Ollama (`ollama_client`), LLM-обогащение чанков (`llm_enricher`) |
+| `src/enrichers/` | HTTP-клиент Ollama (`ollama_client`), rule-based и LLM-обогащение чанков (`rule_metadata_extractor`, `llm_enricher`) |
 | `src/retrieval/` | `FaissSemanticSearcher`, `BM25Search`, `MetadataScorer`, `HybridSearcher` (RRF), `CrossEncoderReranker` |
 | `src/vectorstore/` | Эмбеддинги (`SentenceVectorizer`), хранение (`FAISSStore`) |
 | `src/pipelines/` | Оркестрация: `parse_documents`, `knowledge_base_builder`, `query`, `output` |
 | `src/utils/` | `OutputValidator`, `ChunkValidator`, `RAGLogger` (JSONL), постобработка |
-| `tests/` | Тестовая база (182 вопроса), `evaluator.py` (Hit@k, MRR), `compare_embeddings.py`, скрипты запуска |
+| `tests/` | Набор тестов v4, `retrieval_eval.py`, `run_v4_experiments.py`, `run_v4_ablation_experiments.py`, `validate_benchmark.py` |
 | `usage/` | Точки входа: `query.py` (CLI + Streamlit), `cli.py`, скрипты загрузки и построения |
 
 ## Стек технологий
@@ -115,67 +115,41 @@ python usage/rebuild_index.py
 ### 7. Тестирование
 
 ```bash
-# Полный прогон (182 вопроса)
-python -m tests.evaluator
+# Проверка набора тестов и согласованности с data.json
+python -m tests.validate_benchmark
 
-# Быстрый прогон (10 вопросов)
-python -m tests.evaluator --quick
+# Полный прогон извлечения (1500 вопросов; долго)
+python -m tests.run_v4_experiments
 
-# Фильтр по категории
-python -m tests.evaluator --category prices
+# Быстрая выборка
+python -m tests.run_v4_experiments --limit 50
 
-# Сравнение embedding-моделей
-python -m tests.compare_embeddings
+# Ablation: вклад каналов метаданных (тот же индекс)
+python -m tests.run_v4_ablation_experiments
+
+# Покрытие полей обогащения
+python -m tests.enrichment_quality
 ```
 
-Результаты сохраняются в `tests/results/`. Сводный журнал для диплома и повторных замеров: `tests/test_results.md`. Запуск из произвольного каталога: `python tests/run_evaluator.py`.
+Результаты: `tests/results/v4/`, сводка в `tests/test_results.md` и `reports/v4/`.
 
 ## Результаты оценки
 
-### v2 (44 вопроса) — исходный набор (`paraphrase-multilingual-MiniLM-L12-v2`, 384d)
+### Набор тестов (1500 вопросов, 12 PDF)
+
+База знаний в `usage/vector_store` (2974 чанка). Набор тестов: `tests/benchmarks/benchmark_v4.json`. Схема чанка — поле `search_context` (поле `context` удалено).
 
 | Метрика | Значение |
 |---------|----------|
-| Hit@1 | 50.0% |
-| Hit@3 | 88.6% |
-| Hit@5 | 95.5% |
-| MRR | 0.693 |
-| Avg time | 0.012s |
+| Hit@1 | 36.4% |
+| Hit@3 | 53.5% |
+| Hit@5 | 61.3% |
+| MRR | 0.469 |
+| Avg time | 0.146s |
 
-### v3 (182 вопроса) — расширенный набор (`intfloat/multilingual-e5-large`, 1024d)
+Покрытие ключевых полей: `section` 98.42%, `geo` 99.66%, `metrics` 100.00%, `units` 74.55%, `years` 99.19%, `search_context` 100.00%.
 
-| Метрика | Значение |
-|---------|----------|
-| Hit@1 | 33.5% |
-| Hit@3 | 46.2% |
-| Hit@5 | 59.3% |
-| MRR | 0.432 |
-| Avg time | 0.08s |
-
-**По категориям (v3 Hit@5):**
-
-| Категория | Hit@5 | Комментарий |
-|-----------|-------|------------|
-| tourism | 100% (14/14) | Отличное покрытие |
-| trade | 80% (12/15) | Отличное покрытие |
-| prices | 76% (16/21) | Хорошо |
-| agriculture | 75% (9/12) | Хорошо |
-| comparison | 75% (6/8) | Хорошо |
-| social | 65% (17/26) | Приемлемо |
-| transport | 62% (5/8) | Приемлемо |
-| economy | 54% (20/37) | Требует улучшения |
-| demographics | 26% (6/23) | Слабо |
-| environment | 25% (2/8) | Слабо |
-| sdg | 10% (1/10) | Критично |
-
-### Сравнение embedding-моделей (v3, 182 вопроса)
-
-| Модель | Dim | Hit@1 | Hit@3 | Hit@5 | MRR | Embed | Query |
-|--------|-----|-------|-------|-------|-----|-------|-------|
-| paraphrase-multilingual-MiniLM-L12-v2 | 384 | 26.9% | 45.6% | 53.8% | 0.385 | 3.5s | 0.011s |
-| BAAI/bge-m3 | 1024 | 29.7% | 46.7% | 58.8% | 0.414 | 89.6s | 0.065s |
-| deepvk/USER-bge-m3 | 1024 | 30.8% | 44.5% | 58.2% | 0.415 | 89.3s | 0.076s |
-| **intfloat/multilingual-e5-large** | **1024** | **33.5%** | **46.2%** | **59.3%** | **0.432** | 90.5s | 0.076s |
+Подробности ablation и таймингов построения индекса — в `reports/v4/v4_experiment_report.md` и `tests/test_results.md`.
 
 ## Структура проекта
 
@@ -190,12 +164,14 @@ rag-bseu/
 │   ├── utils/               # chunk_validator, output_validator, logger, post_processor
 │   └── vectorstore/         # SentenceVectorizer, FAISSStore
 ├── tests/
-│   ├── test_data.json       # 182 тестовых вопроса (v3)
-│   ├── evaluator.py         # Автоматическая оценка retrieval
-│   ├── compare_embeddings.py # Сравнение embedding-моделей
-│   ├── run_evaluator.py     # Запуск evaluator из произвольного каталога
-│   ├── run_rebuild_index.py # Запуск rebuild_index из произвольного каталога
-│   └── results/             # JSON-результаты прогонов
+│   ├── benchmarks/         # benchmark_v4.json
+│   ├── retrieval_eval.py   # Hit@k / MRR для JSON-наборов
+│   ├── run_v4_experiments.py
+│   ├── run_v4_ablation_experiments.py
+│   ├── validate_benchmark.py
+│   ├── generate_benchmark_v4.py
+│   ├── run_rebuild_index.py
+│   └── results/v4/          # JSON-результаты прогонов
 ├── usage/
 │   ├── documents/           # Исходные PDF-сборники
 │   ├── vector_store/        # FAISS-индекс + data.json

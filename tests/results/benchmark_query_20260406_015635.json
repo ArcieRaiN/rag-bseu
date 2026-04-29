@@ -1,8 +1,0 @@
-{
-  "mode": "retrieval_plus_output_llm",
-  "queries": 10,
-  "avg_query_s": 14.78,
-  "median_query_s": 13.76,
-  "min_s": 5.02,
-  "max_s": 27.17
-}

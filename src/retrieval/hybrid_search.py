@@ -5,7 +5,7 @@ from __future__ import annotations
 
 Объединяет три канала:
 - Semantic Search (FAISS, cosine similarity, top-40)
-- Lexical Search (BM25Okapi по text+context, top-40)
+- Lexical Search (BM25Okapi по search_context+text, top-40)
 - Metadata Scoring (geo/years/metrics overlap, top-30)
 
 RRF: score(d) = Σ 1/(K + rank_i), K=60.
@@ -41,7 +41,11 @@ class HybridSearcher:
         self._semantic = semantic_searcher
         self._config = config
         self._metadata_scorer = MetadataScorer()
-        self._lexical = BM25Search(self._semantic.get_all_chunks())
+        self._lexical = BM25Search(
+            self._semantic.get_all_chunks(),
+            k1=self._config.bm25_k1,
+            b=self._config.bm25_b,
+        )
 
     def search(self, enriched_query: EnrichedQuery) -> HybridSearchResult:
         sem_results = self._semantic_search(enriched_query)

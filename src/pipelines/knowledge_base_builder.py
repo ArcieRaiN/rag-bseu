@@ -96,14 +96,17 @@ class KnowledgeBaseBuilder:
                 [
                     {
                         "id": ch.id,
-                        "context": ch.context,
+                        "search_context": ch.search_context,
                         "text": ch.text,
                         "source": ch.source,
                         "page": ch.page,
                         "section": ch.section,
                         "geo": ch.geo,
                         "metrics": ch.metrics,
+                        "units": ch.units,
                         "years": ch.years,
+                        "extra": ch.extra,
+                        "metadata_quality": ch.metadata_quality,
                     }
                     for ch in chunks
                 ],

@@ -13,15 +13,17 @@ import numpy as np
 @dataclass
 class Chunk:
     id: str = ""
-    context: str = ""
+    search_context: str = ""
     text: str = ""
     source: str = ""
     page: int = 0
     section: Optional[str] = None
     geo: Optional[List[str]] = None
     metrics: Optional[List[str]] = None
+    units: Optional[List[str]] = None
     years: Optional[List[int]] = field(default_factory=list)
     extra: Optional[Dict[str, Any]] = None
+    metadata_quality: Optional[Dict[str, Any]] = None
 
 
 @dataclass

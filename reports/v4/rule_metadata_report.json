@@ -1,0 +1,36 @@
+{
+  "input": "C:\\Users\\Alex\\Downloads\\projects\\rag-bseu\\usage\\vector_store\\data.json",
+  "output_dir": "usage/vector_store",
+  "only_documents": true,
+  "overwrite": false,
+  "rebuild_index": true,
+  "chunks": 2974,
+  "stats": {
+    "rule_elapsed_s": 5.866,
+    "avg_rule_seconds_per_chunk": 0.001972,
+    "section_mapped_by_source": {
+      "Беларусь в цифрах, 2025.pdf": 57,
+      "Беларусь и Россия, 2024.pdf": 178,
+      "Изучаем Беларусь статистика для школьников, 2024.pdf": 131,
+      "Информационное общество в Республике Беларусь, 2025.pdf": 54,
+      "Наука и инновационная деятельность в Республике Беларусь, 2024.pdf": 75,
+      "Национальные счета Республики Беларусь, 2026.pdf": 143,
+      "Регионы Республики Беларусь, 2025 (том 1).pdf": 710,
+      "Регионы Республики Беларусь, 2025 (том 2).pdf": 583,
+      "Социальное положение и уровень жизни населения Республики Беларусь, 2025.pdf": 211,
+      "Статистический ежегодник Республики Беларусь, 2024.pdf": 317,
+      "Статистический ежегодник Республики Беларусь, 2025.pdf": 305,
+      "Цены в Республике Беларусь, 2024.pdf": 163
+    }
+  },
+  "metadata": {
+    "chunks": 2974,
+    "sources": 12,
+    "schema_version": "4.0",
+    "enrichment": "rules+existing-llm",
+    "vectorizer": "SentenceVectorizer",
+    "model": "intfloat/multilingual-e5-large",
+    "dimension": 1024,
+    "index_elapsed_s": 1606.859
+  }
+}

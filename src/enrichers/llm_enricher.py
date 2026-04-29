@@ -2,7 +2,7 @@
 LLM-обогащение чанков метаданными через Ollama.
 
 LLMEnricher последовательно обрабатывает чанки, извлекая
-структурированные метаданные (context, geo, metrics, years)
+структурированные метаданные (search_context, geo, metrics, units, years)
 для гибридного поиска. Поддерживает retry, периодический
 сброс контекста модели и постобработку результатов.
 """
@@ -18,6 +18,7 @@ from src.core.models import Chunk
 from src.enrichers.ollama_client import OllamaClient
 from src.enrichers.config import EnricherConfig
 from src.enrichers.parsers import parse_single_enrichment
+from src.enrichers.rule_metadata_extractor import RuleMetadataExtractor
 
 # Optional project-specific helpers
 try:
@@ -41,7 +42,7 @@ class LLMEnricher:
     1. Формирует промпт с текстом чанка
     2. Отправляет запрос в LLM и парсит JSON-ответ
     3. Валидирует и нормализует полученные метаданные
-    4. Применяет постобработку (фильтрация metrics, обогащение context)
+    4. Применяет постобработку (фильтрация metrics, сборка search_context)
 
     Поддерживает retry при ошибках LLM/парсинга и периодический сброс
     контекста модели для предотвращения деградации качества ответов.
@@ -53,6 +54,7 @@ class LLMEnricher:
         self._validator = ChunkValidator() if ChunkValidator else None
         self._chunk_filter = ChunkFilter(skip_first_pages=5) if ChunkFilter else None
         self._post = EnrichmentPostProcessor() if EnrichmentPostProcessor else None
+        self._rules = RuleMetadataExtractor()
         self._rag_logger = get_logger()
         self._chunks_since_reset = 0
 
@@ -83,9 +85,10 @@ class LLMEnricher:
         else:
             data_chunks, metadata_chunks, skip_chunks = chunks, [], []
 
-        # Set default context for metadata/skip chunks
+        # Set default search text for metadata/skip chunks
         for ch in (metadata_chunks + skip_chunks):
-            ch.context = ch.text[:200] if ch.text else "нет текста"
+            ch.search_context = ch.text[:200] if ch.text else "нет текста"
+            self._rules.apply_to_chunk(ch)
 
         to_process = data_chunks
         resulting = metadata_chunks + skip_chunks
@@ -128,8 +131,8 @@ class LLMEnricher:
                     getattr(chunk, "id", None),
                     e,
                 )
-                if not chunk.context:
-                    chunk.context = chunk.text[:256] if chunk.text else "нет текста"
+                if not chunk.search_context:
+                    chunk.search_context = chunk.text[:256] if chunk.text else "нет текста"
                 resulting.append(chunk)
 
         # Preserve original order
@@ -152,6 +155,7 @@ class LLMEnricher:
         Returns:
             Обогащённый Chunk или None при неудаче парсинга после всех попыток.
         """
+        self._rules.apply_to_chunk(chunk)
         system_prompt = self._build_system_prompt()
         prompt = self._build_prompt(pdf_name, chunk)
 
@@ -202,20 +206,27 @@ class LLMEnricher:
         # ---------------- Apply parsed fields with normalization ---------------- #
         validator = self._validator or ChunkValidator()
 
-        # context
-        context_raw = parsed.get("context") or chunk.text or "нет текста"
-        chunk.context = validator.normalize_context(str(context_raw))
+        # search_context
+        search_context_raw = parsed.get("search_context") or chunk.search_context or chunk.text or "нет текста"
+        chunk.search_context = validator.normalize_search_context(str(search_context_raw))
 
         # metrics
         if "metrics" in parsed:
-            chunk.metrics = validator.normalize_metrics(parsed.get("metrics"))
+            parsed_metrics = validator.normalize_metrics(parsed.get("metrics"))
+            chunk.metrics = self._merge_list(chunk.metrics, parsed_metrics)
 
         # years
         if "years" in parsed:
-            chunk.years = validator.normalize_years(parsed.get("years"))
+            parsed_years = validator.normalize_years(parsed.get("years"))
+            if parsed_years:
+                chunk.years = sorted(set([*(chunk.years or []), *parsed_years]))
 
         if "geo" in parsed:
-            chunk.geo = parsed["geo"]
+            chunk.geo = self._merge_list(chunk.geo, parsed["geo"])
+
+        if "units" in parsed:
+            parsed_units = validator.normalize_units(parsed.get("units"))
+            chunk.units = self._merge_list(chunk.units, parsed_units)
 
         # Optional validation
         if self._validator:
@@ -235,34 +246,64 @@ class LLMEnricher:
 
         return chunk
 
+    @staticmethod
+    def _merge_list(existing, incoming):
+        values = []
+        existing_items = [existing] if isinstance(existing, str) else (existing or [])
+        incoming_items = [incoming] if isinstance(incoming, str) else (incoming or [])
+        for item in existing_items:
+            if item is not None:
+                values.append(str(item).strip())
+        for item in incoming_items:
+            if item is not None:
+                values.append(str(item).strip())
+        seen = set()
+        result = []
+        for value in values:
+            key = value.lower()
+            if value and key not in seen:
+                seen.add(key)
+                result.append(value)
+        return result or None
+
     def _build_system_prompt(self) -> str:
         return (
             "Ты — аналитик официальной статистики.\n"
             "Входной чанк — фрагмент статистического сборника, чаще всего табличные данные. "
             "Твоя задача — извлечь МЕТАДАННЫЕ для семантического поиска.\n"
             "Верни ТОЛЬКО один валидный JSON с полями:\n"
-            "- context: строка, 1 предложение, которое обобщённо описывает содержание таблиц в чанке, без значений показателей\n"
+            "- search_context: строка, 1 предложение, которое обобщённо описывает содержание таблиц в чанке, без значений показателей\n"
             "- geo: список территорий, упомянутых в чанке (без агрегатов 'в целом по стране', 'итого')\n"
-            "- metrics: список названий показателей, без чисел, лет и единиц измерения\n"
+            "- metrics: список названий показателей как в таблице, без чисел, лет и единиц измерения\n"
+            "- units: список единиц измерения как в таблице, например 'тыс. человек', 'млн рублей', 'процентов'\n"
             "- years: список лет, явно упомянутых в чанке\n\n"
             "Правила:\n"
             "1. Используй только данные из чанка.\n"
-            "2. Если поле невозможно определить — верни пустой список [] или null.\n"
-            "3. Ответ только JSON, без комментариев.\n\n"
+            "2. Не повторяй числовые строки таблицы в search_context.\n"
+            "3. Если поле невозможно определить — верни пустой список [] или null.\n"
+            "4. Ответ только JSON, без комментариев.\n\n"
             "Пример корректного ответа:\n"
             "{\n"
-            '  "context": "Производство основных видов промышленной продукции на душу населения в Беларуси и России за 2018-2021 годы",\n'
+            '  "search_context": "Производство основных видов промышленной продукции на душу населения в Беларуси и России за 2018-2021 годы",\n'
             '  "geo": ["Беларусь", "Россия"],\n'
             '  "metrics": ["Производство нефти", "Производство мяса"],\n'
+            '  "units": ["кг на душу населения"],\n'
             '  "years": [2018, 2019, 2020, 2021]\n'
             "}\n"
         )
 
     def _build_prompt(self, pdf_name: str, chunk: Chunk) -> str:
-        text_snip = (chunk.text or "")[:800]
+        text_snip = (chunk.text or "")[: self._cfg.prompt_char_limit]
+        hints = []
+        if chunk.search_context:
+            hints.append(f"Предварительно извлечено правилами: {chunk.search_context}")
+        if chunk.section:
+            hints.append(f"Раздел: {chunk.section}")
+        hints_text = "\n".join(hints)
         return (
             f"Документ: {pdf_name}\n"
             f"page: {chunk.page}\n\n"
+            f"{hints_text}\n\n"
             "Содержимое чанка:\n"
             f"{text_snip}\n\n"
             "Сформируй JSON-объект строго по инструкции system prompt."

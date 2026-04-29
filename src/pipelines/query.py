@@ -11,6 +11,7 @@ from __future__ import annotations
 """
 
 from pathlib import Path
+import os
 import time
 from typing import List, Optional
 
@@ -25,14 +26,16 @@ from src.core.config import RetrievalConfig
 
 class QueryPipeline:
     def __init__(self, base_dir: Path, *,
-                 retrieval_config: RetrievalConfig | None = None):
+                 retrieval_config: RetrievalConfig | None = None,
+                 vector_store_dir: Path | None = None):
         t0 = time.perf_counter()
         print("[INIT] QueryPipeline: initializing...")
 
         self._base_dir = Path(base_dir)
         self._vectorizer = SentenceVectorizer()
 
-        vector_store_dir = self._base_dir / "usage" / "vector_store"
+        env_vector_store = os.getenv("RAG_VECTOR_STORE_DIR")
+        vector_store_dir = Path(vector_store_dir or env_vector_store or (self._base_dir / "usage" / "vector_store"))
         self._semantic = FaissSemanticSearcher(
             index_path=vector_store_dir / "index.faiss",
             data_path=vector_store_dir / "data.json",

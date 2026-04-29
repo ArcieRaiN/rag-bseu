@@ -1,0 +1,48 @@
+{
+  "created_at": "2026-04-28 14:32:06",
+  "benchmark": "tests/benchmarks/benchmark_v4.json",
+  "vector_store": "usage\\vector_store",
+  "note": "Ablations reuse the final FAISS index in usage/vector_store; metadata/BM25 chunk fields are modified in memory.",
+  "variants": [
+    {
+      "name": "regex_geo_only",
+      "queries": 1500,
+      "hit_at_1": 0.26866666666666666,
+      "hit_at_3": 0.47,
+      "hit_at_5": 0.5766666666666667,
+      "mrr": 0.39447328042328045,
+      "avg_time_s": 0.08085056553332348,
+      "wall_time_s": 125.00005149999924
+    },
+    {
+      "name": "years_metrics_units_only",
+      "queries": 1500,
+      "hit_at_1": 0.36733333333333335,
+      "hit_at_3": 0.5346666666666666,
+      "hit_at_5": 0.6086666666666667,
+      "mrr": 0.4697007936507937,
+      "avg_time_s": 0.1393874753333439,
+      "wall_time_s": 212.88177349999933
+    },
+    {
+      "name": "search_context_only",
+      "queries": 1500,
+      "hit_at_1": 0.282,
+      "hit_at_3": 0.48333333333333334,
+      "hit_at_5": 0.586,
+      "mrr": 0.40720555555555554,
+      "avg_time_s": 0.0716707184666581,
+      "wall_time_s": 110.94316940000135
+    },
+    {
+      "name": "final_best_full",
+      "queries": 1500,
+      "hit_at_1": 0.364,
+      "hit_at_3": 0.5353333333333333,
+      "hit_at_5": 0.6126666666666667,
+      "mrr": 0.46857301587301586,
+      "avg_time_s": 0.14685319960002866,
+      "wall_time_s": 223.76463180000064
+    }
+  ]
+}
