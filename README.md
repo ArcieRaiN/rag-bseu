@@ -67,7 +67,7 @@ OutputPipeline формирует 4-блочный промпт (роль, за�
 ### 1. Установка
 
 ```bash
-git clone <url> && cd rag-bseu
+git clone https://github.com/ArcieRaiN/rag-bseu && cd rag-bseu
 python -m venv .venv
 .venv\Scripts\activate        # Windows
 # source .venv/bin/activate   # Linux/macOS
@@ -77,7 +77,8 @@ pip install -r requirements.txt
 ### 2. Ollama
 
 ```bash
-ollama pull llama3-chatqa:latest
+ollama pull llama3-chatqa:8b #LLM-обогащение
+ollama pull granite4.1:3b #JSON для генерации графиков
 ollama serve
 ```
 
@@ -96,12 +97,11 @@ python usage/prepare_vector_store.py
 ### 5. Запуск
 
 ```bash
-# Streamlit (таблицы + графики + фильтр по источнику)
 streamlit run usage/query.py
 ```
 ```bash
 # CLI
-python usage/query.py
+# python usage/query.py
 ```
 
 ### 6. Пересборка индекса (без LLM)
