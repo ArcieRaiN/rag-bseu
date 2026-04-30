@@ -24,7 +24,7 @@ class KnowledgeBaseBuilder:
         self,
         documents_dir: Path,
         output_dir: Path,
-        llm_model: str = "llama3-chatqa:latest",
+        llm_model: str = "llama3-chatqa:8b",
         llm_client: Optional[OllamaClient] = None,
     ):
         self.documents_dir = documents_dir

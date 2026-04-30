@@ -30,13 +30,13 @@ def main() -> None:
         documents_dir,
         output_dir,
         pdf_count,
-        "llama3-chatqa:latest",
+        "llama3-chatqa:8b",
     )
 
     builder = KnowledgeBaseBuilder(
         documents_dir=documents_dir,
         output_dir=output_dir,
-        llm_model="llama3-chatqa:latest",
+        llm_model="llama3-chatqa:8b",
     )
 
     t0 = time.perf_counter()
