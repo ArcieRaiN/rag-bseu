@@ -35,7 +35,7 @@ class OllamaConfig:
         keep_alive: Время жизни модели в памяти сервера.
     """
     base_url: str = "http://localhost:11434"
-    model: str = "qwen2.5:7b"
+    model: str = "granite4.1:3b"
     timeout: float = 120.0
 
     # Дефолтные параметры генерации (можно переопределить в generate)
