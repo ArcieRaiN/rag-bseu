@@ -19,6 +19,8 @@ from src.pipelines.output import OutputPipeline
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # rag-bseu
 
+MSG_KB_MISS = "По данному запросу информация в базе знаний не найдена."
+
 
 # ================================================================
 # Streamlit detection
@@ -73,9 +75,13 @@ def main_cli() -> None:
                 print()
 
             df = output_pipeline.run(result, user_query=query)
-            if df is not None:
+            if output_pipeline.kb_miss:
+                print(MSG_KB_MISS)
+            elif df is not None:
                 print("\n=== ТАБЛИЦА ===")
                 print(df.to_string(index=False))
+            elif output_pipeline.no_data:
+                print("По данному запросу информация в источниках не найдена.")
             else:
                 print("Не удалось сформировать таблицу.")
 
@@ -146,9 +152,14 @@ def main_streamlit() -> None:
             with st.spinner("Генерация таблицы через LLM..."):
                 df = output_pipeline.run(result, user_query=query.strip())
 
-            if df is None and output_pipeline.no_data:
+            if df is None and output_pipeline.kb_miss:
+                st.warning(MSG_KB_MISS)
                 st.session_state["pipeline_output"].update(
-                    {"df": None, "title": "", "sources": [], "error": "no_data"}
+                    {"df": None, "title": "", "sources": [], "error": "kb_miss"}
+                )
+            elif df is None and output_pipeline.no_data:
+                st.session_state["pipeline_output"].update(
+                    {"df": None, "title": "", "summary": "", "sources": [], "error": "no_data"}
                 )
             elif df is None:
                 st.error("Не удалось сформировать таблицу. Подробности в usage/logs/output_df_fails.json")
@@ -163,7 +174,9 @@ def main_streamlit() -> None:
 
     ui_state = st.session_state["pipeline_output"]
     if ui_state["df"] is None:
-        if ui_state["error"] == "no_data":
+        if ui_state["error"] == "kb_miss":
+            st.warning(MSG_KB_MISS)
+        elif ui_state["error"] == "no_data":
             st.warning("По данному запросу информация в источниках не найдена.")
         elif ui_state["error"]:
             st.info(ui_state["error"])
