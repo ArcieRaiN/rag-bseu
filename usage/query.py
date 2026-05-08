@@ -19,6 +19,8 @@ from src.pipelines.output import OutputPipeline
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # rag-bseu
 
+MSG_KB_MISS = "По данному запросу информация в базе знаний не найдена."
+
 
 # ================================================================
 # Streamlit detection
@@ -73,7 +75,9 @@ def main_cli() -> None:
                 print()
 
             df = output_pipeline.run(result, user_query=query)
-            if df is not None:
+            if output_pipeline.kb_miss:
+                print(MSG_KB_MISS)
+            elif df is not None:
                 print("\n=== ТАБЛИЦА ===")
                 print(df.to_string(index=False))
             else:
@@ -163,7 +167,9 @@ def main_streamlit() -> None:
 
     ui_state = st.session_state["pipeline_output"]
     if ui_state["df"] is None:
-        if ui_state["error"] == "no_data":
+        if ui_state["error"] == "kb_miss":
+            st.warning(MSG_KB_MISS)
+        elif ui_state["error"] == "no_data":
             st.warning("По данному запросу информация в источниках не найдена.")
         elif ui_state["error"]:
             st.info(ui_state["error"])
