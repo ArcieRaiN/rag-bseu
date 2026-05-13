@@ -1,0 +1,5 @@
+# Тема по умолчанию для `streamlit run usage/query.py`.
+# Тёмная тема по-прежнему доступна: ☰ → Settings → Theme → Dark.
+
+[theme]
+base = "light"
